@@ -1,7 +1,6 @@
 package main
 
 import (
-	"embed"
 	"fmt"
 	"log"
 	"os"
@@ -49,13 +48,7 @@ func init() {
 
 }
 
-//go:embed scripts/generate_image.py
-var script_py embed.FS
-
 func main() {
-
-	// data, _ := script_py.ReadFile("scripts/generate_image.py")
-	// fmt.Println(string(data))
 
 	log.Printf("added by git")
 	log.Printf("Authorized on account %s", Bot.Self.UserName)
