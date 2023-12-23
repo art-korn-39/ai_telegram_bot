@@ -57,6 +57,7 @@ func main() {
 	// data, _ := script_py.ReadFile("scripts/generate_image.py")
 	// fmt.Println(string(data))
 
+	log.Printf("added by git")
 	log.Printf("Authorized on account %s", Bot.Self.UserName)
 
 	// u - структура с конфигом для получения апдейтов
