@@ -29,6 +29,10 @@ func SendRequestToGemini(text string) string {
 	model := client_Gemini.GenerativeModel("gemini-pro")
 	resp, err := model.GenerateContent(ctx_Gemini, genai.Text(text))
 	if err != nil {
+		errorString := err.Error()
+		if errorString == "blocked: candidate: FinishReasonSafety" {
+			client_Gemini, _ = genai.NewClient(ctx_Gemini, option.WithAPIKey(Gemini_APIKEY))
+		}
 		Logs <- Log{"Gemini", err.Error(), true}
 		return "Не удалось получить ответ от сервиса. Попробуйте изменить текст запроса."
 	}

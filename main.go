@@ -1,54 +1,45 @@
 package main
 
 import (
+	"database/sql"
+	"encoding/json"
+	"fmt"
+	"io"
 	"log"
 	"os"
 	"slices"
 
 	tgbotapi "github.com/Syfaro/telegram-bot-api"
+	_ "github.com/lib/pq"
 )
 
 const (
-	WebHook           = "https://telegram-ai-bot-art-korn-39.amvera.io/"
-	TelegramBotToken  = "6894745722:AAHMfRNCNM_T9P5-zUgV4OU_DLfzOOUEFmg"
-	ChannelChatID     = -1001997602646
-	ChannelURL        = "https://t.me/+6ZMACWRgFdRkNGEy"
-	CheckSubscription = true
+	ChannelChatID = -1001997602646
+	ChannelURL    = "https://t.me/+6ZMACWRgFdRkNGEy"
 )
 
 var (
+	db          *sql.DB
 	Bot         *tgbotapi.BotAPI
+	Cfg         config
 	Logs        chan Log
 	ListOfUsers = map[int64]*UserInfo{}
-	WhiteList   = []string{"anastasoid", "Eleng39", "Jokorn", "apolo39"}
 	arrayCMD    = []string{"gemini", "kandinsky", "chatgpt"}
 )
 
 //ID chat (my) = 403059287
 //ID chat (my second) = 609614322
 
-// Реализация через webhook
-// if _, err := bot.SetWebhook(tgbotapi.NewWebhook(WebHook)); err != nil {
-// 	log.Fatalf("setting webhook %v; error: %v", WebHook, err)
-// }
-
-//bot.ListenForWebhook("/")
-
-func init() {
-
-	// используя токен создаем новый инстанс бота
-	b, err := tgbotapi.NewBotAPI(TelegramBotToken)
-	if err != nil {
-		log.Panic(err)
-	}
-
-	Bot = b
-
-}
-
 func main() {
 
-	log.Printf("Authorized on account %s", Bot.Self.UserName)
+	// Загрузить файл конфигурации
+	loadConfig()
+
+	// Запустить бота
+	startBot()
+
+	// Установить соединение с базой данных
+	SQL_Connect()
 
 	// u - структура с конфигом для получения апдейтов
 	u := tgbotapi.NewUpdate(0)
@@ -84,7 +75,6 @@ func main() {
 				User = &UserInfo{}
 				ListOfUsers[upd.Message.Chat.ID] = User
 			}
-			defer User.SetIsRunning(false)
 
 			// Фиксируем пользователя и входящее сообщение
 			Logs <- Log{upd.Message.From.UserName, upd.Message.Text, false}
@@ -93,6 +83,7 @@ func main() {
 			if User.CheckUserLock(upd) {
 				return
 			}
+			defer User.SetIsRunning(false)
 
 			// Обработка запроса от пользователя
 			var result ResultOfRequest
@@ -110,6 +101,63 @@ func main() {
 
 		}(update)
 	}
+}
+
+func loadConfig() {
+
+	file, _ := os.OpenFile("config.txt", os.O_RDONLY, 0600)
+	defer file.Close()
+
+	b, err := io.ReadAll(file)
+	if err != nil {
+		panic(err)
+	}
+
+	json.Unmarshal(b, &Cfg)
+
+	log.Println("Config download complete")
+
+}
+
+func startBot() {
+
+	// Используя токен создаем новый инстанс бота
+	var err error
+	Bot, err = tgbotapi.NewBotAPI(Cfg.TelegramBotToken)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	log.Printf("Authorized on account %s", Bot.Self.UserName)
+
+}
+
+func SQL_Connect() {
+
+	return
+
+	// Capture connection properties.
+	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
+		"password=%s dbname=%s sslmode=disable",
+		Cfg.DB_host, Cfg.DB_port, Cfg.DB_user, Cfg.DB_password, Cfg.DB_name)
+
+	// Get a database handle.
+	var err error
+	db, err = sql.Open("postgres", psqlInfo)
+
+	if err != nil {
+		log.Println("Unsuccessful connection to PostgreSQL!")
+		log.Fatal(err)
+	}
+
+	pingErr := db.Ping()
+	if pingErr != nil {
+		log.Println("Unsuccessful connection to PostgreSQL!")
+		log.Fatal(pingErr)
+	}
+
+	log.Println("Successful connection to PostgreSQL")
+
 }
 
 func processCommand(cmd string, upd tgbotapi.Update) ResultOfRequest {
@@ -206,11 +254,11 @@ func processText(text string, cmd string, upd tgbotapi.Update) ResultOfRequest {
 
 func accessIsAllowed(upd tgbotapi.Update) bool {
 
-	if !CheckSubscription {
+	if !Cfg.CheckSubscription {
 		return true
 	}
 
-	if slices.Contains(WhiteList, upd.Message.Chat.UserName) {
+	if slices.Contains(Cfg.WhiteList, upd.Message.Chat.UserName) {
 		return true
 	}
 
@@ -240,3 +288,10 @@ func accessIsAllowed(upd tgbotapi.Update) bool {
 	return result
 
 }
+
+// Реализация через webhook
+// if _, err := bot.SetWebhook(tgbotapi.NewWebhook(WebHook)); err != nil {
+// 	log.Fatalf("setting webhook %v; error: %v", WebHook, err)
+// }
+
+//bot.ListenForWebhook("/")
