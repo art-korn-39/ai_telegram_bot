@@ -50,7 +50,13 @@ func init() {
 
 func main() {
 
-	log.Printf("added by git")
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered. Error:\n", r)
+			go main()
+		}
+	}()
+
 	log.Printf("Authorized on account %s", Bot.Self.UserName)
 
 	// u - структура с конфигом для получения апдейтов
@@ -147,7 +153,8 @@ func processCommand(cmd string, upd tgbotapi.Update) ResultOfRequest {
 		result.Log_message = "/start for " + upd.Message.Chat.UserName
 	case "stop":
 		if upd.Message.From.UserName == "Art_Korn_39" {
-			os.Exit(1)
+			//	os.Exit(1)
+			panic("nam perda")
 		}
 	case "chatgpt":
 		msg_text := "Напишите свой вопрос:"
