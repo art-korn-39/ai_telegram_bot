@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -10,7 +11,10 @@ import (
 func SendRequestToKandinsky(text string) (string, error) {
 
 	dir := filepath.Dir(os.Args[0])
-	cmd := exec.Command(`python`,
+
+	log.Println("путь к баз. каталогу", dir)
+
+	cmd := exec.Command(`python3`,
 		dir+`\scripts\generate_image.py`,
 		strings.ReplaceAll(dir+`\data`, "\\", "/"),
 		text)
