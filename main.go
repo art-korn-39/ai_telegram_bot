@@ -14,6 +14,7 @@ import (
 )
 
 const (
+	Version       = "1.0"
 	ChannelChatID = -1001997602646
 	ChannelURL    = "https://t.me/+6ZMACWRgFdRkNGEy"
 )
@@ -104,6 +105,8 @@ func main() {
 }
 
 func loadConfig() {
+
+	log.Println("Version: " + Version)
 
 	file, _ := os.OpenFile("config.txt", os.O_RDONLY, 0600)
 	defer file.Close()
