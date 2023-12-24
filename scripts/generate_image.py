@@ -8,7 +8,7 @@ import random
 
 from sys import argv
 
-script, text = argv
+script, datapath, text = argv
 
 class Text2ImageAPI:
 
@@ -64,7 +64,8 @@ if __name__ == '__main__':
     base64_img_bytes = base64_img.encode('utf-8')
     
     num = str(int(random.uniform(1, 500)))
-    file_path = 'C:/DEV/GO/telegram_bot_1/data/image_'+num+'.jpg'
+#    file_path = 'C:/DEV/GO/telegram_bot_1/data/image_'+num+'.jpg'
+    file_path = datapath+'/image_'+num+'.jpg'
      
     with open(file_path, 'wb') as file_to_save:
         decoded_image_data = base64.decodebytes(base64_img_bytes)

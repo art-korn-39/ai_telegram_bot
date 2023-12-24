@@ -1,0 +1,2 @@
+[Kandinsky] exit status 1
+[Kandinsky] exit status 9009

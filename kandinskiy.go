@@ -1,18 +1,25 @@
 package main
 
 import (
+	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 )
 
 func SendRequestToKandinsky(text string) (string, error) {
 
-	res, err := exec.Command(`python`,
-		`C:\DEV\GO\telegram_bot_1\scripts\generate_image.py`,
-		//		filepath.Dir(os.Args[0])+`\scripts\generate_image.py`,
-		//`scripts\generate_image.py`,
-		text).
-		Output()
+	dir := filepath.Dir(os.Args[0])
+	cmd := exec.Command(`python`,
+		dir+`\scripts\generate_image.py`,
+		strings.ReplaceAll(dir+`\data`, "\\", "/"),
+		text)
+
+	if cmd.Err != nil {
+		return "", cmd.Err
+	}
+
+	res, err := cmd.Output()
 
 	if err != nil {
 		return "", err
