@@ -1,11 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
-	"path/filepath"
-	"runtime"
 	"slices"
 
 	tgbotapi "github.com/Syfaro/telegram-bot-api"
@@ -50,19 +47,6 @@ func init() {
 }
 
 func main() {
-
-	ex, err := os.Executable()
-	if err != nil {
-		panic(err)
-	}
-	exPath := filepath.Dir(ex)
-	fmt.Println(exPath)
-
-	_, callerFile, _, _ := runtime.Caller(0)
-	executablePath := filepath.Dir(callerFile)
-	fmt.Println(executablePath)
-
-	return
 
 	log.Printf("Authorized on account %s", Bot.Self.UserName)
 

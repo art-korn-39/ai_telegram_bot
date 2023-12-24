@@ -1,18 +1,22 @@
 package main
 
 import (
-	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 )
 
 func SendRequestToKandinsky(text string) (string, error) {
 
-	dir := filepath.Dir(os.Args[0])
-	cmd := exec.Command(`python3`,
-		dir+`\scripts\generate_image.py`,
-		strings.ReplaceAll(dir+`\data`, "\\", "/"),
+	_, callerFile, _, _ := runtime.Caller(0)
+	dir := strings.ReplaceAll(filepath.Dir(callerFile), "\\", "/")
+	scriptPath := dir + "/scripts/generate_image.py"
+	dataFolder := dir + "/data"
+
+	cmd := exec.Command(`python`,
+		scriptPath,
+		dataFolder,
 		text)
 
 	if cmd.Err != nil {
