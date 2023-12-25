@@ -8,13 +8,14 @@ import (
 	"log"
 	"os"
 	"slices"
+	"time"
 
 	tgbotapi "github.com/Syfaro/telegram-bot-api"
 	_ "github.com/lib/pq"
 )
 
 const (
-	Version       = "1.1"
+	Version       = "1.2"
 	ChannelChatID = -1001997602646
 	ChannelURL    = "https://t.me/+6ZMACWRgFdRkNGEy"
 )
@@ -28,8 +29,8 @@ var (
 	arrayCMD    = []string{"gemini", "kandinsky", "chatgpt"}
 )
 
-//ID chat (my) = 403059287
-//ID chat (my second) = 609614322
+//ID chat (art_korn_39) = 403059287
+//ID chat (art_korneev) = 609614322
 
 func main() {
 
@@ -64,6 +65,12 @@ func main() {
 			defer logPanic(false)
 
 			if upd.Message == nil {
+				return
+			}
+
+			// Если сообщение было больше 10 минут назад, то пропускаем
+			if time.Since(upd.Message.Time()).Seconds() > 600 {
+				Logs <- Log{upd.Message.From.UserName, "(timeout) " + upd.Message.Text, false}
 				return
 			}
 

@@ -29,11 +29,11 @@ func saveLogs() {
 func logPanic(main bool) {
 	if r := recover(); r != nil {
 		log.Println("Panic in gorutine. Error:\n", r)
-		writeIntoFile(Ternary(main, "main", "gorutine").(string), r.(string))
+		writeIntoFile(Ternary(main, "main", "gorutine"), r)
 	}
 }
 
-func writeIntoFile(values ...string) {
+func writeIntoFile(values ...any) {
 
 	Mutex.Lock()
 	defer Mutex.Unlock()
