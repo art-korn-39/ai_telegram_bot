@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	Version       = "1.0"
+	Version       = "1.1"
 	ChannelChatID = -1001997602646
 	ChannelURL    = "https://t.me/+6ZMACWRgFdRkNGEy"
 )
@@ -32,6 +32,8 @@ var (
 //ID chat (my second) = 609614322
 
 func main() {
+
+	defer logPanic(true)
 
 	// Загрузить файл конфигурации
 	loadConfig()
@@ -59,7 +61,7 @@ func main() {
 		go func(upd tgbotapi.Update) {
 
 			// Запишем panic если горутина завершилась с ошибкой
-			defer logPanic()
+			defer logPanic(false)
 
 			if upd.Message == nil {
 				return
