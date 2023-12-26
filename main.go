@@ -212,7 +212,7 @@ func AccessIsAllowed(upd tgbotapi.Update) bool {
 		result = false
 	}
 
-	if (chatMember.IsCreator() ||
+	if !(chatMember.IsCreator() ||
 		chatMember.IsAdministrator() ||
 		chatMember.IsMember()) && upd.Message.Text != "/start" {
 
