@@ -15,32 +15,46 @@ import (
 )
 
 const (
-	Version       = "1.2"
+	Version       = "1.3"
 	ChannelChatID = -1001997602646
 	ChannelURL    = "https://t.me/+6ZMACWRgFdRkNGEy"
 )
 
 var (
-	db          *sql.DB
-	Bot         *tgbotapi.BotAPI
-	Cfg         config
-	Logs        chan Log
-	ListOfUsers = map[int64]*UserInfo{}
-	arrayCMD    = []string{"gemini", "kandinsky", "chatgpt"}
+	db              *sql.DB
+	Bot             *tgbotapi.BotAPI
+	Cfg             config
+	Logs            chan Log
+	ListOfUsers     = map[int64]*UserInfo{}
+	arrayCMD        = []string{"gemini", "kandinsky", "chatgpt"}
+	delay_ChatGPT   = time.Tick(time.Second * 12 / 11) // 55 запросов в минуту
+	delay_Gemini    = time.Tick(time.Second * 12 / 11) // 55 запросов в минуту
+	delay_Kandinsky = time.Tick(time.Second / 3)       // 20 запросов в минуту
 )
+
+//sql
+//счетчик запросов
+//последняя команда
+
+//таблица записей:
+// data_time | user id | username | chatgpt | gemini | kandinskiy | request
+
+//ограничения ChatGPT в бесплатной версии – 60 запросов в минуту
+//Gemini в бесплатном тарифе действует ограничение на 60 запросов в минуту.
 
 //ID chat (art_korn_39) = 403059287
 //ID chat (art_korneev) = 609614322
+//ID chat (apolo39) = 6648171361
 
 func main() {
 
-	defer logPanic(true)
+	defer LogPanic("", true)
 
 	// Загрузить файл конфигурации
-	loadConfig()
+	LoadConfig()
 
 	// Запустить бота
-	startBot()
+	StartBot()
 
 	// Установить соединение с базой данных
 	SQL_Connect()
@@ -54,7 +68,7 @@ func main() {
 
 	// В отдельно горутине обрабатываем информацию по логам
 	Logs = make(chan Log, 10)
-	go saveLogs()
+	go SaveLogs()
 
 	// Читаем входящие запросы из канала
 	for update := range updates {
@@ -62,7 +76,7 @@ func main() {
 		go func(upd tgbotapi.Update) {
 
 			// Запишем panic если горутина завершилась с ошибкой
-			defer logPanic(false)
+			defer LogPanic(upd.Message.Text, false)
 
 			if upd.Message == nil {
 				return
@@ -75,7 +89,7 @@ func main() {
 			}
 
 			// Проверка подписки пользователя на канал
-			if !accessIsAllowed(upd) {
+			if !AccessIsAllowed(upd) {
 				return
 			}
 
@@ -100,24 +114,29 @@ func main() {
 			if MsgIsCommand(upd.Message) {
 				cmd := MsgCommand(upd.Message)
 				User.LastCommand = cmd
-				result = processCommand(cmd, upd)
+				result = ProcessCommand(cmd, upd)
 			} else {
-				result = processText(upd.Message.Text, User.LastCommand, upd)
+				result = ProcessText(upd.Message.Text, User.LastCommand, upd)
 			}
 
 			// Отправка сообщения
 			Bot.Send(result.Message)
+
+			// Общий лог, пишем сюда все запросы
 			Logs <- Log{result.Log_author, result.Log_message, false}
 
 		}(update)
 	}
 }
 
-func loadConfig() {
+func LoadConfig() {
 
 	log.Println("Version: " + Version)
 
-	file, _ := os.OpenFile("config.txt", os.O_RDONLY, 0600)
+	file, err := os.OpenFile("config.txt", os.O_RDONLY, 0600)
+	if err != nil {
+		panic(err)
+	}
 	defer file.Close()
 
 	b, err := io.ReadAll(file)
@@ -131,7 +150,7 @@ func loadConfig() {
 
 }
 
-func startBot() {
+func StartBot() {
 
 	// Используя токен создаем новый инстанс бота
 	var err error
@@ -172,99 +191,7 @@ func SQL_Connect() {
 
 }
 
-func processCommand(cmd string, upd tgbotapi.Update) ResultOfRequest {
-
-	var result ResultOfRequest
-	result.Log_author = "bot"
-
-	switch cmd {
-	case "start":
-		msg := tgbotapi.NewMessage(upd.Message.Chat.ID, start(upd.Message.Chat.FirstName))
-		msg.ParseMode = "HTML"
-
-		var buttons = tgbotapi.NewReplyKeyboard(
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton("Gemini"),
-				tgbotapi.NewKeyboardButton("Kandinsky"),
-				tgbotapi.NewKeyboardButton("ChatGPT"),
-			),
-		)
-		msg.ReplyMarkup = buttons
-
-		result.Message = msg
-		result.Log_message = "/start for " + upd.Message.Chat.UserName
-	case "stop":
-		if upd.Message.From.UserName == "Art_Korn_39" {
-			os.Exit(1)
-		}
-	case "chatgpt":
-		msg_text := "Напишите свой вопрос:"
-		result.Message = tgbotapi.NewMessage(upd.Message.Chat.ID, msg_text)
-		result.Log_message = msg_text
-	case "gemini":
-		msg_text := "Напишите свой вопрос:"
-		result.Message = tgbotapi.NewMessage(upd.Message.Chat.ID, msg_text)
-		result.Log_message = msg_text
-	case "kandinsky":
-		msg_text := "Введите свой запрос:"
-		result.Message = tgbotapi.NewMessage(upd.Message.Chat.ID, msg_text)
-		result.Log_message = msg_text
-	}
-
-	return result
-
-}
-
-func processText(text string, cmd string, upd tgbotapi.Update) ResultOfRequest {
-
-	var result ResultOfRequest
-
-	switch cmd {
-	case "chatgpt":
-		msg_text := SendRequestToChatGPT(upd.Message.Text)
-		result.Message = tgbotapi.NewMessage(upd.Message.Chat.ID, msg_text)
-		result.Log_author = "ChatGPT"
-		result.Log_message = msg_text
-
-	case "gemini":
-		msg_text := SendRequestToGemini(upd.Message.Text)
-		result.Message = tgbotapi.NewMessage(upd.Message.Chat.ID, msg_text)
-		result.Log_author = "Gemini"
-		result.Log_message = msg_text
-
-	case "kandinsky":
-		msg := tgbotapi.NewMessage(upd.Message.Chat.ID, "Запущена генерация картинки, она может занять 1-2 минуты.")
-		Bot.Send(msg)
-
-		pathToImage, err := SendRequestToKandinsky(upd.Message.Text)
-		if err != nil {
-			result.Message = tgbotapi.NewMessage(upd.Message.Chat.ID, "Не удалось сгенерировать изображение. Попробуйте позже.")
-			result.Log_author = "Kandinsky"
-			result.Log_message = "Ошибка при генерации картинки."
-			Logs <- Log{"Kandinsky", err.Error(), true}
-		} else {
-			result.Message = tgbotapi.NewPhotoUpload(upd.Message.Chat.ID, pathToImage)
-			result.Log_author = "Kandinsky"
-			result.Log_message = pathToImage
-		}
-	case "":
-		msg_text := "Не выбрана нейросеть для обработки запроса."
-		result.Message = tgbotapi.NewMessage(upd.Message.Chat.ID, msg_text)
-		result.Log_author = "bot"
-		result.Log_message = msg_text
-
-	case "start":
-		msg_text := "Не выбрана нейросеть для обработки запроса."
-		result.Message = tgbotapi.NewMessage(upd.Message.Chat.ID, msg_text)
-		result.Log_author = "bot"
-		result.Log_message = msg_text
-	}
-
-	return result
-
-}
-
-func accessIsAllowed(upd tgbotapi.Update) bool {
+func AccessIsAllowed(upd tgbotapi.Update) bool {
 
 	if !Cfg.CheckSubscription {
 		return true
@@ -285,7 +212,10 @@ func accessIsAllowed(upd tgbotapi.Update) bool {
 		result = false
 	}
 
-	if chatMember.Status != "member" && upd.Message.Text != "/start" {
+	if (chatMember.IsCreator() ||
+		chatMember.IsAdministrator() ||
+		chatMember.IsMember()) && upd.Message.Text != "/start" {
+
 		msg := tgbotapi.NewMessage(upd.Message.Chat.ID, "Для использования бота необходимо подписаться на канал👇")
 		var button = tgbotapi.NewInlineKeyboardMarkup(
 			tgbotapi.NewInlineKeyboardRow(

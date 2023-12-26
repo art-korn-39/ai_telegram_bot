@@ -19,12 +19,6 @@ type config struct {
 	WhiteList         []string
 }
 
-type ResultOfRequest struct {
-	Message     tgbotapi.Chattable
-	Log_author  string
-	Log_message string
-}
-
 func MsgIsCommand(m *tgbotapi.Message) bool {
 
 	if slices.Contains(arrayCMD, strings.ToLower(m.Text)) {

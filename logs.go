@@ -16,24 +16,29 @@ type Log struct {
 	IsError  bool
 }
 
-func saveLogs() {
+func SaveLogs() {
 
 	for v := range Logs {
-		log.Printf("[%s] %s", v.UserName, v.Text)
-		if v.IsError { // дополнительно: ошибку записываем в файл
-			writeIntoFile(v.UserName, v.Text)
+		if v.Text != "" {
+			log.Printf("[%s] %s", v.UserName, v.Text)
+			if v.IsError { // дополнительно: ошибку записываем в файл
+				WriteIntoFile(v.UserName, v.Text)
+			}
 		}
 	}
 }
 
-func logPanic(main bool) {
+func LogPanic(inputtext string, main bool) {
+
 	if r := recover(); r != nil {
-		log.Println("Panic in gorutine. Error:\n", r)
-		writeIntoFile(Ternary(main, "main", "gorutine"), r)
+		text := "Inputtext: " + inputtext + "\n" + "Error: " + fmt.Sprint(r)
+		log.Println("Panic in gorutine.\n", text)
+		WriteIntoFile(Ternary(main, "main", "gorutine"), text)
 	}
+
 }
 
-func writeIntoFile(values ...any) {
+func WriteIntoFile(values ...any) {
 
 	Mutex.Lock()
 	defer Mutex.Unlock()

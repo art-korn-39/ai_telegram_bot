@@ -34,7 +34,9 @@ func TranslateInto(text string, language string) (result string) {
 	return result
 }
 
-func SendRequestToChatGPT(text string) (answer string) {
+func SendRequestToChatGPT(text string) string {
+
+	<-delay_ChatGPT
 
 	resp, err := clientOpenAI.CreateChatCompletion(
 		context.Background(),
@@ -50,10 +52,10 @@ func SendRequestToChatGPT(text string) (answer string) {
 	)
 
 	if err != nil {
-		return err.Error()
+		Logs <- Log{"ChatGPT", "request: " + text + "\nerror: " + err.Error(), true}
+		return "Во время обработки запроса произошла ошибка. Пожалуйста, попробуйте ещё раз позже."
 	}
 
-	answer = resp.Choices[0].Message.Content
-	return answer
+	return resp.Choices[0].Message.Content
 
 }

@@ -25,6 +25,8 @@ func init() {
 
 func SendRequestToGemini(text string) string {
 
+	<-delay_Gemini
+
 	// For text-only input, use the gemini-pro model
 	model := client_Gemini.GenerativeModel("gemini-pro")
 	resp, err := model.GenerateContent(ctx_Gemini, genai.Text(text))
@@ -33,7 +35,7 @@ func SendRequestToGemini(text string) string {
 		if errorString == "blocked: candidate: FinishReasonSafety" {
 			client_Gemini, _ = genai.NewClient(ctx_Gemini, option.WithAPIKey(Gemini_APIKEY))
 		}
-		Logs <- Log{"Gemini", err.Error(), true}
+		Logs <- Log{"Gemini", errorString, true}
 		return "Не удалось получить ответ от сервиса. Попробуйте изменить текст запроса."
 	}
 
