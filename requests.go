@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	tgbotapi "github.com/Syfaro/telegram-bot-api"
@@ -64,6 +65,10 @@ func ProcessCommand(cmd string, upd tgbotapi.Update, user *UserInfo) ResultOfReq
 			case "updconf":
 				LoadConfig()
 				result.Message = tgbotapi.NewMessage(upd.Message.Chat.ID, "Config updated.")
+			case "info":
+				msg_text := fmt.Sprintf("Gemini: %d\nChatGPT: %d\nKandinsky: %d",
+					counter_gemini, counter_chatgpt, counter_kandinsky)
+				result.Message = tgbotapi.NewMessage(upd.Message.Chat.ID, msg_text)
 			}
 		}
 	}
@@ -80,6 +85,7 @@ func ProcessText(text string, user *UserInfo, upd tgbotapi.Update) ResultOfReque
 	case "chatgpt":
 		Operation := NewSQLOperation(user, upd, text)
 		SQL_AddOperation(Operation)
+		counter_chatgpt++
 
 		msg_text := SendRequestToChatGPT(upd.Message.Text, user)
 		result.Message = tgbotapi.NewMessage(upd.Message.Chat.ID, msg_text)
@@ -89,6 +95,7 @@ func ProcessText(text string, user *UserInfo, upd tgbotapi.Update) ResultOfReque
 	case "gemini":
 		Operation := NewSQLOperation(user, upd, text)
 		SQL_AddOperation(Operation)
+		counter_gemini++
 
 		msg_text := SendRequestToGemini(upd.Message.Text, user)
 		result.Message = tgbotapi.NewMessage(upd.Message.Chat.ID, msg_text)

@@ -19,6 +19,8 @@ type Operation struct {
 
 func SQL_Connect() {
 
+	return
+
 	// Capture connection properties.
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
@@ -55,6 +57,8 @@ func NewSQLOperation(user *UserInfo, upd tgbotapi.Update, request string) Operat
 }
 
 func SQL_AddOperation(o Operation) {
+
+	return
 
 	if db == nil {
 		Logs <- Log{"sql", "lost connection to DB", true}

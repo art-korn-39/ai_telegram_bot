@@ -67,6 +67,7 @@ func ProcessInputText_Kandinsky(text string, user *UserInfo, upd tgbotapi.Update
 
 			Operation := NewSQLOperation(user, upd, text)
 			SQL_AddOperation(Operation)
+			counter_kandinsky++
 
 			res, isError := SendRequestToKandinsky(user.InputText, style, upd.Message.Chat.ID)
 			if isError {

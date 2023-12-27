@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -19,16 +20,22 @@ const (
 )
 
 var (
-	db              *sql.DB
-	Bot             *tgbotapi.BotAPI
-	Cfg             config
-	Logs            chan Log
-	ListOfUsers     = map[int64]*UserInfo{}
-	arrayCMD        = []string{"gemini", "kandinsky", "chatgpt"}
+	db          *sql.DB
+	Bot         *tgbotapi.BotAPI
+	Cfg         config
+	Logs        chan Log
+	ListOfUsers = map[int64]*UserInfo{}
+	arrayCMD    = []string{"gemini", "kandinsky", "chatgpt"}
+
 	delay_upd       = time.Tick(time.Millisecond * 10)
 	delay_ChatGPT   = time.Tick(time.Second * 12 / 11) // 55 запросов в минуту
 	delay_Gemini    = time.Tick(time.Second * 12 / 11) // 55 запросов в минуту
 	delay_Kandinsky = time.Tick(time.Second * 3)       // 20 запросов в минуту
+	delay_stat      = time.Tick(time.Minute * 10)
+
+	counter_chatgpt   = 0
+	counter_gemini    = 0
+	counter_kandinsky = 0
 )
 
 //sql
@@ -65,6 +72,15 @@ func main() {
 	// В отдельно горутине обрабатываем информацию по логам
 	Logs = make(chan Log, 10)
 	go SaveLogs()
+
+	go func() {
+		for {
+			<-delay_stat
+			text := fmt.Sprintf("Gemini: %d ChatGPT: %d Kandinsky: %d",
+				counter_gemini, counter_chatgpt, counter_kandinsky)
+			log.Println(text)
+		}
+	}()
 
 	// Читаем входящие запросы из канала
 	for update := range updates {
