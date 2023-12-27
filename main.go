@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	Version       = "1.3"
+	Version       = "1.4"
 	ChannelChatID = -1001997602646
 	ChannelURL    = "https://t.me/+6ZMACWRgFdRkNGEy"
 )
@@ -38,10 +38,6 @@ var (
 
 //ограничения ChatGPT в бесплатной версии – 60 запросов в минуту
 //Gemini в бесплатном тарифе действует ограничение на 60 запросов в минуту.
-
-//kandinsky
-//Стили:
-//без стиля | artstation | 4k | anime
 
 //ID chat (art_korn_39) = 403059287
 //ID chat (art_korneev) = 609614322
@@ -114,12 +110,13 @@ func main() {
 
 			// Обработка запроса от пользователя
 			var result ResultOfRequest
+			// cmd это всё что начинается с "/" и 3 модели строкой
 			if MsgIsCommand(upd.Message) {
 				cmd := MsgCommand(upd.Message)
 				User.LastCommand = cmd
-				result = ProcessCommand(cmd, upd)
+				result = ProcessCommand(cmd, upd, User)
 			} else {
-				result = ProcessText(upd.Message.Text, User.LastCommand, upd)
+				result = ProcessText(upd.Message.Text, User, upd)
 			}
 
 			// Отправка сообщения
@@ -200,3 +197,12 @@ func SQL_Connect() {
 // }
 
 //bot.ListenForWebhook("/")
+
+// /start - start msg
+// /gemini - "введите вопрос"
+//    text - result
+// /chatgpt - "введите вопрос"
+//    text - result
+// /kandinsky - "введите запрос"
+//    text - "выберите стиль изображения"
+//	     style - result

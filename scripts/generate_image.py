@@ -7,7 +7,7 @@ import base64
 
 from sys import argv
 
-script, datapath, text, userid = argv
+script, datapath, text, style, userid = argv
 
 class Text2ImageAPI:
 
@@ -26,6 +26,7 @@ class Text2ImageAPI:
     def generate(self, prompt, model, images=1, width=1024, height=1024):
         params = {
             "type": "GENERATE",
+            "style": style,
             "numImages": images,
             "width": width,
             "height": height,
@@ -42,7 +43,7 @@ class Text2ImageAPI:
         data = response.json()
         return data['uuid']
 
-    def check_generation(self, request_id, attempts=10, delay=10):
+    def check_generation(self, request_id, attempts=12, delay=10):
         while attempts > 0:
             response = requests.get(self.URL + 'key/api/v1/text2image/status/' + request_id, headers=self.AUTH_HEADERS)
             data = response.json()
@@ -59,13 +60,15 @@ if __name__ == '__main__':
     uuid = api.generate(text, 4)
     images = api.check_generation(uuid)   
     
-    base64_img  = images[0]
-    base64_img_bytes = base64_img.encode('utf-8')
-    
-    file_path = datapath+'/image_'+userid+'.jpg'
-     
-    with open(file_path, 'wb') as file_to_save:
-        decoded_image_data = base64.decodebytes(base64_img_bytes)
-        file_to_save.write(decoded_image_data)
+    if images != None:
+        base64_img  = images[0]
+        base64_img_bytes = base64_img.encode('utf-8')
         
-    print(file_path)    
+        file_path = datapath+'/image_'+userid+'.jpg'
+        
+        with open(file_path, 'wb') as file_to_save:
+            decoded_image_data = base64.decodebytes(base64_img_bytes)
+            file_to_save.write(decoded_image_data)
+            
+        print(file_path)    
+

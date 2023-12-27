@@ -9,7 +9,10 @@ import (
 
 type UserInfo struct {
 	IsRunning   bool
+	Model       string
 	LastCommand string
+	InputText   string
+	Stage       string
 	Mutex       sync.Mutex
 }
 
