@@ -78,13 +78,13 @@ func ProcessText(text string, user *UserInfo, upd tgbotapi.Update) ResultOfReque
 
 	switch user.Model {
 	case "chatgpt":
-		msg_text := SendRequestToChatGPT(upd.Message.Text)
+		msg_text := SendRequestToChatGPT(upd.Message.Text, user)
 		result.Message = tgbotapi.NewMessage(upd.Message.Chat.ID, msg_text)
 		result.Log_author = "ChatGPT"
 		result.Log_message = msg_text
 
 	case "gemini":
-		msg_text := SendRequestToGemini(upd.Message.Text)
+		msg_text := SendRequestToGemini(upd.Message.Text, user)
 		result.Message = tgbotapi.NewMessage(upd.Message.Chat.ID, msg_text)
 		result.Log_author = "Gemini"
 		result.Log_message = msg_text
@@ -98,12 +98,6 @@ func ProcessText(text string, user *UserInfo, upd tgbotapi.Update) ResultOfReque
 		result.Message = tgbotapi.NewMessage(upd.Message.Chat.ID, msg_text)
 		result.Log_author = "bot"
 		result.Log_message = msg_text
-
-		// case "start":
-		// 	msg_text := "Не выбрана нейросеть для обработки запроса."
-		// 	result.Message = tgbotapi.NewMessage(upd.Message.Chat.ID, msg_text)
-		// 	result.Log_author = "bot"
-		// 	result.Log_message = msg_text
 	}
 
 	return result

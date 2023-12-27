@@ -5,15 +5,19 @@ import (
 	"sync"
 
 	tgbotapi "github.com/Syfaro/telegram-bot-api"
+	"github.com/google/generative-ai-go/genai"
+	openai "github.com/sashabaranov/go-openai"
 )
 
 type UserInfo struct {
-	IsRunning   bool
-	Model       string
-	LastCommand string
-	InputText   string
-	Stage       string
-	Mutex       sync.Mutex
+	IsRunning        bool
+	Model            string
+	LastCommand      string
+	InputText        string
+	Stage            string
+	Messages_ChatGPT []openai.ChatCompletionMessage
+	History_Gemini   []*genai.Content
+	Mutex            sync.Mutex
 }
 
 func AccessIsAllowed(upd tgbotapi.Update) bool {

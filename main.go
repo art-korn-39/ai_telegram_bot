@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	Version       = "1.4"
+	Version       = "1.5"
 	ChannelChatID = -1001997602646
 	ChannelURL    = "https://t.me/+6ZMACWRgFdRkNGEy"
 )

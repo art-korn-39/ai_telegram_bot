@@ -2,8 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"strings"
 
 	"github.com/sashabaranov/go-openai"
 )
@@ -22,32 +20,20 @@ func init() {
 
 }
 
-func TranslateInto(text string, language string) (result string) {
-
-	request := strings.Join([]string{
-		fmt.Sprintf("Translate text into %s", language),
-		`"` + text + `"`,
-	}, "/n")
-
-	result = SendRequestToChatGPT(request)
-
-	return result
-}
-
-func SendRequestToChatGPT(text string) string {
+func SendRequestToChatGPT(text string, user *UserInfo) string {
 
 	<-delay_ChatGPT
+
+	messages := append(user.Messages_ChatGPT, openai.ChatCompletionMessage{
+		Role:    openai.ChatMessageRoleUser,
+		Content: text,
+	})
 
 	resp, err := clientOpenAI.CreateChatCompletion(
 		context.Background(),
 		openai.ChatCompletionRequest{
-			Model: openai.GPT3Dot5Turbo,
-			Messages: []openai.ChatCompletionMessage{
-				{
-					Role:    "user",
-					Content: text,
-				},
-			},
+			Model:    openai.GPT3Dot5Turbo,
+			Messages: messages,
 		},
 	)
 
@@ -56,6 +42,15 @@ func SendRequestToChatGPT(text string) string {
 		return "Во время обработки запроса произошла ошибка. Пожалуйста, попробуйте ещё раз позже."
 	}
 
-	return resp.Choices[0].Message.Content
+	content := resp.Choices[0].Message.Content
+
+	messages = append(messages, openai.ChatCompletionMessage{
+		Role:    openai.ChatMessageRoleAssistant,
+		Content: content},
+	)
+
+	user.Messages_ChatGPT = messages
+
+	return content
 
 }
