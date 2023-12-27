@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"io"
 	"log"
 	"os"
@@ -34,7 +33,7 @@ var (
 
 //sql
 //таблица записей:
-// data_time | user id | username | chatgpt | gemini | kandinskiy | request
+// data_time | user id | username | model | request
 
 //ограничения ChatGPT в бесплатной версии – 60 запросов в минуту
 //Gemini в бесплатном тарифе действует ограничение на 60 запросов в минуту.
@@ -160,34 +159,6 @@ func StartBot() {
 	}
 
 	log.Printf("Authorized on account %s", Bot.Self.UserName)
-
-}
-
-func SQL_Connect() {
-
-	return
-
-	// Capture connection properties.
-	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
-		"password=%s dbname=%s sslmode=disable",
-		Cfg.DB_host, Cfg.DB_port, Cfg.DB_user, Cfg.DB_password, Cfg.DB_name)
-
-	// Get a database handle.
-	var err error
-	db, err = sql.Open("postgres", psqlInfo)
-
-	if err != nil {
-		log.Println("Unsuccessful connection to PostgreSQL!")
-		log.Fatal(err)
-	}
-
-	pingErr := db.Ping()
-	if pingErr != nil {
-		log.Println("Unsuccessful connection to PostgreSQL!")
-		log.Fatal(pingErr)
-	}
-
-	log.Println("Successful connection to PostgreSQL")
 
 }
 

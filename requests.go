@@ -78,12 +78,18 @@ func ProcessText(text string, user *UserInfo, upd tgbotapi.Update) ResultOfReque
 
 	switch user.Model {
 	case "chatgpt":
+		Operation := NewSQLOperation(user, upd, text)
+		SQL_AddOperation(Operation)
+
 		msg_text := SendRequestToChatGPT(upd.Message.Text, user)
 		result.Message = tgbotapi.NewMessage(upd.Message.Chat.ID, msg_text)
 		result.Log_author = "ChatGPT"
 		result.Log_message = msg_text
 
 	case "gemini":
+		Operation := NewSQLOperation(user, upd, text)
+		SQL_AddOperation(Operation)
+
 		msg_text := SendRequestToGemini(upd.Message.Text, user)
 		result.Message = tgbotapi.NewMessage(upd.Message.Chat.ID, msg_text)
 		result.Log_author = "Gemini"
