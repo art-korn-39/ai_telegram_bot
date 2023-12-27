@@ -75,12 +75,12 @@ func main() {
 
 		go func(upd tgbotapi.Update) {
 
-			// Запишем panic если горутина завершилась с ошибкой
-			defer LogPanic(upd.Message.Text, false)
-
 			if upd.Message == nil {
 				return
 			}
+
+			// Запишем panic если горутина завершилась с ошибкой
+			defer LogPanic(upd.Message.Text, false)
 
 			// Если сообщение было больше 10 минут назад, то пропускаем
 			if time.Since(upd.Message.Time()).Seconds() > 600 {
