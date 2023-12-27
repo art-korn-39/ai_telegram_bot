@@ -7,7 +7,6 @@ import (
 	"io"
 	"log"
 	"os"
-	"slices"
 	"time"
 
 	tgbotapi "github.com/Syfaro/telegram-bot-api"
@@ -27,20 +26,22 @@ var (
 	Logs            chan Log
 	ListOfUsers     = map[int64]*UserInfo{}
 	arrayCMD        = []string{"gemini", "kandinsky", "chatgpt"}
+	delay_upd       = time.Tick(time.Millisecond * 10)
 	delay_ChatGPT   = time.Tick(time.Second * 12 / 11) // 55 запросов в минуту
 	delay_Gemini    = time.Tick(time.Second * 12 / 11) // 55 запросов в минуту
-	delay_Kandinsky = time.Tick(time.Second / 3)       // 20 запросов в минуту
+	delay_Kandinsky = time.Tick(time.Second * 3)       // 20 запросов в минуту
 )
 
 //sql
-//счетчик запросов
-//последняя команда
-
 //таблица записей:
 // data_time | user id | username | chatgpt | gemini | kandinskiy | request
 
 //ограничения ChatGPT в бесплатной версии – 60 запросов в минуту
 //Gemini в бесплатном тарифе действует ограничение на 60 запросов в минуту.
+
+//kandinsky
+//Стили:
+//без стиля | artstation | 4k | anime
 
 //ID chat (art_korn_39) = 403059287
 //ID chat (art_korneev) = 609614322
@@ -72,6 +73,8 @@ func main() {
 
 	// Читаем входящие запросы из канала
 	for update := range updates {
+
+		<-delay_upd
 
 		go func(upd tgbotapi.Update) {
 
@@ -188,46 +191,6 @@ func SQL_Connect() {
 	}
 
 	log.Println("Successful connection to PostgreSQL")
-
-}
-
-func AccessIsAllowed(upd tgbotapi.Update) bool {
-
-	if !Cfg.CheckSubscription {
-		return true
-	}
-
-	if slices.Contains(Cfg.WhiteList, upd.Message.Chat.UserName) {
-		return true
-	}
-
-	result := true
-
-	conf := tgbotapi.ChatConfigWithUser{ChatID: ChannelChatID, UserID: int(upd.Message.Chat.ID)}
-	chatMember, err := Bot.GetChatMember(conf)
-	if err != nil {
-		Logs <- Log{"bot{GetChatMember}", err.Error(), true}
-		msg := tgbotapi.NewMessage(upd.Message.Chat.ID, "Произошла непредвиденная ошибка, попробуйте позже.")
-		Bot.Send(msg)
-		result = false
-	}
-
-	if !(chatMember.IsCreator() ||
-		chatMember.IsAdministrator() ||
-		chatMember.IsMember()) && upd.Message.Text != "/start" {
-
-		msg := tgbotapi.NewMessage(upd.Message.Chat.ID, "Для использования бота необходимо подписаться на канал👇")
-		var button = tgbotapi.NewInlineKeyboardMarkup(
-			tgbotapi.NewInlineKeyboardRow(
-				tgbotapi.NewInlineKeyboardButtonURL("✅Подписаться", ChannelURL),
-			),
-		)
-		msg.ReplyMarkup = button
-		Bot.Send(msg)
-		result = false
-	}
-
-	return result
 
 }
 

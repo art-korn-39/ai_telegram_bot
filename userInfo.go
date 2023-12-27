@@ -1,6 +1,7 @@
 package main
 
 import (
+	"slices"
 	"sync"
 
 	tgbotapi "github.com/Syfaro/telegram-bot-api"
@@ -12,9 +13,49 @@ type UserInfo struct {
 	Mutex       sync.Mutex
 }
 
+func AccessIsAllowed(upd tgbotapi.Update) bool {
+
+	if !Cfg.CheckSubscription {
+		return true
+	}
+
+	if slices.Contains(Cfg.WhiteList, upd.Message.Chat.UserName) {
+		return true
+	}
+
+	result := true
+
+	conf := tgbotapi.ChatConfigWithUser{ChatID: ChannelChatID, UserID: int(upd.Message.Chat.ID)}
+	chatMember, err := Bot.GetChatMember(conf)
+	if err != nil {
+		Logs <- Log{"bot{GetChatMember}", err.Error(), true}
+		msg := tgbotapi.NewMessage(upd.Message.Chat.ID, "Произошла непредвиденная ошибка, попробуйте позже.")
+		Bot.Send(msg)
+		result = false
+	}
+
+	if !(chatMember.IsCreator() ||
+		chatMember.IsAdministrator() ||
+		chatMember.IsMember()) && upd.Message.Text != "/start" {
+
+		msg := tgbotapi.NewMessage(upd.Message.Chat.ID, "Для использования бота необходимо подписаться на канал👇")
+		var button = tgbotapi.NewInlineKeyboardMarkup(
+			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonURL("✅Подписаться", ChannelURL),
+			),
+		)
+		msg.ReplyMarkup = button
+		Bot.Send(msg)
+		result = false
+	}
+
+	return result
+
+}
+
 func (u *UserInfo) CheckUserLock(upd tgbotapi.Update) (isLocking bool) {
 
-	// Устанавливаем блокировку по объекту UserInfo
+	// Устанавливаем блокировку по объекту UserInfo на период проверки запуска и блокировки
 	u.Mutex.Lock()
 	// Разблокировку ставим через defer, чтобы она не стала вечной, если в методе произойдёт panic
 	defer u.Mutex.Unlock()
