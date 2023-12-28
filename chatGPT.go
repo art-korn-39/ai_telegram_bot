@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"log"
+	"strings"
 
 	"github.com/sashabaranov/go-openai"
 )
@@ -20,7 +22,7 @@ func init() {
 
 }
 
-func SendRequestToChatGPT(text string, user *UserInfo) string {
+func SendRequestToChatGPT(text string, user *UserInfo, firstLaunch bool) string {
 
 	<-delay_ChatGPT
 
@@ -37,12 +39,24 @@ func SendRequestToChatGPT(text string, user *UserInfo) string {
 		},
 	)
 
+	var content string
 	if err != nil {
-		Logs <- Log{"ChatGPT", "request: " + text + "\nerror: " + err.Error(), true}
-		return "Во время обработки запроса произошла ошибка. Пожалуйста, попробуйте ещё раз позже."
-	}
+		errString := err.Error()
 
-	content := resp.Choices[0].Message.Content
+		if strings.Contains(errString, "This model's maximum context length is 4097 tokens") && firstLaunch { //чтобы в рекурсию не уйти
+
+			log.Println("limit 4097 tokens, refresh context")
+			user.Messages_ChatGPT = []openai.ChatCompletionMessage{}
+			content = SendRequestToChatGPT(text, user, false)
+
+		} else {
+			Logs <- Log{"ChatGPT", "request: " + text + "\nerror: " + errString, true}
+			return "Во время обработки запроса произошла ошибка. Пожалуйста, попробуйте ещё раз позже."
+		}
+
+	} else {
+		content = resp.Choices[0].Message.Content
+	}
 
 	messages = append(messages, openai.ChatCompletionMessage{
 		Role:    openai.ChatMessageRoleAssistant,
@@ -52,5 +66,7 @@ func SendRequestToChatGPT(text string, user *UserInfo) string {
 	user.Messages_ChatGPT = messages
 
 	return content
+
+	//This model's maximum context length is 4097 tokens.
 
 }

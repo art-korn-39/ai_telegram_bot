@@ -43,7 +43,7 @@ func SendRequestToGemini(text string, user *UserInfo) string {
 
 		}
 		Logs <- Log{"Gemini", errorString, true}
-		return "Не удалось получить ответ от сервиса. Попробуйте изменить текст запроса."
+		return "Не удалось получить ответ от сервиса. Попробуйте изменить текст запроса или очистить историю диалога командой /clearContext."
 	}
 
 	result := resp.Candidates[0].Content.Parts[0].(genai.Text)

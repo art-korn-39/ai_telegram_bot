@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	Version       = "1.5"
+	Version       = "1.6"
 	ChannelChatID = -1001997602646
 	ChannelURL    = "https://t.me/+6ZMACWRgFdRkNGEy"
 )
@@ -28,9 +28,9 @@ var (
 	arrayCMD    = []string{"gemini", "kandinsky", "chatgpt"}
 
 	delay_upd       = time.Tick(time.Millisecond * 10)
-	delay_ChatGPT   = time.Tick(time.Second * 12 / 11) // 55 запросов в минуту
-	delay_Gemini    = time.Tick(time.Second * 12 / 11) // 55 запросов в минуту
-	delay_Kandinsky = time.Tick(time.Second * 3)       // 20 запросов в минуту
+	delay_ChatGPT   = time.Tick(time.Second * 3)       // 20 RPM
+	delay_Gemini    = time.Tick(time.Second * 12 / 11) // 55 RPM
+	delay_Kandinsky = time.Tick(time.Second * 3)       // 20 RPM
 	delay_stat      = time.Tick(time.Minute * 10)
 
 	counter_chatgpt   = 0
@@ -38,11 +38,10 @@ var (
 	counter_kandinsky = 0
 )
 
-//sql
-//таблица записей:
-// data_time | user id | username | model | request
+// по юзерам с пустым username записать детализацию
 
-//ограничения ChatGPT в бесплатной версии – 60 запросов в минуту
+//ограничения ChatGPT в бесплатной версии – 3 запросов в минуту (200 в день?)
+//зарегистрировать несколько API?
 //Gemini в бесплатном тарифе действует ограничение на 60 запросов в минуту.
 
 //ID chat (art_korn_39) = 403059287
@@ -73,14 +72,8 @@ func main() {
 	Logs = make(chan Log, 10)
 	go SaveLogs()
 
-	go func() {
-		for {
-			<-delay_stat
-			text := fmt.Sprintf("Gemini: %d ChatGPT: %d Kandinsky: %d",
-				counter_gemini, counter_chatgpt, counter_kandinsky)
-			log.Println(text)
-		}
-	}()
+	// Пишем счетчики в логи, на всякий случай + пока БД не готова
+	go SaveStatistics()
 
 	// Читаем входящие запросы из канала
 	for update := range updates {
@@ -90,6 +83,10 @@ func main() {
 		go func(upd tgbotapi.Update) {
 
 			if upd.Message == nil {
+				return
+			}
+
+			if upd.Message.Text == "" || upd.Message.From.IsBot {
 				return
 			}
 
@@ -134,6 +131,8 @@ func main() {
 				result = ProcessText(upd.Message.Text, User, upd)
 			}
 
+			result.addUsernameIntoLog(upd.Message.From.UserName)
+
 			// Отправка сообщения
 			Bot.Send(result.Message)
 
@@ -141,6 +140,15 @@ func main() {
 			Logs <- Log{result.Log_author, result.Log_message, false}
 
 		}(update)
+	}
+}
+
+func SaveStatistics() {
+	for {
+		<-delay_stat
+		text := fmt.Sprintf("Gemini: %d ChatGPT: %d Kandinsky: %d",
+			counter_gemini, counter_chatgpt, counter_kandinsky)
+		log.Println(text)
 	}
 }
 

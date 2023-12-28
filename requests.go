@@ -5,6 +5,7 @@ import (
 	"os"
 
 	tgbotapi "github.com/Syfaro/telegram-bot-api"
+	"github.com/google/generative-ai-go/genai"
 )
 
 var buttons_start = tgbotapi.NewReplyKeyboard(
@@ -19,6 +20,10 @@ type ResultOfRequest struct {
 	Message     tgbotapi.Chattable
 	Log_author  string
 	Log_message string
+}
+
+func (r *ResultOfRequest) addUsernameIntoLog(username string) {
+	r.Log_author = r.Log_author + "->" + username
 }
 
 func ProcessCommand(cmd string, upd tgbotapi.Update, user *UserInfo) ResultOfRequest {
@@ -57,6 +62,13 @@ func ProcessCommand(cmd string, upd tgbotapi.Update, user *UserInfo) ResultOfReq
 		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(false)
 		result.Message = msg
 		result.Log_message = msg_text
+	case "clearContext":
+		user.History_Gemini = []*genai.Content{}
+		msg_text := "История диалога с Gemini очищена."
+		msg := tgbotapi.NewMessage(upd.Message.Chat.ID, msg_text)
+		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(false)
+		result.Message = msg
+		result.Log_message = msg_text
 	default:
 		if upd.Message.From.UserName == "Art_Korn_39" {
 			switch cmd {
@@ -87,7 +99,7 @@ func ProcessText(text string, user *UserInfo, upd tgbotapi.Update) ResultOfReque
 		SQL_AddOperation(Operation)
 		counter_chatgpt++
 
-		msg_text := SendRequestToChatGPT(upd.Message.Text, user)
+		msg_text := SendRequestToChatGPT(upd.Message.Text, user, true)
 		result.Message = tgbotapi.NewMessage(upd.Message.Chat.ID, msg_text)
 		result.Log_author = "ChatGPT"
 		result.Log_message = msg_text
