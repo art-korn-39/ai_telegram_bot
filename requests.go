@@ -62,7 +62,7 @@ func ProcessCommand(cmd string, upd tgbotapi.Update, user *UserInfo) ResultOfReq
 		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(false)
 		result.Message = msg
 		result.Log_message = msg_text
-	case "clearContext":
+	case "clearcontext":
 		user.History_Gemini = []*genai.Content{}
 		msg_text := "История диалога с Gemini очищена."
 		msg := tgbotapi.NewMessage(upd.Message.Chat.ID, msg_text)
