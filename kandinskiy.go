@@ -88,7 +88,7 @@ func ProcessInputText_Kandinsky(text string, user *UserInfo, upd tgbotapi.Update
 			user.InputText = ""
 
 		} else {
-			msg_text := "Пожалуйста, введите стиль из предложенных вариантов"
+			msg_text := "Пожалуйста, выберите стиль из предложенных вариантов"
 			msg := tgbotapi.NewMessage(upd.Message.Chat.ID, msg_text)
 
 			result.Message = msg

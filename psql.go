@@ -19,8 +19,6 @@ type Operation struct {
 
 func SQL_Connect() {
 
-	return
-
 	// Capture connection properties.
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",

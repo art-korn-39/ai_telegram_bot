@@ -19,9 +19,9 @@ var (
 )
 
 func init() {
-	ctx_Gemini = context.Background()
-	client_Gemini, _ = genai.NewClient(ctx_Gemini, option.WithAPIKey(Gemini_APIKEY))
-	model_Gemini = client_Gemini.GenerativeModel("gemini-pro")
+	//	ctx_Gemini = context.Background()
+	//	client_Gemini, _ = genai.NewClient(ctx_Gemini, option.WithAPIKey(Gemini_APIKEY))
+	//	model_Gemini = client_Gemini.GenerativeModel("gemini-pro")
 }
 
 func SendRequestToGemini(text string, user *UserInfo) string {
