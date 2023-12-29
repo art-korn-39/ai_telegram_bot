@@ -28,7 +28,7 @@ var (
 	arrayCMD    = []string{"gemini", "kandinsky", "chatgpt"}
 
 	delay_upd       = time.Tick(time.Millisecond * 10)
-	delay_ChatGPT   = time.Tick(time.Second * 3)       // 20 RPM
+	delay_ChatGPT   = time.Tick(time.Second * 5)       // 12 RPM
 	delay_Gemini    = time.Tick(time.Second * 12 / 11) // 55 RPM
 	delay_Kandinsky = time.Tick(time.Second * 3)       // 20 RPM
 	delay_stat      = time.Tick(time.Minute * 10)
@@ -39,6 +39,10 @@ var (
 )
 
 // по юзерам с пустым username записать детализацию
+// лимит по токенам в чат гпт
+// СУБД прицепить на сервере
+// about добавить с полным описанием
+// про тестирование подумать
 
 //ограничения ChatGPT в бесплатной версии – 3 запросов в минуту (200 в день?)
 //зарегистрировать несколько API?

@@ -9,7 +9,8 @@ import (
 )
 
 const (
-	OpenAIToken = "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"
+	OpenAIToken = "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" //Коли
+	//OpenAIToken = "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" // мой
 )
 
 var (
@@ -21,6 +22,11 @@ func init() {
 	clientOpenAI = openai.NewClient(OpenAIToken)
 
 }
+
+//для оценки токенов
+//2 символа RU = 1 токен
+//4 символа EN = 1 токен
+//utf8.RuneCountInString(str)
 
 func SendRequestToChatGPT(text string, user *UserInfo, firstLaunch bool) string {
 

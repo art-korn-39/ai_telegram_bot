@@ -128,15 +128,15 @@ func SendRequestToKandinsky(text string, style string, userid int64) (result str
 	res, err := cmd.Output()
 
 	if err != nil {
-		description := fmt.Sprintf("text: %s [%s]\nerror: %s", text, style, cmd.Err.Error())
+		description := fmt.Sprintf("text: %s [%s]\nerror: %s", text, style, err.Error())
 		Logs <- Log{"Kandinsky{cmd.Output()}", description, true}
-		return "Не удалось сгенерировать изображение. Попробуйте позже.", true
+		return "Не удалось сгенерировать изображение. Попробуйте изменить текст описания картинки.", true
 	}
 
 	pathToImage := strings.TrimSpace(string(res[:]))
 
 	if pathToImage == "" {
-		description := fmt.Sprintf("text: %s [%s]\nerror: %s", text, style, cmd.Err.Error())
+		description := fmt.Sprintf("text: %s [%s]\nerror: %s", text, style, "скрипт вернул пустой путь до картинки")
 		Logs <- Log{"Kandinsky{API}", description, true}
 		return "Не удалось сгенерировать изображение. Попробуйте позже.", true
 	}

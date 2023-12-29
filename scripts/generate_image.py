@@ -41,6 +41,7 @@ class Text2ImageAPI:
         }
         response = requests.post(self.URL + 'key/api/v1/text2image/run', headers=self.AUTH_HEADERS, files=data)
         data = response.json()
+#        print(data)
         return data['uuid']
 
     def check_generation(self, request_id, attempts=12, delay=10):
@@ -48,6 +49,7 @@ class Text2ImageAPI:
             response = requests.get(self.URL + 'key/api/v1/text2image/status/' + request_id, headers=self.AUTH_HEADERS)
             data = response.json()
             if data['status'] == 'DONE':
+#                print(data)
                 return data['images']
 
             attempts -= 1
