@@ -56,30 +56,25 @@ func NewSQLOperation(user *UserInfo, upd tgbotapi.Update, request string) Operat
 
 func SQL_AddOperation(o Operation) {
 
-	return
-
 	if db == nil {
 		Logs <- Log{"sql", "lost connection to DB", true}
 		return
 	}
 
-	tx, _ := db.Begin()
-	defer tx.Rollback()
-
 	Statement := `
 	INSERT INTO Operations (data, user_id, username, model, request)
 	VALUES ($1, $2, $3, $4, $5)`
 
-	_, err := tx.Exec(Statement,
+	_, err := db.Exec(Statement,
 		o.data,
 		o.user_id,
 		o.username,
 		o.model,
 		o.request)
 
-	tx.Commit()
-
 	if err != nil {
 		Logs <- Log{"sql", err.Error(), true}
+		return
 	}
+
 }

@@ -65,7 +65,7 @@ func ProcessInputText_Kandinsky(text string, user *UserInfo, upd tgbotapi.Update
 			msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(false)
 			Bot.Send(msg)
 
-			Operation := NewSQLOperation(user, upd, text)
+			Operation := NewSQLOperation(user, upd, "["+text+"] "+user.InputText)
 			SQL_AddOperation(Operation)
 			counter_kandinsky++
 

@@ -19,7 +19,7 @@ var (
 
 func init() {
 
-	//	clientOpenAI = openai.NewClient(OpenAIToken)
+	clientOpenAI = openai.NewClient(OpenAIToken)
 
 }
 

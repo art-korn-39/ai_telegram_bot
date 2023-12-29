@@ -39,44 +39,25 @@ func ProcessCommand(cmd string, upd tgbotapi.Update, user *UserInfo) ResultOfReq
 	case "start":
 		user.Model = ""
 		msg_text = start(upd.Message.Chat.FirstName)
-		//msg := tgbotapi.NewMessage(upd.Message.Chat.ID, msg_text)
 		Message.ParseMode = "HTML"
 		Message.ReplyMarkup = buttons_start
-		//result.Message = msg
-		//result.Log_message = "/start for " + upd.Message.Chat.UserName
 
 	case "chatgpt":
 		user.Model = "chatgpt"
 		msg_text = "Напишите свой вопрос:"
-		// msg := tgbotapi.NewMessage(upd.Message.Chat.ID, msg_text)
-		// msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(false)
-		// result.Message = msg
-		// result.Log_message = msg_text
 
 	case "gemini":
 		user.Model = "gemini"
 		msg_text = "Напишите свой вопрос:"
-		// msg := tgbotapi.NewMessage(upd.Message.Chat.ID, msg_text)
-		// msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(false)
-		// result.Message = msg
-		// result.Log_message = msg_text
 
 	case "kandinsky":
 		user.Model = "kandinsky"
 		user.Stage = "text"
 		msg_text = "Введите свой запрос:"
-		// msg := tgbotapi.NewMessage(upd.Message.Chat.ID, msg_text)
-		// msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(false)
-		// result.Message = msg
-		// result.Log_message = msg_text
 
 	case "clearcontext":
 		user.History_Gemini = []*genai.Content{}
 		msg_text = "История диалога с Gemini очищена."
-		// msg := tgbotapi.NewMessage(upd.Message.Chat.ID, msg_text)
-		// msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(false)
-		// result.Message = msg
-		// result.Log_message = msg_text
 
 	default:
 		if upd.Message.From.UserName == "Art_Korn_39" {
@@ -86,11 +67,9 @@ func ProcessCommand(cmd string, upd tgbotapi.Update, user *UserInfo) ResultOfReq
 			case "updconf":
 				LoadConfig()
 				msg_text = "Config updated."
-				//result.Message = tgbotapi.NewMessage(upd.Message.Chat.ID, msg_text)
 			case "info":
 				msg_text = fmt.Sprintf("Gemini: %d\nChatGPT: %d\nKandinsky: %d",
 					counter_gemini, counter_chatgpt, counter_kandinsky)
-				//result.Message = tgbotapi.NewMessage(upd.Message.Chat.ID, msg_text)
 			}
 		}
 	}
@@ -121,9 +100,6 @@ func ProcessText(text string, user *UserInfo, upd tgbotapi.Update) ResultOfReque
 		counter_chatgpt++
 
 		msg_text = SendRequestToChatGPT(upd.Message.Text, user, true)
-		//result.Message = tgbotapi.NewMessage(upd.Message.Chat.ID, msg_text)
-		//result.Log_author = "ChatGPT"
-		//result.Log_message = msg_text
 
 	case "gemini":
 		Operation := NewSQLOperation(user, upd, text)
@@ -131,9 +107,6 @@ func ProcessText(text string, user *UserInfo, upd tgbotapi.Update) ResultOfReque
 		counter_gemini++
 
 		msg_text = SendRequestToGemini(upd.Message.Text, user)
-		//result.Message = tgbotapi.NewMessage(upd.Message.Chat.ID, msg_text)
-		//result.Log_author = "Gemini"
-		//result.Log_message = msg_text
 
 	case "kandinsky": // пользователь ввел текст по модели kand
 
@@ -141,9 +114,7 @@ func ProcessText(text string, user *UserInfo, upd tgbotapi.Update) ResultOfReque
 
 	default:
 		msg_text = "Не выбрана нейросеть для обработки запроса."
-		//result.Message = tgbotapi.NewMessage(upd.Message.Chat.ID, msg_text)
 		result.Log_author = "bot"
-		//result.Log_message = msg_text
 	}
 
 	Message.Text = msg_text
