@@ -43,7 +43,7 @@ func WriteIntoFile(values ...any) {
 	Mutex.Lock()
 	defer Mutex.Unlock()
 
-	file, _ := os.OpenFile("Errors.txt", os.O_APPEND|os.O_WRONLY, 0600)
+	file, _ := os.OpenFile("errors.txt", os.O_APPEND|os.O_WRONLY, 0600)
 	defer file.Close()
 	file.WriteString(fmt.Sprintf("(%s) [%s] %s\n", time.Now().Format(time.DateTime), values[0], values[1]))
 
