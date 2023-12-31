@@ -10,6 +10,8 @@ import (
 )
 
 type UserInfo struct {
+	Username         string
+	ChatID           int64
 	IsRunning        bool
 	Model            string
 	LastCommand      string
@@ -18,6 +20,14 @@ type UserInfo struct {
 	Messages_ChatGPT []openai.ChatCompletionMessage
 	History_Gemini   []*genai.Content
 	Mutex            sync.Mutex
+}
+
+func NewUserInfo(u *tgbotapi.User, id int64) *UserInfo {
+	username := u.UserName
+	if username == "" {
+		username = u.FirstName + "_" + u.LastName
+	}
+	return &UserInfo{Username: username, ChatID: id}
 }
 
 func AccessIsAllowed(upd tgbotapi.Update) bool {

@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	Version       = "1.6"
+	Version       = "1.7"
 	ChannelChatID = -1001997602646
 	ChannelURL    = "https://t.me/+6ZMACWRgFdRkNGEy"
 )
@@ -40,7 +40,6 @@ var (
 
 // по юзерам с пустым username записать детализацию
 // лимит по токенам в чат гпт
-// СУБД прицепить на сервере
 // about добавить с полным описанием
 // про тестирование подумать
 
@@ -60,10 +59,13 @@ func main() {
 	LoadConfig()
 
 	// Запустить бота
-	StartBot()
+	//StartBot()
 
 	// Установить соединение с базой данных
 	SQL_Connect()
+
+	startFillSQL()
+	return
 
 	// u - структура с конфигом для получения апдейтов
 	u := tgbotapi.NewUpdate(0)
@@ -111,12 +113,12 @@ func main() {
 			// Получаем данные пользователя
 			User, ok := ListOfUsers[upd.Message.Chat.ID]
 			if !ok {
-				User = &UserInfo{}
+				User = NewUserInfo(upd.Message.From, upd.Message.Chat.ID)
 				ListOfUsers[upd.Message.Chat.ID] = User
 			}
 
 			// Фиксируем пользователя и входящее сообщение
-			Logs <- Log{upd.Message.From.UserName, upd.Message.Text, false}
+			Logs <- Log{User.Username, upd.Message.Text, false}
 
 			// Если предыдущий запрос ещё выполняется, то новые команды не обрабатываем
 			if User.CheckUserLock(upd) {
@@ -135,7 +137,7 @@ func main() {
 				result = ProcessText(upd.Message.Text, User, upd)
 			}
 
-			result.addUsernameIntoLog(upd.Message.From.UserName)
+			result.addUsernameIntoLog(User.Username)
 
 			// Отправка сообщения
 			Bot.Send(result.Message)

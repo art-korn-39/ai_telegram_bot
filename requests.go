@@ -31,7 +31,7 @@ func ProcessCommand(cmd string, upd tgbotapi.Update, user *UserInfo) ResultOfReq
 	var result ResultOfRequest
 	result.Log_author = "bot"
 
-	Message := tgbotapi.NewMessage(upd.Message.Chat.ID, "")
+	Message := tgbotapi.NewMessage(user.ChatID, "")
 	Message.ReplyMarkup = tgbotapi.NewRemoveKeyboard(false)
 	var msg_text string
 
@@ -60,7 +60,7 @@ func ProcessCommand(cmd string, upd tgbotapi.Update, user *UserInfo) ResultOfReq
 		msg_text = "История диалога с Gemini очищена."
 
 	default:
-		if upd.Message.From.UserName == "Art_Korn_39" {
+		if user.Username == "Art_Korn_39" {
 			switch cmd {
 			case "stop":
 				os.Exit(1)
@@ -78,7 +78,7 @@ func ProcessCommand(cmd string, upd tgbotapi.Update, user *UserInfo) ResultOfReq
 	result.Message = Message
 	result.Log_message = msg_text
 	if cmd == "start" {
-		result.Log_message = "/start for " + upd.Message.Chat.UserName
+		result.Log_message = "/start for " + user.Username
 	}
 
 	return result
@@ -90,19 +90,19 @@ func ProcessText(text string, user *UserInfo, upd tgbotapi.Update) ResultOfReque
 	var result ResultOfRequest
 	result.Log_author = user.Model
 
-	Message := tgbotapi.NewMessage(upd.Message.Chat.ID, "")
+	Message := tgbotapi.NewMessage(user.ChatID, "")
 	var msg_text string
 
 	switch user.Model {
 	case "chatgpt":
-		Operation := NewSQLOperation(user, upd, text)
+		Operation := NewSQLOperation(user, text)
 		SQL_AddOperation(Operation)
 		counter_chatgpt++
 
 		msg_text = SendRequestToChatGPT(upd.Message.Text, user, true)
 
 	case "gemini":
-		Operation := NewSQLOperation(user, upd, text)
+		Operation := NewSQLOperation(user, text)
 		SQL_AddOperation(Operation)
 		counter_gemini++
 
@@ -110,7 +110,7 @@ func ProcessText(text string, user *UserInfo, upd tgbotapi.Update) ResultOfReque
 
 	case "kandinsky": // пользователь ввел текст по модели kand
 
-		return ProcessInputText_Kandinsky(text, user, upd)
+		return ProcessInputText_Kandinsky(text, user)
 
 	default:
 		msg_text = "Не выбрана нейросеть для обработки запроса."

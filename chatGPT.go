@@ -5,6 +5,7 @@ import (
 	"log"
 	"strings"
 
+	tgbotapi "github.com/Syfaro/telegram-bot-api"
 	"github.com/sashabaranov/go-openai"
 )
 
@@ -50,6 +51,9 @@ func SendRequestToChatGPT(text string, user *UserInfo, firstLaunch bool) string 
 		errString := err.Error()
 
 		if strings.Contains(errString, "This model's maximum context length is 4097 tokens") && firstLaunch { //чтобы в рекурсию не уйти
+
+			Message := tgbotapi.NewMessage(user.ChatID, "Достингут лимит в 4097 токенов, контекст диалога очищен.")
+			Bot.Send(Message)
 
 			log.Println("limit 4097 tokens, refresh context")
 			user.Messages_ChatGPT = []openai.ChatCompletionMessage{}

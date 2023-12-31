@@ -28,7 +28,7 @@ var (
 	)
 )
 
-func ProcessInputText_Kandinsky(text string, user *UserInfo, upd tgbotapi.Update) ResultOfRequest {
+func ProcessInputText_Kandinsky(text string, user *UserInfo) ResultOfRequest {
 
 	var result ResultOfRequest
 
@@ -37,7 +37,7 @@ func ProcessInputText_Kandinsky(text string, user *UserInfo, upd tgbotapi.Update
 		user.Stage = "text"
 
 		msg_text := "Введите свой запрос:"
-		msg := tgbotapi.NewMessage(upd.Message.Chat.ID, msg_text)
+		msg := tgbotapi.NewMessage(user.ChatID, msg_text)
 		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(false)
 
 		result.Message = msg
@@ -49,7 +49,7 @@ func ProcessInputText_Kandinsky(text string, user *UserInfo, upd tgbotapi.Update
 		user.Stage = "style"
 
 		msg_text := "Выберите стиль, в котором генерировать изображение."
-		msg := tgbotapi.NewMessage(upd.Message.Chat.ID, msg_text)
+		msg := tgbotapi.NewMessage(user.ChatID, msg_text)
 		msg.ReplyMarkup = buttons_style
 
 		result.Message = msg
@@ -61,21 +61,21 @@ func ProcessInputText_Kandinsky(text string, user *UserInfo, upd tgbotapi.Update
 		style, ok := styles_knd[text]
 		if ok {
 
-			msg := tgbotapi.NewMessage(upd.Message.Chat.ID, "Запущена генерация картинки, она может занять 1-2 минуты.")
+			msg := tgbotapi.NewMessage(user.ChatID, "Запущена генерация картинки, она может занять 1-2 минуты.")
 			msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(false)
 			Bot.Send(msg)
 
-			Operation := NewSQLOperation(user, upd, "["+text+"] "+user.InputText)
+			Operation := NewSQLOperation(user, "["+text+"] "+user.InputText)
 			SQL_AddOperation(Operation)
 			counter_kandinsky++
 
-			res, isError := SendRequestToKandinsky(user.InputText, style, upd.Message.Chat.ID)
+			res, isError := SendRequestToKandinsky(user.InputText, style, user.ChatID)
 			if isError {
-				msg = tgbotapi.NewMessage(upd.Message.Chat.ID, res)
+				msg = tgbotapi.NewMessage(user.ChatID, res)
 				msg.ReplyMarkup = button_newGenerate
 				result.Message = msg
 			} else {
-				msg := tgbotapi.NewPhotoUpload(upd.Message.Chat.ID, res)
+				msg := tgbotapi.NewPhotoUpload(user.ChatID, res)
 				msg.Caption = fmt.Sprintf(`Результат генерации по запросу "%s", стиль: "%s"`, user.InputText, text)
 				msg.ReplyMarkup = button_newGenerate
 				result.Message = msg
@@ -89,7 +89,7 @@ func ProcessInputText_Kandinsky(text string, user *UserInfo, upd tgbotapi.Update
 
 		} else {
 			msg_text := "Пожалуйста, выберите стиль из предложенных вариантов"
-			msg := tgbotapi.NewMessage(upd.Message.Chat.ID, msg_text)
+			msg := tgbotapi.NewMessage(user.ChatID, msg_text)
 
 			result.Message = msg
 			result.Log_author = "kandinsky"
