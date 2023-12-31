@@ -55,3 +55,16 @@ func start(user string) string {
 		user)
 
 }
+
+func subString(s string, first int, last int) string {
+
+	runes := []rune(s)
+	length := len(runes)
+
+	if length <= last {
+		last = length
+	}
+
+	return string(runes[first:last])
+
+}
