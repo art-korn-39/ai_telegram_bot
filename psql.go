@@ -79,6 +79,8 @@ func SQL_AddOperation(o Operation) {
 
 func startFillSQL() {
 
+	return
+
 	tx, _ := db.Begin()
 	defer tx.Rollback()
 

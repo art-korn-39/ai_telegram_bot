@@ -59,13 +59,10 @@ func main() {
 	LoadConfig()
 
 	// Запустить бота
-	//StartBot()
+	StartBot()
 
 	// Установить соединение с базой данных
 	SQL_Connect()
-
-	startFillSQL()
-	return
 
 	// u - структура с конфигом для получения апдейтов
 	u := tgbotapi.NewUpdate(0)
