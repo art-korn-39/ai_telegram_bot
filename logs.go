@@ -20,7 +20,6 @@ func SaveLogs() {
 	for v := range Logs {
 		if v.Text != "" {
 			timeNow := time.Now().UTC().Add(3 * time.Hour).Format(time.DateTime)
-			//log.Printf("[%s] %s", v.UserName, v.Text)
 			fmt.Printf("%s [%s] %s\n", timeNow, v.UserName, v.Text)
 			if v.IsError { // дополнительно: ошибку записываем в файл
 				WriteIntoFile(timeNow, v.UserName, v.Text)

@@ -29,13 +29,15 @@ func SQL_Connect() {
 
 	if err != nil {
 		log.Println("Unsuccessful connection to PostgreSQL!")
-		log.Fatal(err)
+		log.Println(err.Error())
+		return
 	}
 
 	pingErr := db.Ping()
 	if pingErr != nil {
 		log.Println("Unsuccessful connection to PostgreSQL!")
-		log.Fatal(pingErr)
+		log.Println(pingErr.Error())
+		return
 	}
 
 	log.Println("Successful connection to DB " + Cfg.DB_name)
@@ -81,7 +83,7 @@ func SQL_AddOperation(o Operation) {
 func SQL_LoadUserStates() {
 
 	if db == nil {
-		log.Fatal("sql", "lost connection to DB")
+		Logs <- Log{"sql{LoadUserStates}", "lost connection to DB", true}
 	}
 
 	stmt := `
@@ -92,7 +94,7 @@ func SQL_LoadUserStates() {
 	`
 	rows, err := db.Query(stmt)
 	if err != nil {
-		Logs <- Log{"sql_load", err.Error(), true}
+		Logs <- Log{"sql{LoadUserStates}", err.Error(), true}
 		return
 	}
 	defer rows.Close()
@@ -101,23 +103,23 @@ func SQL_LoadUserStates() {
 		var u UserInfo
 		if err := rows.Scan(&u.Username, &u.ChatID, &u.Model,
 			&u.LastCommand, &u.InputText, &u.Stage); err != nil {
-			Logs <- Log{"sql_load", err.Error(), true}
+			Logs <- Log{"sql{LoadUserStates}", err.Error(), true}
 		}
 		ListOfUsers[u.ChatID] = &u
 	}
 	if err = rows.Err(); err != nil {
-		Logs <- Log{"sql_load", err.Error(), true}
+		Logs <- Log{"sql{LoadUserStates}", err.Error(), true}
 		return
 	}
 
-	log.Println("Loading user_states complete")
+	Logs <- Log{"sql{LoadUserStates}", "Loading user_states complete", false}
 
 }
 
 func SQL_SaveUserStates() {
 
 	if db == nil {
-		log.Printf("[%s] %s", "sql", "lost connection to DB")
+		Logs <- Log{"sql{SaveUserStates}", "lost connection to DB", true}
 	}
 
 	tx, _ := db.Begin()
@@ -126,7 +128,7 @@ func SQL_SaveUserStates() {
 	stmt := `delete from user_states`
 	_, err := tx.Exec(stmt)
 	if err != nil {
-		log.Printf("[%s] %s", "sql", err.Error())
+		Logs <- Log{"sql{SaveUserStates}", err.Error(), true}
 		return
 	}
 
@@ -136,12 +138,13 @@ func SQL_SaveUserStates() {
 	for _, v := range ListOfUsers {
 		_, err = tx.Exec(stmt, v.Username, v.ChatID, v.Model, v.LastCommand, v.InputText, v.Stage)
 		if err != nil {
-			log.Printf("[%s] %s", "sql", err.Error())
+			Logs <- Log{"sql{SaveUserStates}", err.Error(), true}
 			return
 		}
 	}
 
-	log.Printf("[%s] %s", "sql", "Saving user states done")
+	Logs <- Log{"sql{SaveUserStates}", "Saving user states done", false}
+
 	tx.Commit()
 
 }
