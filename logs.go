@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"sync"
 	"time"
@@ -20,22 +19,14 @@ func SaveLogs() {
 
 	for v := range Logs {
 		if v.Text != "" {
-			log.Printf("[%s] %s", v.UserName, v.Text)
+			timeNow := time.Now().UTC().Add(3 * time.Hour).Format(time.DateTime)
+			//log.Printf("[%s] %s", v.UserName, v.Text)
+			fmt.Printf("%s [%s] %s\n", timeNow, v.UserName, v.Text)
 			if v.IsError { // дополнительно: ошибку записываем в файл
-				WriteIntoFile(v.UserName, v.Text)
+				WriteIntoFile(timeNow, v.UserName, v.Text)
 			}
 		}
 	}
-}
-
-func LogPanic(inputtext string, main bool) {
-
-	if r := recover(); r != nil {
-		text := "Inputtext: " + inputtext + "\n" + "Error: " + fmt.Sprint(r)
-		log.Println("Panic in gorutine.\n", text)
-		WriteIntoFile(Ternary(main, "main", "gorutine"), text)
-	}
-
 }
 
 func WriteIntoFile(values ...any) {
@@ -45,6 +36,6 @@ func WriteIntoFile(values ...any) {
 
 	file, _ := os.OpenFile("errors.txt", os.O_APPEND|os.O_WRONLY, 0600)
 	defer file.Close()
-	file.WriteString(fmt.Sprintf("(%s) [%s] %s\n", time.Now().Format(time.DateTime), values[0], values[1]))
+	file.WriteString(fmt.Sprintf("(%s) [%s] %s\n", values[0], values[1], values[2]))
 
 }

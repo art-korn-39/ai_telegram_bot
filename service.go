@@ -21,6 +21,19 @@ func FR(v any, err error) any {
 	return v
 }
 
+func subString(s string, first int, last int) string {
+
+	runes := []rune(s)
+	length := len(runes)
+
+	if length <= last {
+		last = length
+	}
+
+	return string(runes[first:last])
+
+}
+
 func Round(x float64, decimals float64) float64 {
 
 	multiplier := math.Pow(10, decimals)

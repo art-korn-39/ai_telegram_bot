@@ -1,7 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
+	"log"
+	"os"
 	"slices"
 	"strings"
 
@@ -17,6 +21,27 @@ type config struct {
 	DB_password       string
 	CheckSubscription bool
 	WhiteList         []string
+}
+
+func LoadConfig() {
+
+	log.Println("Version: " + Version)
+
+	file, err := os.OpenFile("config.txt", os.O_RDONLY, 0600)
+	if err != nil {
+		panic(err)
+	}
+	defer file.Close()
+
+	b, err := io.ReadAll(file)
+	if err != nil {
+		panic(err)
+	}
+
+	json.Unmarshal(b, &Cfg)
+
+	log.Println("Config download complete")
+
 }
 
 func MsgIsCommand(m *tgbotapi.Message) bool {
@@ -53,18 +78,5 @@ func start(user string) string {
 
 Чтобы начать - просто выбери подходящую нейросеть и задай ей вопрос (или попроси сделать картинку), удачи!🔥`,
 		user)
-
-}
-
-func subString(s string, first int, last int) string {
-
-	runes := []rune(s)
-	length := len(runes)
-
-	if length <= last {
-		last = length
-	}
-
-	return string(runes[first:last])
 
 }

@@ -24,6 +24,10 @@ func init() {
 	model_Gemini = client_Gemini.GenerativeModel("gemini-pro")
 }
 
+// - FinishReasonSafety означает, что потенциальное содержимое было помечено по соображениям безопасности.
+// - BlockReasonSafety означает, что промт был заблокирован по соображениям безопасности. Вы можете проверить
+// `safety_ratings`, чтобы понять, какая категория безопасности заблокировала его.
+
 func SendRequestToGemini(text string, user *UserInfo) string {
 
 	<-delay_Gemini
@@ -41,9 +45,11 @@ func SendRequestToGemini(text string, user *UserInfo) string {
 			client_Gemini, _ = genai.NewClient(ctx_Gemini, option.WithAPIKey(Gemini_APIKEY))
 			model_Gemini = client_Gemini.GenerativeModel("gemini-pro")
 
+		} else if errorString == "blocked: prompt: BlockReasonSafety" {
+			// опасный контент
 		}
 		Logs <- Log{"Gemini", errorString, true}
-		return "Не удалось получить ответ от сервиса. Попробуйте изменить текст запроса или очистить историю диалога командой /clearContext."
+		return "Не удалось получить ответ от сервиса. Попробуйте изменить текст запроса или очистить историю диалога командой /clearcontext."
 	}
 
 	result := resp.Candidates[0].Content.Parts[0].(genai.Text)

@@ -2,11 +2,8 @@ package main
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
-	"io"
 	"log"
-	"os"
 	"time"
 
 	tgbotapi "github.com/Syfaro/telegram-bot-api"
@@ -14,7 +11,7 @@ import (
 )
 
 const (
-	Version       = "1.7"
+	Version       = "1.8"
 	ChannelChatID = -1001997602646
 	ChannelURL    = "https://t.me/+6ZMACWRgFdRkNGEy"
 )
@@ -26,34 +23,17 @@ var (
 	Logs        chan Log
 	ListOfUsers = map[int64]*UserInfo{}
 	arrayCMD    = []string{"gemini", "kandinsky", "chatgpt"}
+	admins      = []string{"Art_Korn_39", "Nik_05_04", "MnNik0"}
 
 	delay_upd       = time.Tick(time.Millisecond * 10)
 	delay_ChatGPT   = time.Tick(time.Second * 5)       // 12 RPM
 	delay_Gemini    = time.Tick(time.Second * 12 / 11) // 55 RPM
 	delay_Kandinsky = time.Tick(time.Second * 3)       // 20 RPM
-	delay_stat      = time.Tick(time.Minute * 10)
-
-	counter_chatgpt   = 0
-	counter_gemini    = 0
-	counter_kandinsky = 0
 )
-
-// по юзерам с пустым username записать детализацию
-// лимит по токенам в чат гпт
-// about добавить с полным описанием
-// про тестирование подумать
-
-//ограничения ChatGPT в бесплатной версии – 3 запросов в минуту (200 в день?)
-//зарегистрировать несколько API?
-//Gemini в бесплатном тарифе действует ограничение на 60 запросов в минуту.
-
-//ID chat (art_korn_39) = 403059287
-//ID chat (art_korneev) = 609614322
-//ID chat (apolo39) = 6648171361
 
 func main() {
 
-	defer LogPanic("", true)
+	defer FinishGorutine("", true)
 
 	// Загрузить файл конфигурации
 	LoadConfig()
@@ -63,6 +43,9 @@ func main() {
 
 	// Установить соединение с базой данных
 	SQL_Connect()
+
+	// Загрузить текущие состояния по пользователям
+	SQL_LoadUserStates()
 
 	// u - структура с конфигом для получения апдейтов
 	u := tgbotapi.NewUpdate(0)
@@ -74,9 +57,6 @@ func main() {
 	// В отдельно горутине обрабатываем информацию по логам
 	Logs = make(chan Log, 10)
 	go SaveLogs()
-
-	// Пишем счетчики в логи, на всякий случай + пока БД не готова
-	go SaveStatistics()
 
 	// Читаем входящие запросы из канала
 	for update := range updates {
@@ -94,7 +74,7 @@ func main() {
 			}
 
 			// Запишем panic если горутина завершилась с ошибкой
-			defer LogPanic(upd.Message.Text, false)
+			defer FinishGorutine(upd.Message.Text, false)
 
 			// Если сообщение было больше 10 минут назад, то пропускаем
 			if time.Since(upd.Message.Time()).Seconds() > 600 {
@@ -146,39 +126,8 @@ func main() {
 	}
 }
 
-func SaveStatistics() {
-	for {
-		<-delay_stat
-		text := fmt.Sprintf("Gemini: %d ChatGPT: %d Kandinsky: %d",
-			counter_gemini, counter_chatgpt, counter_kandinsky)
-		log.Println(text)
-	}
-}
-
-func LoadConfig() {
-
-	log.Println("Version: " + Version)
-
-	file, err := os.OpenFile("config.txt", os.O_RDONLY, 0600)
-	if err != nil {
-		panic(err)
-	}
-	defer file.Close()
-
-	b, err := io.ReadAll(file)
-	if err != nil {
-		panic(err)
-	}
-
-	json.Unmarshal(b, &Cfg)
-
-	log.Println("Config download complete")
-
-}
-
 func StartBot() {
 
-	// Используя токен создаем новый инстанс бота
 	var err error
 	Bot, err = tgbotapi.NewBotAPI(Cfg.TelegramBotToken)
 	if err != nil {
@@ -189,18 +138,16 @@ func StartBot() {
 
 }
 
-// Реализация через webhook
-// if _, err := bot.SetWebhook(tgbotapi.NewWebhook(WebHook)); err != nil {
-// 	log.Fatalf("setting webhook %v; error: %v", WebHook, err)
-// }
+func FinishGorutine(inputtext string, main bool) {
 
-//bot.ListenForWebhook("/")
+	timeNow := time.Now().UTC().Add(3 * time.Hour).Format(time.DateTime)
+	if r := recover(); r != nil {
+		text := "Inputtext: " + inputtext + "\n" + "Error: " + fmt.Sprint(r)
+		//log.Println("Panic in gorutine.\n", text)
+		fmt.Println(timeNow+" Panic in gorutine:", text)
+		WriteIntoFile(timeNow, Ternary(main, "main", "gorutine"), text)
+	} else if main { // штатное завершение программы
+		SQL_SaveUserStates()
+	}
 
-// /start - start msg
-// /gemini - "введите вопрос"
-//    text - result
-// /chatgpt - "введите вопрос"
-//    text - result
-// /kandinsky - "введите запрос"
-//    text - "выберите стиль изображения"
-//	     style - result
+}

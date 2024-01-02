@@ -3,10 +3,21 @@ package main
 import (
 	"fmt"
 	"os"
+	"slices"
+	"time"
 
 	tgbotapi "github.com/Syfaro/telegram-bot-api"
 	"github.com/google/generative-ai-go/genai"
 )
+
+// /start - start msg
+// /gemini - "введите вопрос"
+//    text - result
+// /chatgpt - "введите вопрос"
+//    text - result
+// /kandinsky - "введите запрос"
+//    text - "выберите стиль изображения"
+//	     style - result
 
 var buttons_start = tgbotapi.NewReplyKeyboard(
 	tgbotapi.NewKeyboardButtonRow(
@@ -60,7 +71,7 @@ func ProcessCommand(cmd string, upd tgbotapi.Update, user *UserInfo) ResultOfReq
 		msg_text = "История диалога с Gemini очищена."
 
 	default:
-		if user.Username == "Art_Korn_39" {
+		if slices.Contains(admins, user.Username) {
 			switch cmd {
 			case "stop":
 				os.Exit(1)
@@ -68,8 +79,9 @@ func ProcessCommand(cmd string, upd tgbotapi.Update, user *UserInfo) ResultOfReq
 				LoadConfig()
 				msg_text = "Config updated."
 			case "info":
-				msg_text = fmt.Sprintf("Gemini: %d\nChatGPT: %d\nKandinsky: %d",
-					counter_gemini, counter_chatgpt, counter_kandinsky)
+				//msg_text = fmt.Sprintf("Gemini: %d\nChatGPT: %d\nKandinsky: %d",
+				//	counter_gemini, counter_chatgpt, counter_kandinsky)
+				msg_text = GetInfo()
 			}
 		}
 	}
@@ -95,16 +107,14 @@ func ProcessText(text string, user *UserInfo, upd tgbotapi.Update) ResultOfReque
 
 	switch user.Model {
 	case "chatgpt":
-		Operation := NewSQLOperation(user, text)
+		Operation := SQL_NewOperation(user, text)
 		SQL_AddOperation(Operation)
-		counter_chatgpt++
 
 		msg_text = SendRequestToChatGPT(upd.Message.Text, user, true)
 
 	case "gemini":
-		Operation := NewSQLOperation(user, text)
+		Operation := SQL_NewOperation(user, text)
 		SQL_AddOperation(Operation)
-		counter_gemini++
 
 		msg_text = SendRequestToGemini(upd.Message.Text, user)
 
@@ -114,6 +124,7 @@ func ProcessText(text string, user *UserInfo, upd tgbotapi.Update) ResultOfReque
 
 	default:
 		msg_text = "Не выбрана нейросеть для обработки запроса."
+		Message.ReplyMarkup = buttons_start
 		result.Log_author = "bot"
 	}
 
@@ -122,5 +133,34 @@ func ProcessText(text string, user *UserInfo, upd tgbotapi.Update) ResultOfReque
 	result.Log_message = msg_text
 
 	return result
+
+}
+
+func GetInfo() string {
+
+	Now := time.Now().UTC().Add(3 * time.Hour)
+	Yesterday := Now.AddDate(0, 0, -1)
+	StartDay := time.Date(Now.Year(), Now.Month(), Now.Day(), 0, 0, 0, 0, Now.Location())
+
+	result_24h, err1 := SQL_GetInfoOnDate(Yesterday)
+	if err1 != "" {
+		return err1
+	}
+
+	result_Today, err2 := SQL_GetInfoOnDate(StartDay)
+	if err2 != "" {
+		return err2
+	}
+
+	return fmt.Sprintf(
+		`Last 24h
+Users: %d
+Gemini: %d | ChatGPT: %d | Kandinsky: %d
+
+This day
+Users: %d
+Gemini: %d | ChatGPT: %d | Kandinsky: %d`,
+		result_24h["users"], result_24h["gemini"], result_24h["chatgpt"], result_24h["kandinsky"],
+		result_Today["users"], result_Today["gemini"], result_Today["chatgpt"], result_Today["kandinsky"])
 
 }

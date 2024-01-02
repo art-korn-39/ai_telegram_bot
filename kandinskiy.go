@@ -65,9 +65,8 @@ func ProcessInputText_Kandinsky(text string, user *UserInfo) ResultOfRequest {
 			msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(false)
 			Bot.Send(msg)
 
-			Operation := NewSQLOperation(user, "["+text+"] "+user.InputText)
+			Operation := SQL_NewOperation(user, "["+text+"] "+user.InputText)
 			SQL_AddOperation(Operation)
-			counter_kandinsky++
 
 			res, isError := SendRequestToKandinsky(user.InputText, style, user.ChatID)
 			if isError {

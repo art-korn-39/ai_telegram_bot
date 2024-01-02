@@ -50,6 +50,7 @@ func SendRequestToChatGPT(text string, user *UserInfo, firstLaunch bool) string 
 	if err != nil {
 		errString := err.Error()
 
+		// превышен лимит токенов, очищаем сообщения и отправляем запрос ещё раз
 		if strings.Contains(errString, "This model's maximum context length is 4097 tokens") && firstLaunch { //чтобы в рекурсию не уйти
 
 			Message := tgbotapi.NewMessage(user.ChatID, "Достингут лимит в 4097 токенов, контекст диалога очищен.")
@@ -76,7 +77,5 @@ func SendRequestToChatGPT(text string, user *UserInfo, firstLaunch bool) string 
 	user.Messages_ChatGPT = messages
 
 	return content
-
-	//This model's maximum context length is 4097 tokens.
 
 }

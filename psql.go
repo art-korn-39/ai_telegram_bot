@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 )
 
@@ -41,7 +42,7 @@ func SQL_Connect() {
 
 }
 
-func NewSQLOperation(user *UserInfo, request string) Operation {
+func SQL_NewOperation(user *UserInfo, request string) Operation {
 
 	return Operation{
 		date:     time.Now().UTC().Add(3 * time.Hour),
@@ -74,5 +75,123 @@ func SQL_AddOperation(o Operation) {
 		Logs <- Log{"sql", err.Error(), true}
 		return
 	}
+
+}
+
+func SQL_LoadUserStates() {
+
+	if db == nil {
+		log.Fatal("sql", "lost connection to DB")
+	}
+
+	stmt := `
+	select
+		user_name, chat_id, model, last_command, input_text, stage 
+	from 
+		user_states
+	`
+	rows, err := db.Query(stmt)
+	if err != nil {
+		Logs <- Log{"sql_load", err.Error(), true}
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var u UserInfo
+		if err := rows.Scan(&u.Username, &u.ChatID, &u.Model,
+			&u.LastCommand, &u.InputText, &u.Stage); err != nil {
+			Logs <- Log{"sql_load", err.Error(), true}
+		}
+		ListOfUsers[u.ChatID] = &u
+	}
+	if err = rows.Err(); err != nil {
+		Logs <- Log{"sql_load", err.Error(), true}
+	}
+
+}
+
+func SQL_SaveUserStates() {
+
+	if db == nil {
+		log.Printf("[%s] %s", "sql", "lost connection to DB")
+	}
+
+	tx, _ := db.Begin()
+	defer tx.Rollback()
+
+	stmt := `delete from userStates`
+	_, err := tx.Exec(stmt)
+	if err != nil {
+		log.Printf("[%s] %s", "sql", err.Error())
+		return
+	}
+
+	stmt = `insert into user_states (user_name, chat_id, model, last_command, input_text, stage)
+	values ($1, $2, $3, $4, $5, $6)`
+
+	for _, v := range ListOfUsers {
+		_, err = tx.Exec(stmt, v.Username, v.ChatID, v.Model, v.LastCommand, v.InputText, v.Stage)
+		if err != nil {
+			log.Printf("[%s] %s", "sql", err.Error())
+			return
+		}
+	}
+
+	log.Printf("[%s] %s", "sql", "Saving user states done")
+	tx.Commit()
+
+}
+
+func SQL_GetInfoOnDate(timestamp time.Time) (result map[string]int, errStr string) {
+
+	if db == nil {
+		Logs <- Log{"sql", "lost connection to DB", true}
+		return result, "Отсутствует подключение к БД"
+	}
+
+	result = map[string]int{}
+	var count int
+
+	Statement := `
+	select count(distinct username) from operations where date > '$1';
+	select count(*), model from operations where date > '$1' group by model;
+	`
+	Statement = strings.ReplaceAll(Statement, "$1", timestamp.Format(time.DateTime))
+
+	rows, err := db.Query(Statement)
+	if err != nil {
+		Logs <- Log{"info", err.Error(), true}
+		return result, "Ошибка при выполнении запроса к БД"
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		if err := rows.Scan(&count); err != nil {
+			return result, err.Error()
+		}
+	}
+	if err = rows.Err(); err != nil {
+		return result, err.Error()
+	}
+
+	result["users"] = count
+
+	rows.NextResultSet()
+
+	for rows.Next() {
+		var model string
+		err := rows.Scan(&count, &model)
+		switch err {
+		case nil:
+			result[model] = count
+		default:
+			return result, err.Error()
+		}
+	}
+	if err = rows.Err(); err != nil {
+		return result, err.Error()
+	}
+
+	return
 
 }
