@@ -103,3 +103,13 @@ func (u *UserInfo) AlreadyRunning(upd tgbotapi.Update) bool {
 func (u *UserInfo) SetIsRunning(v bool) {
 	u.IsRunning = v
 }
+
+func SaveUserStates() {
+	for {
+		<-delay_SaveUserStates
+		if UserInfoChanged {
+			UserInfoChanged = false
+			SQL_SaveUserStates()
+		}
+	}
+}

@@ -10,7 +10,7 @@ import (
 
 type Operation struct {
 	date     time.Time
-	user_id  int64
+	chat_id  int64
 	username string
 	model    string
 	request  string
@@ -46,7 +46,7 @@ func SQL_NewOperation(user *UserInfo, request string) Operation {
 
 	return Operation{
 		date:     time.Now().UTC().Add(3 * time.Hour),
-		user_id:  user.ChatID,
+		chat_id:  user.ChatID,
 		username: subString(user.Username, 0, 40),
 		model:    user.Model,
 		request:  request,
@@ -61,12 +61,12 @@ func SQL_AddOperation(o Operation) {
 	}
 
 	Statement := `
-	INSERT INTO Operations (date, user_id, username, model, request)
+	INSERT INTO Operations (date, chat_id, username, model, request)
 	VALUES ($1, $2, $3, $4, $5)`
 
 	_, err := db.Exec(Statement,
 		o.date,
-		o.user_id,
+		o.chat_id,
 		o.username,
 		o.model,
 		o.request)
@@ -93,6 +93,7 @@ func SQL_LoadUserStates() {
 	rows, err := db.Query(stmt)
 	if err != nil {
 		Logs <- Log{"sql_load", err.Error(), true}
+		return
 	}
 	defer rows.Close()
 
@@ -106,7 +107,10 @@ func SQL_LoadUserStates() {
 	}
 	if err = rows.Err(); err != nil {
 		Logs <- Log{"sql_load", err.Error(), true}
+		return
 	}
+
+	log.Println("Loading user_states complete")
 
 }
 
@@ -119,7 +123,7 @@ func SQL_SaveUserStates() {
 	tx, _ := db.Begin()
 	defer tx.Rollback()
 
-	stmt := `delete from userStates`
+	stmt := `delete from user_states`
 	_, err := tx.Exec(stmt)
 	if err != nil {
 		log.Printf("[%s] %s", "sql", err.Error())

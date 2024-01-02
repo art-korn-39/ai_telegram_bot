@@ -17,18 +17,20 @@ const (
 )
 
 var (
-	db          *sql.DB
-	Bot         *tgbotapi.BotAPI
-	Cfg         config
-	Logs        chan Log
-	ListOfUsers = map[int64]*UserInfo{}
-	arrayCMD    = []string{"gemini", "kandinsky", "chatgpt"}
-	admins      = []string{"Art_Korn_39", "Nik_05_04", "MnNik0"}
+	db              *sql.DB
+	Bot             *tgbotapi.BotAPI
+	Cfg             config
+	Logs            = make(chan Log, 10)
+	ListOfUsers     = map[int64]*UserInfo{}
+	arrayCMD        = []string{"gemini", "kandinsky", "chatgpt"}
+	admins          = []string{"Art_Korn_39", "Nik_05_04", "MnNik0"}
+	UserInfoChanged = false
 
-	delay_upd       = time.Tick(time.Millisecond * 10)
-	delay_ChatGPT   = time.Tick(time.Second * 5)       // 12 RPM
-	delay_Gemini    = time.Tick(time.Second * 12 / 11) // 55 RPM
-	delay_Kandinsky = time.Tick(time.Second * 3)       // 20 RPM
+	delay_upd            = time.Tick(time.Millisecond * 10)
+	delay_ChatGPT        = time.Tick(time.Second * 5)       // 12 RPM
+	delay_Gemini         = time.Tick(time.Second * 12 / 11) // 55 RPM
+	delay_Kandinsky      = time.Tick(time.Second * 3)       // 20 RPM
+	delay_SaveUserStates = time.Tick(time.Second * 30)      // 1 RPM
 )
 
 func main() {
@@ -55,8 +57,10 @@ func main() {
 	updates, _ := Bot.GetUpdatesChan(u)
 
 	// В отдельно горутине обрабатываем информацию по логам
-	Logs = make(chan Log, 10)
 	go SaveLogs()
+
+	// При наличии изменений - регулярно обновляем инфо по юзерам в БД
+	go SaveUserStates()
 
 	// Читаем входящие запросы из канала
 	for update := range updates {
@@ -114,6 +118,8 @@ func main() {
 				result = ProcessText(upd.Message.Text, User, upd)
 			}
 
+			UserInfoChanged = true // фиксируем факт поступивших изменений
+
 			result.addUsernameIntoLog(User.Username)
 
 			// Отправка сообщения
@@ -143,11 +149,8 @@ func FinishGorutine(inputtext string, main bool) {
 	timeNow := time.Now().UTC().Add(3 * time.Hour).Format(time.DateTime)
 	if r := recover(); r != nil {
 		text := "Inputtext: " + inputtext + "\n" + "Error: " + fmt.Sprint(r)
-		//log.Println("Panic in gorutine.\n", text)
 		fmt.Println(timeNow+" Panic in gorutine:", text)
 		WriteIntoFile(timeNow, Ternary(main, "main", "gorutine"), text)
-	} else if main { // штатное завершение программы
-		SQL_SaveUserStates()
 	}
 
 }
