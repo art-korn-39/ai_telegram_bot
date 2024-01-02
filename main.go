@@ -30,7 +30,7 @@ var (
 	delay_ChatGPT        = time.Tick(time.Second * 5)       // 12 RPM
 	delay_Gemini         = time.Tick(time.Second * 12 / 11) // 55 RPM
 	delay_Kandinsky      = time.Tick(time.Second * 3)       // 20 RPM
-	delay_SaveUserStates = time.Tick(time.Second * 30)      // 1 RPM
+	delay_SaveUserStates = time.Tick(time.Minute * 1)       // 1 RPM
 )
 
 func main() {

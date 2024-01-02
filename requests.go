@@ -70,17 +70,17 @@ func ProcessCommand(cmd string, upd tgbotapi.Update, user *UserInfo) ResultOfReq
 		user.History_Gemini = []*genai.Content{}
 		msg_text = "История диалога с Gemini очищена."
 
+	case "stop":
+		if user.Username == "Art_Korn_39" {
+			os.Exit(1)
+		}
 	default:
 		if slices.Contains(admins, user.Username) {
 			switch cmd {
-			case "stop":
-				os.Exit(1)
 			case "updconf":
 				LoadConfig()
 				msg_text = "Config updated."
 			case "info":
-				//msg_text = fmt.Sprintf("Gemini: %d\nChatGPT: %d\nKandinsky: %d",
-				//	counter_gemini, counter_chatgpt, counter_kandinsky)
 				msg_text = GetInfo()
 			}
 		}
@@ -89,8 +89,11 @@ func ProcessCommand(cmd string, upd tgbotapi.Update, user *UserInfo) ResultOfReq
 	Message.Text = msg_text
 	result.Message = Message
 	result.Log_message = msg_text
-	if cmd == "start" {
+	switch cmd {
+	case "start":
 		result.Log_message = "/start for " + user.Username
+	case "info":
+		result.Log_message = "/info for " + user.Username
 	}
 
 	return result
@@ -176,7 +179,7 @@ Last 24h
 Users: %d
 Gemini: %d | ChatGPT: %d | Kandinsky: %d
 
-This day
+Today
 Users: %d
 Gemini: %d | ChatGPT: %d | Kandinsky: %d`,
 		result_dec25["gemini"], result_dec25["chatgpt"], result_dec25["kandinsky"],
