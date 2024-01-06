@@ -1,6 +1,8 @@
 package main
 
 import (
+	"slices"
+
 	tgbotapi "github.com/Syfaro/telegram-bot-api"
 )
 
@@ -143,10 +145,18 @@ func HandleMessage(u *UserInfo, m *tgbotapi.Message) {
 	case "chatgpt/dialog":
 		gpt_dialog(u, m.Text, true)
 
-	case "info":
-		SendMessage(u, GetInfo(), button_RemoveKeyboard, "")
 	default:
-		SendMessage(u, "Не выбрана нейросеть для обработки запроса.", buttons_start, "")
+		if slices.Contains(admins, u.Username) {
+			switch cmd {
+			case "info":
+				SendMessage(u, GetInfo(), button_RemoveKeyboard, "")
+			case "updconf":
+				LoadConfig()
+				SendMessage(u, "Config updated.", button_RemoveKeyboard, "")
+			}
+		} else {
+			SendMessage(u, "Не выбрана нейросеть для обработки запроса.", buttons_start, "")
+		}
 	}
 
 }
