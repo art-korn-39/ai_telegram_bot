@@ -2,6 +2,7 @@ package main
 
 import (
 	"math"
+	"sort"
 	"unicode"
 )
 
@@ -21,7 +22,7 @@ func FR(v any, err error) any {
 	return v
 }
 
-func subString(s string, first int, last int) string {
+func SubString(s string, first int, last int) string {
 
 	runes := []rune(s)
 	length := len(runes)
@@ -58,4 +59,23 @@ func IsRusByUnicode(str string) bool {
 		}
 	}
 	return false
+}
+
+func SortMap(m map[int]string) (result map[int]string) {
+
+	result = map[int]string{}
+
+	keys := make([]int, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+
+	sort.Ints(keys)
+
+	for _, k := range keys {
+		result[k] = m[k]
+	}
+
+	return result
+
 }

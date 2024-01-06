@@ -2,39 +2,19 @@ package main
 
 import (
 	"fmt"
-	"os/exec"
-	"path/filepath"
-	"runtime"
-	"strconv"
-	"strings"
 
 	tgbotapi "github.com/Syfaro/telegram-bot-api"
 )
 
-var (
-	styles_knd    = map[string]string{"Без стиля": "DEFAULT", "Art": "KANDINSKY", "4K": "UHD", "Anime": "ANIME"}
-	buttons_style = tgbotapi.NewReplyKeyboard(
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("Без стиля"),
-			tgbotapi.NewKeyboardButton("Art"),
-			tgbotapi.NewKeyboardButton("4K"),
-			tgbotapi.NewKeyboardButton("Anime"),
-		),
-	)
-	button_newGenerate = tgbotapi.NewReplyKeyboard(
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("Новая генерация по тексту"),
-		),
-	)
-)
-
+// del
 func ProcessInputText_Kandinsky(text string, user *UserInfo) ResultOfRequest {
 
 	var result ResultOfRequest
 
-	switch user.Stage {
+	//	switch user.Stage {
+	switch "123" {
 	case "NewGeneration": // предложение о новой генерации картинки
-		user.Stage = "text"
+		//		user.Stage = "text"
 
 		msg_text := "Введите свой запрос:"
 		msg := tgbotapi.NewMessage(user.ChatID, msg_text)
@@ -45,8 +25,8 @@ func ProcessInputText_Kandinsky(text string, user *UserInfo) ResultOfRequest {
 		result.Log_message = msg_text
 
 	case "text": // после ввода текста запроса
-		user.InputText = text
-		user.Stage = "style"
+		//		user.InputText = text
+		//		user.Stage = "style"
 
 		msg_text := "Выберите стиль, в котором генерировать изображение."
 		msg := tgbotapi.NewMessage(user.ChatID, msg_text)
@@ -65,17 +45,19 @@ func ProcessInputText_Kandinsky(text string, user *UserInfo) ResultOfRequest {
 			msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(false)
 			Bot.Send(msg)
 
-			Operation := SQL_NewOperation(user, "["+text+"] "+user.InputText)
-			SQL_AddOperation(Operation)
+			//			Operation := SQL_NewOperation(user, "["+text+"] "+user.InputText)
+			//			SQL_AddOperation(Operation)
 
-			res, isError := SendRequestToKandinsky(user.InputText, style, user.ChatID)
+			//			res, isError := SendRequestToKandinsky(user.InputText, style, user.ChatID)
+			res, isError := SendRequestToKandinsky("123", style, user.ChatID)
 			if isError {
 				msg = tgbotapi.NewMessage(user.ChatID, res)
 				msg.ReplyMarkup = button_newGenerate
 				result.Message = msg
 			} else {
 				msg := tgbotapi.NewPhotoUpload(user.ChatID, res)
-				msg.Caption = fmt.Sprintf(`Результат генерации по запросу "%s", стиль: "%s"`, user.InputText, text)
+				//msg.Caption = fmt.Sprintf(`Результат генерации по запросу "%s", стиль: "%s"`, user.InputText, text)
+				msg.Caption = fmt.Sprintf(`Результат генерации по запросу "%s", стиль: "%s"`, "123", text)
 				msg.ReplyMarkup = button_newGenerate
 				result.Message = msg
 			}
@@ -83,8 +65,8 @@ func ProcessInputText_Kandinsky(text string, user *UserInfo) ResultOfRequest {
 			result.Log_author = "Kandinsky"
 			result.Log_message = res
 
-			user.Stage = "NewGeneration"
-			user.InputText = ""
+			//			user.Stage = "NewGeneration"
+			//			user.InputText = ""
 
 		} else {
 			msg_text := "Пожалуйста, выберите стиль из предложенных вариантов"
@@ -98,48 +80,5 @@ func ProcessInputText_Kandinsky(text string, user *UserInfo) ResultOfRequest {
 	}
 
 	return result
-
-}
-
-func SendRequestToKandinsky(text string, style string, userid int64) (result string, isError bool) {
-
-	<-delay_Kandinsky
-
-	_, callerFile, _, _ := runtime.Caller(0)
-	dir := strings.ReplaceAll(filepath.Dir(callerFile), "\\", "/")
-	scriptPath := dir + "/scripts/generate_image.py"
-	dataFolder := dir + "/data"
-
-	cmd := exec.Command(`python`,
-		scriptPath,
-		dataFolder,
-		text,
-		style,
-		strconv.Itoa(int(userid)))
-
-	if cmd.Err != nil {
-		description := fmt.Sprintf("text: %s [%s]\nerror: %s", text, style, cmd.Err.Error())
-		Logs <- Log{"Kandinsky{cmd}", description, true}
-		return "Не удалось сгенерировать изображение. Попробуйте позже.", true
-	}
-
-	// Получение результата команды
-	res, err := cmd.Output()
-
-	if err != nil {
-		description := fmt.Sprintf("text: %s [%s]\nerror: %s", text, style, err.Error())
-		Logs <- Log{"Kandinsky{cmd.Output()}", description, true}
-		return "Не удалось сгенерировать изображение. Попробуйте изменить текст описания картинки.", true
-	}
-
-	pathToImage := strings.TrimSpace(string(res[:]))
-
-	if pathToImage == "" {
-		description := fmt.Sprintf("text: %s [%s]\nerror: %s", text, style, "скрипт вернул пустой путь до картинки")
-		Logs <- Log{"Kandinsky{API}", description, true}
-		return "Не удалось сгенерировать изображение. Попробуйте позже.", true
-	}
-
-	return pathToImage, false
 
 }

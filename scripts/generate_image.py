@@ -59,18 +59,20 @@ class Text2ImageAPI:
 if __name__ == '__main__':
     
     api = Text2ImageAPI('https://api-key.fusionbrain.ai/', '1B189E2CFA69FFD2130FC56294B96DA9', '7C0B7C7FE4FFA4F6EE9DF0CFA257167C')
-    uuid = api.generate(text, 4)
+    model_id = api.get_model()
+    uuid = api.generate(text, model_id)
     images = api.check_generation(uuid)   
     
     if images != None:
+
         base64_img  = images[0]
         base64_img_bytes = base64_img.encode('utf-8')
-        
-        file_path = datapath+'/image_'+userid+'.jpg'
-        
+            
+        file_path = datapath+'/img_'+userid+'_kand_0.jpg'
+            
         with open(file_path, 'wb') as file_to_save:
             decoded_image_data = base64.decodebytes(base64_img_bytes)
             file_to_save.write(decoded_image_data)
             
-        print(file_path)    
+        print(file_path)
 

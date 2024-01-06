@@ -2,8 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
-	"log"
 	"time"
 
 	tgbotapi "github.com/Syfaro/telegram-bot-api"
@@ -11,7 +9,7 @@ import (
 )
 
 const (
-	Version       = "1.8"
+	Version       = "2.0.1"
 	ChannelChatID = -1001997602646
 	ChannelURL    = "https://t.me/+6ZMACWRgFdRkNGEy"
 )
@@ -33,9 +31,13 @@ var (
 	delay_SaveUserStates = time.Tick(time.Minute * 1)       // 1 RPM
 )
 
-func main() {
+func main2() {
 
-	defer FinishGorutine("", true)
+	// // лучше использовать location = UTC для корректной работы Truncate()
+	// StartOfDay := time.Date(2023, 12, 31, 2, 45, 0, 0, time.UTC).Truncate(time.Hour * 24)
+	// DateString := StartOfDay.Format(time.DateTime)
+
+	defer FinishGorutine(nil, "", true)
 
 	// Загрузить файл конфигурации
 	LoadConfig()
@@ -78,16 +80,16 @@ func main() {
 			}
 
 			// Запишем panic если горутина завершилась с ошибкой
-			defer FinishGorutine(upd.Message.Text, false)
+			defer FinishGorutine(nil, upd.Message.Text, false)
 
 			// Если сообщение было больше 10 минут назад, то пропускаем
 			if time.Since(upd.Message.Time()).Seconds() > 600 {
-				Logs <- Log{upd.Message.From.UserName, "(timeout) " + upd.Message.Text, false}
+				//				Logs <- Log{upd.Message.From.UserName, "(timeout) " + upd.Message.Text, false}
 				return
 			}
 
 			// Проверка подписки пользователя на канал
-			if !AccessIsAllowed(upd) {
+			if !AccessIsAllowed(upd, nil) {
 				return
 			}
 
@@ -99,7 +101,7 @@ func main() {
 			}
 
 			// Фиксируем пользователя и входящее сообщение
-			Logs <- Log{User.Username, upd.Message.Text, false}
+			//			Logs <- Log{User.Username, upd.Message.Text, false}
 
 			// Если предыдущий запрос ещё выполняется, то новые команды не обрабатываем
 			if User.CheckUserLock(upd) {
@@ -112,45 +114,25 @@ func main() {
 			// cmd это всё что начинается с "/" и 3 модели строкой
 			if MsgIsCommand(upd.Message) {
 				cmd := MsgCommand(upd.Message)
-				User.LastCommand = cmd
+				//				User.LastCommand = cmd
 				result = ProcessCommand(cmd, upd, User)
 			} else {
 				result = ProcessText(upd.Message.Text, User, upd)
 			}
 
-			UserInfoChanged = true // фиксируем факт поступивших изменений
+			// Фиксируем факт поступивших изменений
+			if result.UserInfoChanged {
+				UserInfoChanged = true
+			}
 
 			result.addUsernameIntoLog(User.Username)
 
 			// Отправка сообщения
 			Bot.Send(result.Message)
 
-			// Общий лог, пишем сюда все запросы
-			Logs <- Log{result.Log_author, result.Log_message, false}
+			// Общий лог, пишем сюда все ответы
+			//			Logs <- Log{result.Log_author, result.Log_message, false}
 
 		}(update)
 	}
-}
-
-func StartBot() {
-
-	var err error
-	Bot, err = tgbotapi.NewBotAPI(Cfg.TelegramBotToken)
-	if err != nil {
-		log.Panic(err)
-	}
-
-	log.Printf("Authorized on account %s", Bot.Self.UserName)
-
-}
-
-func FinishGorutine(inputtext string, main bool) {
-
-	timeNow := time.Now().UTC().Add(3 * time.Hour).Format(time.DateTime)
-	if r := recover(); r != nil {
-		text := "Inputtext: " + inputtext + "\n" + "Error: " + fmt.Sprint(r)
-		fmt.Println(timeNow+" Panic in gorutine:", text)
-		WriteIntoFile(timeNow, Ternary(main, "main", "gorutine"), text)
-	}
-
 }

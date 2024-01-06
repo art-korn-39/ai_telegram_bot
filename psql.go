@@ -13,6 +13,7 @@ type Operation struct {
 	chat_id  int64
 	username string
 	model    string
+	class    string
 	request  string
 }
 
@@ -44,13 +45,14 @@ func SQL_Connect() {
 
 }
 
-func SQL_NewOperation(user *UserInfo, request string) Operation {
+func SQL_NewOperation(user *UserInfo, model, class, request string) Operation {
 
 	return Operation{
 		date:     time.Now().UTC().Add(3 * time.Hour),
 		chat_id:  user.ChatID,
-		username: subString(user.Username, 0, 40),
-		model:    user.Model,
+		username: SubString(user.Username, 0, 40),
+		model:    model,
+		class:    class,
 		request:  request,
 	}
 }
@@ -58,23 +60,24 @@ func SQL_NewOperation(user *UserInfo, request string) Operation {
 func SQL_AddOperation(o Operation) {
 
 	if db == nil {
-		Logs <- Log{"sql", "lost connection to DB", true}
+		Logs <- NewLog(nil, "SQL{AddOperation}", Error, "lost connection to DB")
 		return
 	}
 
 	Statement := `
-	INSERT INTO Operations (date, chat_id, username, model, request)
-	VALUES ($1, $2, $3, $4, $5)`
+	INSERT INTO Operations (date, chat_id, username, model, class, request)
+	VALUES ($1, $2, $3, $4, $5, $6)`
 
 	_, err := db.Exec(Statement,
 		o.date,
 		o.chat_id,
 		o.username,
 		o.model,
+		o.class,
 		o.request)
 
 	if err != nil {
-		Logs <- Log{"sql", err.Error(), true}
+		Logs <- NewLog(nil, "SQL{AddOperation}", Error, err.Error())
 		return
 	}
 
@@ -83,43 +86,44 @@ func SQL_AddOperation(o Operation) {
 func SQL_LoadUserStates() {
 
 	if db == nil {
-		Logs <- Log{"sql{LoadUserStates}", "lost connection to DB", true}
+		Logs <- NewLog(nil, "SQL{LoadUserStates}", Error, "lost connection to DB")
 	}
 
 	stmt := `
 	select
-		user_name, chat_id, model, last_command, input_text, stage 
+		user_name, chat_id, path, options 
 	from 
 		user_states
 	`
 	rows, err := db.Query(stmt)
 	if err != nil {
-		Logs <- Log{"sql{LoadUserStates}", err.Error(), true}
+		Logs <- NewLog(nil, "SQL{LoadUserStates}", Error, err.Error())
 		return
 	}
 	defer rows.Close()
 
 	for rows.Next() {
 		var u UserInfo
-		if err := rows.Scan(&u.Username, &u.ChatID, &u.Model,
-			&u.LastCommand, &u.InputText, &u.Stage); err != nil {
-			Logs <- Log{"sql{LoadUserStates}", err.Error(), true}
+		var options string
+		if err := rows.Scan(&u.Username, &u.ChatID, &u.Path, &options); err != nil {
+			Logs <- NewLog(nil, "SQL{LoadUserStates}", Error, err.Error())
 		}
+		u.Options = JSONtoMap(options)
 		ListOfUsers[u.ChatID] = &u
 	}
 	if err = rows.Err(); err != nil {
-		Logs <- Log{"sql{LoadUserStates}", err.Error(), true}
+		Logs <- NewLog(nil, "SQL{LoadUserStates}", Error, err.Error())
 		return
 	}
 
-	Logs <- Log{"sql{LoadUserStates}", "Loading user_states complete", false}
+	Logs <- NewLog(nil, "SQL{LoadUserStates}", Info, "Loading user_states complete")
 
 }
 
 func SQL_SaveUserStates() {
 
 	if db == nil {
-		Logs <- Log{"sql{SaveUserStates}", "lost connection to DB", true}
+		Logs <- NewLog(nil, "SQL{SaveUserStates}", Error, "lost connection to DB")
 	}
 
 	tx, _ := db.Begin()
@@ -128,22 +132,23 @@ func SQL_SaveUserStates() {
 	stmt := `delete from user_states`
 	_, err := tx.Exec(stmt)
 	if err != nil {
-		Logs <- Log{"sql{SaveUserStates}", err.Error(), true}
+		Logs <- NewLog(nil, "SQL{SaveUserStates}", Error, err.Error())
 		return
 	}
 
-	stmt = `insert into user_states (user_name, chat_id, model, last_command, input_text, stage)
-	values ($1, $2, $3, $4, $5, $6)`
+	stmt = `insert into user_states (user_name, chat_id, path, options)
+	values ($1, $2, $3, $4)`
 
 	for _, v := range ListOfUsers {
-		_, err = tx.Exec(stmt, v.Username, v.ChatID, v.Model, v.LastCommand, v.InputText, v.Stage)
+		optionsJSON := mapToJSON(v.Options)
+		_, err = tx.Exec(stmt, v.Username, v.ChatID, v.Path, optionsJSON)
 		if err != nil {
-			Logs <- Log{"sql{SaveUserStates}", err.Error(), true}
+			Logs <- NewLog(nil, "SQL{SaveUserStates}", Error, err.Error())
 			return
 		}
 	}
 
-	Logs <- Log{"sql{SaveUserStates}", "Saving user states done", false}
+	Logs <- NewLog(nil, "SQL{SaveUserStates}", Info, "Saving user states done")
 
 	tx.Commit()
 
@@ -152,7 +157,7 @@ func SQL_SaveUserStates() {
 func SQL_GetInfoOnDate(timestamp time.Time) (result map[string]int, errStr string) {
 
 	if db == nil {
-		Logs <- Log{"sql", "lost connection to DB", true}
+		Logs <- NewLog(nil, "SQL{Info}", Error, "lost connection to DB")
 		return result, "Отсутствует подключение к БД"
 	}
 
@@ -167,18 +172,18 @@ func SQL_GetInfoOnDate(timestamp time.Time) (result map[string]int, errStr strin
 
 	rows, err := db.Query(Statement)
 	if err != nil {
-		Logs <- Log{"info", err.Error(), true}
-		return result, "Ошибка при выполнении запроса к БД"
+		Logs <- NewLog(nil, "SQL{Info}", Error, err.Error())
+		return nil, err.Error()
 	}
 	defer rows.Close()
 
 	for rows.Next() {
 		if err := rows.Scan(&count); err != nil {
-			return result, err.Error()
+			return nil, err.Error()
 		}
 	}
 	if err = rows.Err(); err != nil {
-		return result, err.Error()
+		return nil, err.Error()
 	}
 
 	result["users"] = count
@@ -196,9 +201,35 @@ func SQL_GetInfoOnDate(timestamp time.Time) (result map[string]int, errStr strin
 		}
 	}
 	if err = rows.Err(); err != nil {
-		return result, err.Error()
+		return nil, err.Error()
 	}
 
 	return
+
+}
+
+func SQL_AddLog(l Log) {
+
+	if db == nil {
+		Logs <- NewLog(nil, "SQL{AddLog}", Error, "lost connection to DB")
+		return
+	}
+
+	stat := `
+	INSERT INTO logs (date, chat_id, author, path, level, text)
+	VALUES ($1, $2, $3, $4, $5, $6)`
+
+	_, err := db.Exec(stat,
+		l.Date,
+		l.ChatID,
+		l.Author,
+		l.Path,
+		l.Level,
+		l.Text)
+
+	if err != nil {
+		Logs <- NewLog(nil, "SQL{AddLog}", Error, err.Error())
+		return
+	}
 
 }

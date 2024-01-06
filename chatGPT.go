@@ -10,19 +10,13 @@ import (
 )
 
 const (
-	OpenAIToken = "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" //Коли
-	//OpenAIToken = "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" // мой
+// OpenAIToken = "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" //Коли
+// OpenAIToken = "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" //Мой
 )
 
 var (
 	clientOpenAI *openai.Client
 )
-
-func init() {
-
-	clientOpenAI = openai.NewClient(OpenAIToken)
-
-}
 
 //для оценки токенов
 //2 символа RU = 1 токен
@@ -61,7 +55,7 @@ func SendRequestToChatGPT(text string, user *UserInfo, firstLaunch bool) string 
 			content = SendRequestToChatGPT(text, user, false)
 
 		} else {
-			Logs <- Log{"ChatGPT", "request: " + text + "\nerror: " + errString, true}
+			//			Logs <- Log{"ChatGPT", "request: " + text + "\nerror: " + errString, true}
 			return "Во время обработки запроса произошла ошибка. Пожалуйста, попробуйте ещё раз позже."
 		}
 

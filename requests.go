@@ -28,9 +28,10 @@ var buttons_start = tgbotapi.NewReplyKeyboard(
 )
 
 type ResultOfRequest struct {
-	Message     tgbotapi.Chattable
-	Log_author  string
-	Log_message string
+	Message         tgbotapi.Chattable
+	Log_author      string
+	Log_message     string
+	UserInfoChanged bool
 }
 
 func (r *ResultOfRequest) addUsernameIntoLog(username string) {
@@ -41,6 +42,7 @@ func ProcessCommand(cmd string, upd tgbotapi.Update, user *UserInfo) ResultOfReq
 
 	var result ResultOfRequest
 	result.Log_author = "bot"
+	result.UserInfoChanged = true
 
 	Message := tgbotapi.NewMessage(user.ChatID, "")
 	Message.ReplyMarkup = tgbotapi.NewRemoveKeyboard(false)
@@ -48,22 +50,22 @@ func ProcessCommand(cmd string, upd tgbotapi.Update, user *UserInfo) ResultOfReq
 
 	switch cmd {
 	case "start":
-		user.Model = ""
+		//		user.Model = ""
 		msg_text = start(upd.Message.Chat.FirstName)
 		Message.ParseMode = "HTML"
 		Message.ReplyMarkup = buttons_start
 
 	case "chatgpt":
-		user.Model = "chatgpt"
+		//		user.Model = "chatgpt"
 		msg_text = "Напишите свой вопрос:"
 
 	case "gemini":
-		user.Model = "gemini"
+		//		user.Model = "gemini"
 		msg_text = "Напишите свой вопрос:"
 
 	case "kandinsky":
-		user.Model = "kandinsky"
-		user.Stage = "text"
+		//		user.Model = "kandinsky"
+		//		user.Stage = "text"
 		msg_text = "Введите свой запрос:"
 
 	case "clearcontext":
@@ -75,6 +77,7 @@ func ProcessCommand(cmd string, upd tgbotapi.Update, user *UserInfo) ResultOfReq
 			os.Exit(1)
 		}
 	default:
+		result.UserInfoChanged = false
 		if slices.Contains(admins, user.Username) {
 			switch cmd {
 			case "updconf":
@@ -103,21 +106,23 @@ func ProcessCommand(cmd string, upd tgbotapi.Update, user *UserInfo) ResultOfReq
 func ProcessText(text string, user *UserInfo, upd tgbotapi.Update) ResultOfRequest {
 
 	var result ResultOfRequest
-	result.Log_author = user.Model
+	//	result.Log_author = user.Model
+	result.UserInfoChanged = true
 
 	Message := tgbotapi.NewMessage(user.ChatID, "")
 	var msg_text string
 
-	switch user.Model {
+	//	switch user.Model {
+	switch "123" {
 	case "chatgpt":
-		Operation := SQL_NewOperation(user, text)
-		SQL_AddOperation(Operation)
+		//Operation := SQL_NewOperation(user, text)
+		//SQL_AddOperation(Operation)
 
 		msg_text = SendRequestToChatGPT(upd.Message.Text, user, true)
 
 	case "gemini":
-		Operation := SQL_NewOperation(user, text)
-		SQL_AddOperation(Operation)
+		//Operation := SQL_NewOperation(user, text)
+		//SQL_AddOperation(Operation)
 
 		msg_text = SendRequestToGemini(upd.Message.Text, user)
 
@@ -129,6 +134,7 @@ func ProcessText(text string, user *UserInfo, upd tgbotapi.Update) ResultOfReque
 		msg_text = "Не выбрана нейросеть для обработки запроса."
 		Message.ReplyMarkup = buttons_start
 		result.Log_author = "bot"
+		result.UserInfoChanged = false
 	}
 
 	Message.Text = msg_text

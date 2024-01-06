@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"slices"
 	"sync"
 
@@ -10,16 +11,20 @@ import (
 )
 
 type UserInfo struct {
-	Username         string
-	ChatID           int64
-	IsRunning        bool
-	Model            string
-	LastCommand      string
-	InputText        string
-	Stage            string
+	Username  string
+	ChatID    int64
+	IsRunning bool
+	// Model            string //del
+	// LastCommand      string //del
+	// InputText        string //del
+	// Stage            string //del
+	Path             string
+	Options          map[string]string
 	Messages_ChatGPT []openai.ChatCompletionMessage
 	History_Gemini   []*genai.Content
+	Images_Gemini    map[int]string // удалять не забыть
 	Mutex            sync.Mutex
+	WG               sync.WaitGroup
 }
 
 func NewUserInfo(u *tgbotapi.User, id int64) *UserInfo {
@@ -30,24 +35,38 @@ func NewUserInfo(u *tgbotapi.User, id int64) *UserInfo {
 	return &UserInfo{Username: username, ChatID: id}
 }
 
-func AccessIsAllowed(upd tgbotapi.Update) bool {
+func (u *UserInfo) ClearUserData() {
+	u.Options = map[string]string{}
+	u.Messages_ChatGPT = []openai.ChatCompletionMessage{}
+	u.History_Gemini = []*genai.Content{}
+	u.DeleteImages()
+}
+
+func (u *UserInfo) DeleteImages() {
+	for _, v := range u.Images_Gemini {
+		os.Remove(v)
+	}
+	u.Images_Gemini = map[int]string{}
+}
+
+func AccessIsAllowed(upd tgbotapi.Update, u *UserInfo) bool {
 
 	if !Cfg.CheckSubscription {
 		return true
 	}
 
-	if slices.Contains(Cfg.WhiteList, upd.Message.Chat.UserName) {
+	if slices.Contains(Cfg.WhiteList, u.Username) {
 		return true
 	}
 
 	result := true
 
-	conf := tgbotapi.ChatConfigWithUser{ChatID: ChannelChatID, UserID: int(upd.Message.Chat.ID)}
+	conf := tgbotapi.ChatConfigWithUser{ChatID: ChannelChatID, UserID: int(u.ChatID)}
 	chatMember, err := Bot.GetChatMember(conf)
 	if err != nil {
-		Logs <- Log{"bot{GetChatMember}", err.Error(), true}
-		msg := tgbotapi.NewMessage(upd.Message.Chat.ID, "Произошла непредвиденная ошибка, попробуйте позже.")
-		Bot.Send(msg)
+		Logs <- NewLog(u, "bot", Error, "{GetChatMember} "+err.Error())
+		msgText := "Произошла непредвиденная ошибка, попробуйте позже."
+		SendMessage(u, msgText, nil, "")
 		result = false
 	}
 
@@ -55,14 +74,15 @@ func AccessIsAllowed(upd tgbotapi.Update) bool {
 		chatMember.IsAdministrator() ||
 		chatMember.IsMember()) && upd.Message.Text != "/start" {
 
-		msg := tgbotapi.NewMessage(upd.Message.Chat.ID, "Для использования бота необходимо подписаться на канал👇")
 		var button = tgbotapi.NewInlineKeyboardMarkup(
 			tgbotapi.NewInlineKeyboardRow(
 				tgbotapi.NewInlineKeyboardButtonURL("✅Подписаться", ChannelURL),
 			),
 		)
-		msg.ReplyMarkup = button
-		Bot.Send(msg)
+
+		msgText := "Для использования бота необходимо подписаться на канал👇"
+		SendMessage(u, msgText, button, "")
+
 		result = false
 	}
 
@@ -78,30 +98,27 @@ func (u *UserInfo) CheckUserLock(upd tgbotapi.Update) (isLocking bool) {
 	defer u.Mutex.Unlock()
 
 	// Проверка на наличие уже обрабатываемого запроса от пользователя
-	if u.AlreadyRunning(upd) {
+	if u.IsRunning && !u.ImagesLoading(upd) {
+		msgText := "Последняя операция ещё выполняется, дождитесь её завершения перед отправкой новых запросов."
+		SendMessage(u, msgText, nil, "")
+		Logs <- NewLog(u, "bot", Info, msgText)
 		return true
 	}
+
 	// Блокируем новые запросы от пользователя
 	u.SetIsRunning(true)
 	return false
 }
 
-func (u *UserInfo) AlreadyRunning(upd tgbotapi.Update) bool {
-
-	if u.IsRunning {
-		warning := "Последняя операция ещё выполняется, дождитесь её завершения перед отправкой новых запросов."
-		msg := tgbotapi.NewMessage(upd.Message.Chat.ID, warning)
-		Bot.Send(msg)
-		Logs <- Log{"bot", warning, false}
-		return true
-	}
-
-	return false
-
-}
-
 func (u *UserInfo) SetIsRunning(v bool) {
 	u.IsRunning = v
+}
+
+func (u *UserInfo) ImagesLoading(upd tgbotapi.Update) bool {
+	if u.Path == "gemini/type/image" && upd.Message.Photo != nil {
+		return true
+	}
+	return false
 }
 
 func SaveUserStates() {
