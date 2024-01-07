@@ -11,7 +11,7 @@ import (
 // art39 : 403059287
 
 const (
-	Version       = "2.0.2"
+	Version       = "2.0.4"
 	ChannelChatID = -1001997602646
 	ChannelURL    = "https://t.me/+6ZMACWRgFdRkNGEy"
 )
@@ -92,7 +92,7 @@ func main() {
 			// Запишем panic если горутина завершилась с ошибкой
 			defer FinishGorutine(User, upd.Message.Text, false)
 
-			// Если сообщение было больше 10 минут назад, то отправляем сообщение
+			// Если сообщение было больше 10 минут назад, то один раз отвечаем
 			if time.Since(upd.Message.Time()).Seconds() > 600 {
 				if !slices.Contains(recoveryChatID, User.ChatID) {
 					recoveryChatID = append(recoveryChatID, User.ChatID)

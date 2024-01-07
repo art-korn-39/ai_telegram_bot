@@ -50,7 +50,8 @@ func gen_type(user *UserInfo, text string) {
 		SendMessage(user, "Загрузите одну или несколько картинок", button_RemoveKeyboard, "")
 		user.Path = "gemini/type/image"
 	default:
-		SendMessage(user, "Неизвестная команда", buttons_geminiTypes, "")
+		//SendMessage(user, "Неизвестная команда", buttons_geminiTypes, "")
+		gen_dialog(user, text)
 	}
 
 }
@@ -93,9 +94,7 @@ func gen_dialog(user *UserInfo, text string) {
 	}
 
 	if resp.Candidates[0].Content == nil {
-
 		Logs <- NewLog(user, "Gemini", Error, "resp.Candidates[0].Content = nil")
-
 		msgText = "Не удалось получить ответ от сервиса. Попробуйте изменить текст запроса."
 		SendMessage(user, msgText, buttons_geminiEndDialog, "")
 		return
@@ -160,6 +159,10 @@ func gen_image(user *UserInfo, message *tgbotapi.Message) {
 	// Собираем в map, где key = MsgID, value = путь к файлу
 	// Тут важно собрать горутины в очередь, чтобы самая первая стала основной
 	user.Mutex.Lock()
+	if user.Images_Gemini == nil {
+		// инициализируем мапу с файлами картинок (хотя обычно она != nil)
+		user.Images_Gemini = map[int]string{}
+	}
 	ImageNumber := len(user.Images_Gemini)                            // количество уже добавленных
 	newName := fmt.Sprintf("img_%d_gen_%d", user.ChatID, ImageNumber) // создаем новое имя с индексом в массиве фото
 	newFilename := strings.ReplaceAll(filename, name, newName)        // получаем полный путь с новым именем
@@ -169,10 +172,6 @@ func gen_image(user *UserInfo, message *tgbotapi.Message) {
 	user.Mutex.Unlock()
 
 	user.WG.Done()
-
-	// msg := tgbotapi.NewPhotoUpload(user.ChatID, newFilename)
-	// msg.Caption = fmt.Sprint(message.MessageID)
-	// Bot.Send(msg)
 
 	// Если это последующие горутины, то завершаем их
 	if !IsMainGorutine {
@@ -191,8 +190,8 @@ func gen_image(user *UserInfo, message *tgbotapi.Message) {
 		`Загружено фотографий: %d
 Напишите свой вопрос.
 Например:
-"Чем отличаются эти картинки?"
-"Что за актёр на фотографии?"`, len(user.Images_Gemini))
+"Кто на фотографии?"
+"Чем отличаются эти картинки?"`, len(user.Images_Gemini))
 	SendMessage(user, msgText, button_RemoveKeyboard, "")
 
 	user.Path = "gemini/type/image/text"
@@ -227,6 +226,15 @@ func gen_imgtext(user *UserInfo, text string) {
 	resp, err := model.GenerateContent(ctx_Gemini, prompt...)
 
 	if err != nil {
+		Logs <- NewLog(user, "Gemini{img}", Error, err.Error())
+		msgText := "Не удалось получить ответ от сервиса. Попробуйте изменить текст запроса или использовать другие изображения."
+		SendMessage(user, msgText, buttons_geminiNewgen, "")
+		user.Path = "gemini/type/image/text/newgen"
+		return
+	}
+
+	if resp.Candidates[0].Content == nil {
+		Logs <- NewLog(user, "Gemini{img}", Error, "resp.Candidates[0].Content = nil")
 		msgText := "Не удалось получить ответ от сервиса. Попробуйте изменить текст запроса или использовать другие изображения."
 		SendMessage(user, msgText, buttons_geminiNewgen, "")
 		user.Path = "gemini/type/image/text/newgen"
@@ -235,7 +243,6 @@ func gen_imgtext(user *UserInfo, text string) {
 
 	result := resp.Candidates[0].Content.Parts[0].(genai.Text)
 
-	// Генерация результата и отправка его пользователю
 	SendMessage(user, string(result), buttons_geminiNewgen, "")
 
 	user.Path = "gemini/type/image/text/newgen"

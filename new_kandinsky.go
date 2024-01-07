@@ -76,6 +76,7 @@ func kand_style(user *UserInfo, text string) {
 		Message.Caption = fmt.Sprintf(`Результат генерации по запросу "%s", стиль: "%s"`, inputText, text)
 		Message.ReplyMarkup = button_newGenerate
 		Bot.Send(Message)
+		Logs <- NewLog(user, "kandinsky", Info, res)
 	}
 
 	user.Path = "kandinsky/text/style/newgen"
