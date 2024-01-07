@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"strings"
 
@@ -228,7 +227,10 @@ func gen_imgtext(user *UserInfo, text string) {
 	resp, err := model.GenerateContent(ctx_Gemini, prompt...)
 
 	if err != nil {
-		log.Fatal(err)
+		msgText := "Не удалось получить ответ от сервиса. Попробуйте изменить текст запроса или использовать другие изображения."
+		SendMessage(user, msgText, buttons_geminiNewgen, "")
+		user.Path = "gemini/type/image/text/newgen"
+		return
 	}
 
 	result := resp.Candidates[0].Content.Parts[0].(genai.Text)
