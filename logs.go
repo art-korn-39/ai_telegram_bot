@@ -35,7 +35,6 @@ type Log struct {
 	Path   string
 	Level  LevelOfLog
 	Text   string
-	//	IsError bool //del
 }
 
 func NewLog(u *UserInfo, name string, level LevelOfLog, text string) Log {
@@ -63,27 +62,6 @@ func NewLog(u *UserInfo, name string, level LevelOfLog, text string) Log {
 	}
 }
 
-func SaveLogs() {
-
-	for v := range Logs {
-		if v.Text != "" {
-
-			// время по Мск час. поясу
-			timeNow := v.Date.Format(time.DateTime)
-
-			// date - username - text
-			fmt.Printf("(%s) [%s] %s\n", timeNow, v.Author, v.Text)
-
-			// если это ошибка, то записываем в отдельный файл
-			if v.Level == FatalError || v.Level == Error {
-				WriteIntoFile(timeNow, v.Author, v.Text)
-			}
-
-			SQL_AddLog(v)
-		}
-	}
-}
-
 func WriteIntoFile(values ...any) {
 
 	Mutex.Lock()
@@ -91,7 +69,7 @@ func WriteIntoFile(values ...any) {
 
 	file, _ := os.OpenFile("errors.log", os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0600)
 	defer file.Close()
-	file.WriteString(fmt.Sprintf("(%s) [%s] %s\n", values[0], values[1], values[2]))
+	file.WriteString(fmt.Sprintf("(%s) %d [%s] %s\n", values[0], values[1], values[2], values[3]))
 
 }
 
@@ -104,7 +82,12 @@ func FinishGorutine(u *UserInfo, text string, main bool) {
 
 		fmt.Println(timeNow+" Panic in gorutine:", text)
 
-		WriteIntoFile(timeNow, Ternary(main, "main", "gorutine"), text)
+		chatid := 0
+		if u != nil {
+			chatid = int(u.ChatID)
+		}
+
+		WriteIntoFile(timeNow, chatid, Ternary(main, "main", "gorutine"), text)
 
 		SQL_AddLog(NewLog(u, "", FatalError, fmt.Sprint(r)))
 

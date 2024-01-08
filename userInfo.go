@@ -11,20 +11,17 @@ import (
 )
 
 type UserInfo struct {
-	Username  string
-	ChatID    int64
-	IsRunning bool
-	// Model            string //del
-	// LastCommand      string //del
-	// InputText        string //del
-	// Stage            string //del
-	Path             string
-	Options          map[string]string
-	Messages_ChatGPT []openai.ChatCompletionMessage
-	History_Gemini   []*genai.Content
-	Images_Gemini    map[int]string // удалять не забыть
-	Mutex            sync.Mutex
-	WG               sync.WaitGroup
+	Username           string
+	ChatID             int64
+	IsRunning          bool
+	Path               string
+	Options            map[string]string
+	Messages_ChatGPT   []openai.ChatCompletionMessage
+	Messages_Gemini    []*genai.Content
+	Images_Gemini      map[int]string // удалять не забыть
+	TokensUsed_ChatGPT int
+	Mutex              sync.Mutex
+	WG                 sync.WaitGroup
 }
 
 func NewUserInfo(u *tgbotapi.User, id int64) *UserInfo {
@@ -38,7 +35,7 @@ func NewUserInfo(u *tgbotapi.User, id int64) *UserInfo {
 func (u *UserInfo) ClearUserData() {
 	u.Options = map[string]string{}
 	u.Messages_ChatGPT = []openai.ChatCompletionMessage{}
-	u.History_Gemini = []*genai.Content{}
+	u.Messages_Gemini = []*genai.Content{}
 	u.DeleteImages()
 }
 
@@ -119,14 +116,4 @@ func (u *UserInfo) ImagesLoading(upd tgbotapi.Update) bool {
 		return true
 	}
 	return false
-}
-
-func SaveUserStates() {
-	for {
-		<-delay_SaveUserStates
-		if UserInfoChanged {
-			UserInfoChanged = false
-			SQL_SaveUserStates()
-		}
-	}
 }

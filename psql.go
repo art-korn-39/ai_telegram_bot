@@ -6,6 +6,8 @@ import (
 	"log"
 	"strings"
 	"time"
+
+	_ "github.com/lib/pq"
 )
 
 type Operation struct {
@@ -91,7 +93,7 @@ func SQL_LoadUserStates() {
 
 	stmt := `
 	select
-		user_name, chat_id, path, options 
+		user_name, chat_id, path, options, tokens_used_gpt 
 	from 
 		user_states
 	`
@@ -105,7 +107,7 @@ func SQL_LoadUserStates() {
 	for rows.Next() {
 		var u UserInfo
 		var options string
-		if err := rows.Scan(&u.Username, &u.ChatID, &u.Path, &options); err != nil {
+		if err := rows.Scan(&u.Username, &u.ChatID, &u.Path, &options, &u.TokensUsed_ChatGPT); err != nil {
 			Logs <- NewLog(nil, "SQL{LoadUserStates}", Error, err.Error())
 		}
 		u.Options = JSONtoMap(options)
@@ -136,12 +138,12 @@ func SQL_SaveUserStates() {
 		return
 	}
 
-	stmt = `insert into user_states (user_name, chat_id, path, options)
-	values ($1, $2, $3, $4)`
+	stmt = `insert into user_states (user_name, chat_id, path, options, tokens_used_gpt)
+	values ($1, $2, $3, $4, $5)`
 
 	for _, v := range ListOfUsers {
 		optionsJSON := mapToJSON(v.Options)
-		_, err = tx.Exec(stmt, v.Username, v.ChatID, v.Path, optionsJSON)
+		_, err = tx.Exec(stmt, v.Username, v.ChatID, v.Path, optionsJSON, v.TokensUsed_ChatGPT)
 		if err != nil {
 			Logs <- NewLog(nil, "SQL{SaveUserStates}", Error, err.Error())
 			return

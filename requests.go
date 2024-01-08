@@ -2,12 +2,9 @@ package main
 
 import (
 	"fmt"
-	"os"
-	"slices"
 	"time"
 
 	tgbotapi "github.com/Syfaro/telegram-bot-api"
-	"github.com/google/generative-ai-go/genai"
 )
 
 // /start - start msg
@@ -27,123 +24,123 @@ var buttons_start = tgbotapi.NewReplyKeyboard(
 	),
 )
 
-type ResultOfRequest struct {
-	Message         tgbotapi.Chattable
-	Log_author      string
-	Log_message     string
-	UserInfoChanged bool
-}
+// type ResultOfRequest struct {
+// 	Message         tgbotapi.Chattable
+// 	Log_author      string
+// 	Log_message     string
+// 	UserInfoChanged bool
+// }
 
-func (r *ResultOfRequest) addUsernameIntoLog(username string) {
-	r.Log_author = r.Log_author + "->" + username
-}
+// func (r *ResultOfRequest) addUsernameIntoLog(username string) {
+// 	r.Log_author = r.Log_author + "->" + username
+// }
 
-func ProcessCommand(cmd string, upd tgbotapi.Update, user *UserInfo) ResultOfRequest {
+// func ProcessCommand(cmd string, upd tgbotapi.Update, user *UserInfo) ResultOfRequest {
 
-	var result ResultOfRequest
-	result.Log_author = "bot"
-	result.UserInfoChanged = true
+// 	var result ResultOfRequest
+// 	result.Log_author = "bot"
+// 	result.UserInfoChanged = true
 
-	Message := tgbotapi.NewMessage(user.ChatID, "")
-	Message.ReplyMarkup = tgbotapi.NewRemoveKeyboard(false)
-	var msg_text string
+// 	Message := tgbotapi.NewMessage(user.ChatID, "")
+// 	Message.ReplyMarkup = tgbotapi.NewRemoveKeyboard(false)
+// 	var msg_text string
 
-	switch cmd {
-	case "start":
-		//		user.Model = ""
-		msg_text = start(upd.Message.Chat.FirstName)
-		Message.ParseMode = "HTML"
-		Message.ReplyMarkup = buttons_start
+// 	switch cmd {
+// 	case "start":
+// 		//		user.Model = ""
+// 		msg_text = start(upd.Message.Chat.FirstName)
+// 		Message.ParseMode = "HTML"
+// 		Message.ReplyMarkup = buttons_start
 
-	case "chatgpt":
-		//		user.Model = "chatgpt"
-		msg_text = "Напишите свой вопрос:"
+// 	case "chatgpt":
+// 		//		user.Model = "chatgpt"
+// 		msg_text = "Напишите свой вопрос:"
 
-	case "gemini":
-		//		user.Model = "gemini"
-		msg_text = "Напишите свой вопрос:"
+// 	case "gemini":
+// 		//		user.Model = "gemini"
+// 		msg_text = "Напишите свой вопрос:"
 
-	case "kandinsky":
-		//		user.Model = "kandinsky"
-		//		user.Stage = "text"
-		msg_text = "Введите свой запрос:"
+// 	case "kandinsky":
+// 		//		user.Model = "kandinsky"
+// 		//		user.Stage = "text"
+// 		msg_text = "Введите свой запрос:"
 
-	case "clearcontext":
-		user.History_Gemini = []*genai.Content{}
-		msg_text = "История диалога с Gemini очищена."
+// 	case "clearcontext":
+// 		user.History_Gemini = []*genai.Content{}
+// 		msg_text = "История диалога с Gemini очищена."
 
-	case "stop":
-		if user.Username == "Art_Korn_39" {
-			os.Exit(1)
-		}
-	default:
-		result.UserInfoChanged = false
-		if slices.Contains(admins, user.Username) {
-			switch cmd {
-			case "updconf":
-				LoadConfig()
-				msg_text = "Config updated."
-			case "info":
-				msg_text = GetInfo()
-			}
-		}
-	}
+// 	case "stop":
+// 		if user.Username == "Art_Korn_39" {
+// 			os.Exit(1)
+// 		}
+// 	default:
+// 		result.UserInfoChanged = false
+// 		if slices.Contains(admins, user.Username) {
+// 			switch cmd {
+// 			case "updconf":
+// 				LoadConfig()
+// 				msg_text = "Config updated."
+// 			case "info":
+// 				msg_text = GetInfo()
+// 			}
+// 		}
+// 	}
 
-	Message.Text = msg_text
-	result.Message = Message
-	result.Log_message = msg_text
-	switch cmd {
-	case "start":
-		result.Log_message = "/start for " + user.Username
-	case "info":
-		result.Log_message = "/info for " + user.Username
-	}
+// 	Message.Text = msg_text
+// 	result.Message = Message
+// 	result.Log_message = msg_text
+// 	switch cmd {
+// 	case "start":
+// 		result.Log_message = "/start for " + user.Username
+// 	case "info":
+// 		result.Log_message = "/info for " + user.Username
+// 	}
 
-	return result
+// 	return result
 
-}
+// }
 
-func ProcessText(text string, user *UserInfo, upd tgbotapi.Update) ResultOfRequest {
+// func ProcessText(text string, user *UserInfo, upd tgbotapi.Update) ResultOfRequest {
 
-	var result ResultOfRequest
-	//	result.Log_author = user.Model
-	result.UserInfoChanged = true
+// 	var result ResultOfRequest
+// 	//	result.Log_author = user.Model
+// 	result.UserInfoChanged = true
 
-	Message := tgbotapi.NewMessage(user.ChatID, "")
-	var msg_text string
+// 	Message := tgbotapi.NewMessage(user.ChatID, "")
+// 	var msg_text string
 
-	//	switch user.Model {
-	switch "123" {
-	case "chatgpt":
-		//Operation := SQL_NewOperation(user, text)
-		//SQL_AddOperation(Operation)
+// 	//	switch user.Model {
+// 	switch "123" {
+// 	case "chatgpt":
+// 		//Operation := SQL_NewOperation(user, text)
+// 		//SQL_AddOperation(Operation)
 
-		msg_text = SendRequestToChatGPT(upd.Message.Text, user, true)
+// 		msg_text = SendRequestToChatGPT(upd.Message.Text, user, true)
 
-	case "gemini":
-		//Operation := SQL_NewOperation(user, text)
-		//SQL_AddOperation(Operation)
+// 	case "gemini":
+// 		//Operation := SQL_NewOperation(user, text)
+// 		//SQL_AddOperation(Operation)
 
-		msg_text = SendRequestToGemini(upd.Message.Text, user)
+// 		msg_text = SendRequestToGemini(upd.Message.Text, user)
 
-	case "kandinsky": // пользователь ввел текст по модели kand
+// 	case "kandinsky": // пользователь ввел текст по модели kand
 
-		return ProcessInputText_Kandinsky(text, user)
+// 		return ProcessInputText_Kandinsky(text, user)
 
-	default:
-		msg_text = "Не выбрана нейросеть для обработки запроса."
-		Message.ReplyMarkup = buttons_start
-		result.Log_author = "bot"
-		result.UserInfoChanged = false
-	}
+// 	default:
+// 		msg_text = "Не выбрана нейросеть для обработки запроса."
+// 		Message.ReplyMarkup = buttons_start
+// 		result.Log_author = "bot"
+// 		result.UserInfoChanged = false
+// 	}
 
-	Message.Text = msg_text
-	result.Message = Message
-	result.Log_message = msg_text
+// 	Message.Text = msg_text
+// 	result.Message = Message
+// 	result.Log_message = msg_text
 
-	return result
+// 	return result
 
-}
+// }
 
 func GetInfo() string {
 

@@ -11,7 +11,7 @@ import (
 // art39 : 403059287
 
 const (
-	Version       = "2.0.4"
+	Version       = "2.1.1"
 	ChannelChatID = -1001997602646
 	ChannelURL    = "https://t.me/+6ZMACWRgFdRkNGEy"
 )
@@ -22,16 +22,11 @@ var (
 	Cfg             config
 	Logs            = make(chan Log, 10)
 	ListOfUsers     = map[int64]*UserInfo{}
-	arrayCMD        = []string{"gemini", "kandinsky", "chatgpt"}
-	admins          = []string{"Art_Korn_39", "Nik_05_04", "MnNik0"}
+	Models          = []string{"gemini", "kandinsky", "chatgpt"}
+	admins          = []string{"Art_Korn_39", "MnNik0"}
+	SpecialCMD      = []string{"gpt_samples"}
 	recoveryChatID  = []int64{}
 	UserInfoChanged = false
-
-	delay_upd            = time.Tick(time.Millisecond * 10)
-	delay_ChatGPT        = time.Tick(time.Second * 15 / 10) // 40 RPM
-	delay_Gemini         = time.Tick(time.Second * 12 / 11) // 55 RPM
-	delay_Kandinsky      = time.Tick(time.Second * 3)       // 20 RPM
-	delay_SaveUserStates = time.Tick(time.Minute * 1)       // 1 RPM
 )
 
 func main() {
@@ -67,6 +62,9 @@ func main() {
 	// При наличии изменений - регулярно обновляем инфо по юзерам в БД
 	go SaveUserStates()
 
+	// Каждый день в 00:00 по Мск очищаем счетчик токенов chat GPT
+	go ClearTokensEveryDay()
+
 	// Читаем входящие запросы из канала
 	for update := range updates {
 
@@ -74,11 +72,7 @@ func main() {
 
 		go func(upd tgbotapi.Update) {
 
-			if upd.Message == nil {
-				return
-			}
-
-			if upd.Message.From.IsBot {
+			if !ValidMessage(&upd) {
 				return
 			}
 
@@ -107,7 +101,7 @@ func main() {
 			}
 
 			// Пустой текст пропускаем только в случае загрузки картинок у gemini
-			if User.Path != "gemini/type/image" && upd.Message.Text == "" {
+			if upd.Message.Text == "" && User.Path != "gemini/type/image" {
 				return
 			}
 
@@ -130,16 +124,45 @@ func main() {
 	}
 }
 
+func ValidMessage(upd *tgbotapi.Update) bool {
+
+	if upd.Message == nil && upd.CallbackQuery == nil {
+		return false
+	}
+
+	if upd.Message != nil {
+		if upd.Message.From.IsBot {
+			return false
+		}
+	}
+
+	if upd.Message == nil && upd.CallbackQuery != nil {
+		Message := tgbotapi.Message{
+			From: upd.CallbackQuery.From,
+			Text: upd.CallbackQuery.Data,
+			Chat: upd.CallbackQuery.Message.Chat,
+			//Date: upd.CallbackQuery.Message.Date,
+			Date: int(time.Now().Unix()),
+		}
+		upd.Message = &Message
+	}
+
+	return true
+
+}
+
 func HandleMessage(u *UserInfo, m *tgbotapi.Message) {
 
 	// 1. Определяем команду
 	cmd := MsgCommand(m)
+
+	// 2. Устанавливаем базовый путь и очищаем данные
 	if cmd != "" {
 		u.Path = cmd
 		u.ClearUserData()
 	}
 
-	// 2. Формируем ответ
+	// 3. Формируем ответ
 	switch u.Path {
 	case "start":
 		SendMessage(u, start(m.From.FirstName), buttons_start, "HTML")
@@ -177,8 +200,20 @@ func HandleMessage(u *UserInfo, m *tgbotapi.Message) {
 	case "chatgpt":
 		gpt_start(u)
 
-	case "chatgpt/dialog":
+	case "chatgpt/type":
+		gpt_type(u, m.Text)
+
+	case "chatgpt/type/dialog":
 		gpt_dialog(u, m.Text, true)
+
+	case "chatgpt/type/audio_text":
+		gpt_audio_text(u, m.Text)
+
+	case "chatgpt/type/audio_text/voice":
+		gpt_speech(u, m.Text)
+
+	case "chatgpt/type/audio_text/voice/newgen":
+		gpt_audio_newgen(u, m.Text)
 
 	default:
 		if slices.Contains(admins, u.Username) {
