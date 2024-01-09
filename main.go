@@ -11,7 +11,7 @@ import (
 // art39 : 403059287
 
 const (
-	Version       = "2.1.5"
+	Version       = "2.1.6"
 	ChannelChatID = -1001997602646
 	ChannelURL    = "https://t.me/+6ZMACWRgFdRkNGEy"
 )

@@ -11,6 +11,8 @@ import (
 
 func SaveLogs() {
 
+	defer FinishGorutine(nil, "panic in SaveLogs()", false)
+
 	for v := range Logs {
 		if v.Text != "" {
 
@@ -32,6 +34,8 @@ func SaveLogs() {
 
 func SaveUserStates() {
 
+	defer FinishGorutine(nil, "panic in SaveUserStates()", false)
+
 	delay := time.Tick(time.Minute * 1) // 1 RPM
 
 	for {
@@ -45,6 +49,8 @@ func SaveUserStates() {
 }
 
 func ClearTokensEveryDay() {
+
+	defer FinishGorutine(nil, "panic in ClearTokensEveryDay()", false)
 
 	for {
 
@@ -68,6 +74,8 @@ func ClearTokensEveryDay() {
 }
 
 func Kandinsky_CheckModelID() {
+
+	defer FinishGorutine(nil, "panic in Kandinsky_CheckModelID()", false)
 
 	delay := time.Tick(time.Minute * 30)
 
