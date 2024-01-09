@@ -2,13 +2,9 @@ package main
 
 import (
 	"math"
-	"slices"
 	"sort"
-	"strings"
 	"time"
 	"unicode"
-
-	"github.com/sashabaranov/go-openai"
 )
 
 func Unused(...any) {}
@@ -91,22 +87,6 @@ func SortMap(m map[int]string) (result map[int]string) {
 	}
 
 	return result
-
-}
-
-func gptGetVoice(voice string) (v openai.SpeechVoice, isError bool) {
-
-	array := []openai.SpeechVoice{openai.VoiceAlloy, openai.VoiceEcho, openai.VoiceFable,
-		openai.VoiceOnyx, openai.VoiceNova, openai.VoiceShimmer}
-
-	SV := openai.SpeechVoice(strings.ToLower(voice))
-
-	i := slices.Index(array, SV)
-	if i == -1 {
-		return "", true
-	} else {
-		return array[i], false
-	}
 
 }
 

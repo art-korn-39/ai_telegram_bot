@@ -13,6 +13,7 @@ import (
 type UserInfo struct {
 	Username         string
 	ChatID           int64
+	Language         string
 	IsRunning        bool
 	Path             string
 	Options          map[string]string
@@ -24,7 +25,11 @@ type UserInfo struct {
 	WG               sync.WaitGroup
 }
 
-func NewUserInfo(u *tgbotapi.User, id int64) *UserInfo {
+func NewUserInfo(m *tgbotapi.Message) *UserInfo {
+
+	u := m.From
+	id := m.Chat.ID
+
 	username := u.UserName
 	if username == "" {
 		username = u.FirstName + "_" + u.LastName

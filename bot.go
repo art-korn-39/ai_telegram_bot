@@ -14,8 +14,6 @@ import (
 	"github.com/sashabaranov/go-openai"
 )
 
-var button_RemoveKeyboard = tgbotapi.NewRemoveKeyboard(false)
-
 func SendMessage(user *UserInfo, text string, ReplyMarkup any, ParseMod string) {
 
 	// Если длина сообщения превышает лимиты телеграма
@@ -47,14 +45,29 @@ func SendMessage(user *UserInfo, text string, ReplyMarkup any, ParseMod string) 
 
 }
 
-func SendAudioMessage(user *UserInfo, filename string, caption string, ReplyMarkup any) {
+func SendAudioMessage(user *UserInfo, filename string, caption string, ReplyMarkup any) error {
 
 	Message := tgbotapi.NewAudioUpload(user.ChatID, filename)
 	Message.Caption = caption
 	Message.ReplyMarkup = ReplyMarkup
-	Bot.Send(Message)
+	_, err := Bot.Send(Message)
 
 	Logs <- NewLog(user, "bot", Info, filename)
+
+	return err
+
+}
+
+func SendPhotoMessage(user *UserInfo, filename string, caption string, ReplyMarkup any) error {
+
+	Message := tgbotapi.NewPhotoUpload(user.ChatID, filename)
+	Message.Caption = caption
+	Message.ReplyMarkup = ReplyMarkup
+	_, err := Bot.Send(Message)
+
+	Logs <- NewLog(user, "bot", Info, filename)
+
+	return err
 
 }
 

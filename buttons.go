@@ -4,6 +4,8 @@ import tgbotapi "github.com/Syfaro/telegram-bot-api"
 
 var (
 	//COMMON
+	button_RemoveKeyboard = tgbotapi.NewRemoveKeyboard(false)
+
 	buttons_Subscribe = tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonURL("✅Подписаться", ChannelURL),

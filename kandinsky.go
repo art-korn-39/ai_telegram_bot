@@ -1,16 +1,17 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os/exec"
 	"strconv"
 	"strings"
-
-	tgbotapi "github.com/Syfaro/telegram-bot-api"
+	"unicode/utf8"
 )
 
 var (
-	kand_Styles = map[string]string{"Без стиля": "DEFAULT", "Art": "KANDINSKY", "4K": "UHD", "Anime": "ANIME"}
+	kand_Styles   = map[string]string{"Без стиля": "DEFAULT", "Art": "KANDINSKY", "4K": "UHD", "Anime": "ANIME"}
+	kand_Model_id = "4"
 )
 
 // После команды "/kandinsky" или при вводе текста = "kandinsky"
@@ -25,6 +26,11 @@ func kand_start(user *UserInfo) {
 
 // После ввода запроса пользователем
 func kand_text(user *UserInfo, text string) {
+
+	if utf8.RuneCountInString(text) >= 900 {
+		SendMessage(user, "Текст описания картинки не должен превышать 1000 символов.", nil, "")
+		return
+	}
 
 	user.Options["text"] = text
 
@@ -48,22 +54,23 @@ func kand_style(user *UserInfo, text string) {
 	user.Options["style"] = style
 	inputText := user.Options["text"]
 
-	msgText := "Запущена генерация картинки, она может занять 1-2 минуты."
+	msgText := "Запущена генерация картинки, среднее время выполнения 25-30 секунд."
 	SendMessage(user, msgText, button_RemoveKeyboard, "")
 
 	Operation := SQL_NewOperation(user, "kandinsky", text, inputText)
 	SQL_AddOperation(Operation)
 
-	res, isError := SendRequestToKandinsky(inputText, style, user.ChatID)
-	if isError {
-		// в errors уже записали в самой функции "SendRequestToKandinsky()"
+	res, err := SendRequestToKandinsky(inputText, style, user)
+	if err != nil {
+		Logs <- NewLog(user, "kandinsky", Error, err.Error())
 		SendMessage(user, res, button_kandNewgen, "")
 	} else {
-		Message := tgbotapi.NewPhotoUpload(user.ChatID, res)
-		Message.Caption = fmt.Sprintf(`Результат генерации по запросу "%s", стиль: "%s"`, inputText, text)
-		Message.ReplyMarkup = button_kandNewgen
-		Bot.Send(Message)
-		Logs <- NewLog(user, "kandinsky", Info, res)
+		caption := fmt.Sprintf(`Результат генерации по запросу "%s", стиль: "%s"`, inputText, text)
+		err := SendPhotoMessage(user, res, caption, button_kandNewgen)
+		if err != nil {
+			Logs <- NewLog(user, "kandinsky", Error, "{ImgSend} "+err.Error())
+			SendMessage(user, "При отправке картинки возникла ошибка, попробуйте ещё раз позже.", button_kandNewgen, "")
+		}
 	}
 
 	user.Path = "kandinsky/text/style/newgen"
@@ -87,7 +94,9 @@ func kand_newgen(user *UserInfo, text string) {
 
 }
 
-func SendRequestToKandinsky(text string, style string, chatid int64) (result string, isError bool) {
+// Максимальный размер текстового описания - 1000 символов.
+// "censored": true (возвращая ошибку, когда запрос или изображение не соответствует)
+func SendRequestToKandinsky(text string, style string, user *UserInfo) (result string, err error) {
 
 	<-delay_Kandinsky
 
@@ -99,31 +108,38 @@ func SendRequestToKandinsky(text string, style string, chatid int64) (result str
 		dataFolder,
 		text,
 		style,
-		strconv.Itoa(int(chatid)))
+		strconv.Itoa(int(user.ChatID)),
+		kand_Model_id,
+		Cfg.Kandinsky_Key,
+		Cfg.Kandinsky_Secret,
+	)
 
 	if cmd.Err != nil {
 		description := fmt.Sprintf("text: %s [%s]\nerror: %s", text, style, cmd.Err.Error())
-		Logs <- NewLog(nil, "Kandinsky{cmd}", Error, description)
-		return "Не удалось сгенерировать изображение. Попробуйте позже.", true
+		err = errors.New("{cmd} " + description)
+		//Logs <- NewLog(user, "Kandinsky{cmd}", Error, description)
+		return "Не удалось сгенерировать изображение. Попробуйте позже.", err
 	}
 
 	// Получение результата команды
-	res, err := cmd.Output()
+	res, err2 := cmd.Output()
 
-	if err != nil {
-		description := fmt.Sprintf("text: %s [%s]\nerror: %s", text, style, err.Error())
-		Logs <- NewLog(nil, "Kandinsky{cmd.Output()}", Error, description)
-		return "Не удалось сгенерировать изображение. Попробуйте изменить текст описания картинки.", true
+	if err2 != nil {
+		description := fmt.Sprintf("text: %s [%s]\nerror: %s", text, style, err2.Error())
+		err = errors.New("{cmd.Output()} " + description)
+		//Logs <- NewLog(user, "Kandinsky{cmd.Output()}", Error, description)
+		return "Не удалось сгенерировать изображение. Попробуйте изменить текст описания картинки.", err
 	}
 
 	pathToImage := strings.TrimSpace(string(res[:]))
 
 	if pathToImage == "" {
-		description := fmt.Sprintf("text: %s [%s]\nerror: %s", text, style, "скрипт вернул пустой путь до картинки")
-		Logs <- NewLog(nil, "Kandinsky{API}", Error, description)
-		return "Не удалось сгенерировать изображение. Попробуйте позже.", true
+		description := fmt.Sprintf("text: %s [%s]\nerror: %s", text, style, "скрипт вернул пустой путь до картинки (не успел получит ответ по api)")
+		err = errors.New("{API} " + description)
+		//Logs <- NewLog(user, "Kandinsky{API}", Error, description)
+		return "Не удалось сгенерировать изображение. Попробуйте позже.", err
 	}
 
-	return pathToImage, false
+	return pathToImage, nil
 
 }

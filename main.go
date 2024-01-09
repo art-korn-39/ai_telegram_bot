@@ -11,7 +11,7 @@ import (
 // art39 : 403059287
 
 const (
-	Version       = "2.1.4"
+	Version       = "2.1.5"
 	ChannelChatID = -1001997602646
 	ChannelURL    = "https://t.me/+6ZMACWRgFdRkNGEy"
 )
@@ -65,6 +65,9 @@ func main() {
 	// Каждый день в 00:00 по Мск очищаем счетчик токенов chat GPT
 	go ClearTokensEveryDay()
 
+	// Обновление model_id каждые 20 минут
+	go Kandinsky_CheckModelID()
+
 	// Читаем входящие запросы из канала
 	for update := range updates {
 
@@ -79,9 +82,10 @@ func main() {
 			// Получаем данные пользователя
 			User, ok := ListOfUsers[upd.Message.Chat.ID]
 			if !ok {
-				User = NewUserInfo(upd.Message.From, upd.Message.Chat.ID)
+				User = NewUserInfo(upd.Message)
 				ListOfUsers[upd.Message.Chat.ID] = User
 			}
+			User.Language = upd.Message.From.LanguageCode // может меняться
 
 			// Запишем panic если горутина завершилась с ошибкой
 			defer FinishGorutine(User, upd.Message.Text, false)

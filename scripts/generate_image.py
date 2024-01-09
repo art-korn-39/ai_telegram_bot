@@ -7,7 +7,7 @@ import base64
 
 from sys import argv
 
-script, datapath, text, style, userid = argv
+script, datapath, text, style, userid, model_id, api, secret = argv
 
 class Text2ImageAPI:
 
@@ -41,25 +41,34 @@ class Text2ImageAPI:
         }
         response = requests.post(self.URL + 'key/api/v1/text2image/run', headers=self.AUTH_HEADERS, files=data)
         data = response.json()
-#        print(data)
+        #print(data)
         return data['uuid']
 
-    def check_generation(self, request_id, attempts=12, delay=10):
+    def check_generation(self, request_id, attempts=8, delay=5):
+        #a 8  7  6  5  4  3  2    1
+        #d 5  6  7  8  9  10 11   12
+        #t 15 20 26 33 41 50 1.00 1.11
+        # меньше 10 секунд не бывает генераций, поэтому не пингуем
+        time.sleep(15)
         while attempts > 0:
             response = requests.get(self.URL + 'key/api/v1/text2image/status/' + request_id, headers=self.AUTH_HEADERS)
             data = response.json()
             if data['status'] == 'DONE':
-#                print(data)
+                #print(data)
                 return data['images']
 
             attempts -= 1
-            time.sleep(delay)
+            
+            # на последней итерации нет смысла вставать на паузу
+            if attempts != 0 :
+                time.sleep(delay)
+                delay += 1
 
 
 if __name__ == '__main__':
     
     api = Text2ImageAPI('https://api-key.fusionbrain.ai/', '1B189E2CFA69FFD2130FC56294B96DA9', '7C0B7C7FE4FFA4F6EE9DF0CFA257167C')
-    model_id = api.get_model()
+    #model_id = api.get_model()
     uuid = api.generate(text, model_id)
     images = api.check_generation(uuid)   
     

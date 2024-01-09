@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"slices"
 	"strings"
 
 	tgbotapi "github.com/Syfaro/telegram-bot-api"
@@ -96,5 +97,21 @@ func gpt_DailyLimitOfTokensIsOver(u *UserInfo) bool {
 	}
 
 	return false
+
+}
+
+func gpt_GetSpeechVoice(voice string) (v openai.SpeechVoice, isError bool) {
+
+	array := []openai.SpeechVoice{openai.VoiceAlloy, openai.VoiceEcho, openai.VoiceFable,
+		openai.VoiceOnyx, openai.VoiceNova, openai.VoiceShimmer}
+
+	SV := openai.SpeechVoice(strings.ToLower(voice))
+
+	i := slices.Index(array, SV)
+	if i == -1 {
+		return "", true
+	} else {
+		return array[i], false
+	}
 
 }

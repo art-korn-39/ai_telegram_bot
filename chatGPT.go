@@ -132,7 +132,7 @@ func gpt_speech_voice(user *UserInfo, text string) {
 		return
 	}
 
-	voice, isErr := gptGetVoice(text)
+	voice, isErr := gpt_GetSpeechVoice(text)
 	if isErr {
 		msgText := "Выберите голос из предложенных вариантов."
 		SendMessage(user, msgText, buttons_gptVoices, "")
@@ -156,7 +156,7 @@ func gpt_speech_voice(user *UserInfo, text string) {
 		})
 
 	if err != nil {
-		Logs <- NewLog(user, "chatgpt{speech1}", 1, err.Error())
+		Logs <- NewLog(user, "chatgpt", 1, "{speech1} "+err.Error())
 		msgText := "Произошла непредвиденная ошибка. Попробуйте позже."
 		SendMessage(user, msgText, buttons_gptTypes, "")
 		user.Path = "chatgpt/type"
@@ -167,7 +167,7 @@ func gpt_speech_voice(user *UserInfo, text string) {
 	filename := fmt.Sprintf(WorkDir+"/data/speech_%d.mp3", user.ChatID)
 	err = CreateFile(filename, res)
 	if err != nil {
-		Logs <- NewLog(user, "chatgpt{speech2}", 1, err.Error())
+		Logs <- NewLog(user, "chatgpt", 1, "{speech2} "+err.Error())
 		msgText := "Произошла непредвиденная ошибка. Попробуйте позже."
 		SendMessage(user, msgText, buttons_gptTypes, "")
 		user.Path = "chatgpt/type"
@@ -178,7 +178,11 @@ func gpt_speech_voice(user *UserInfo, text string) {
 	user.Tokens_used_gpt = user.Tokens_used_gpt + tokensForRequest
 
 	caption := fmt.Sprintf(`Результат генерации по тексту "%s", голос: "%s"`, inputText, voice)
-	SendAudioMessage(user, filename, caption, buttons_gptSpeechNewgen)
+	err = SendAudioMessage(user, filename, caption, buttons_gptSpeechNewgen)
+	if err != nil {
+		Logs <- NewLog(user, "chatgpt", Error, "{AudioSend} "+err.Error())
+		SendMessage(user, "При отправке аудиофайла возникла ошибка, попробуйте ещё раз позже.", nil, "")
+	}
 
 	user.Path = "chatgpt/type/speech_text/voice/newgen"
 

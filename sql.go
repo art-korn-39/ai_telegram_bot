@@ -67,7 +67,7 @@ func SQL_AddOperation(o Operation) {
 	}
 
 	Statement := `
-	INSERT INTO Operations (date, chat_id, username, model, class, request)
+	INSERT INTO operations (date, chat_id, username, model, class, request)
 	VALUES ($1, $2, $3, $4, $5, $6)`
 
 	_, err := db.Exec(Statement,
@@ -89,12 +89,13 @@ func SQL_LoadUserStates() {
 
 	if db == nil {
 		Logs <- NewLog(nil, "SQL{LoadUserStates}", Error, "lost connection to DB")
+		return
 	}
 
 	stmt := `
-	select
-		user_name, chat_id, path, options, tokens_used_gpt 
-	from 
+	SELECT
+		user_name, chat_id, path, options, tokens_used_gpt, language 
+	FROM 
 		user_states
 	`
 	rows, err := db.Query(stmt)
@@ -107,7 +108,7 @@ func SQL_LoadUserStates() {
 	for rows.Next() {
 		var u UserInfo
 		var options string
-		if err := rows.Scan(&u.Username, &u.ChatID, &u.Path, &options, &u.Tokens_used_gpt); err != nil {
+		if err := rows.Scan(&u.Username, &u.ChatID, &u.Path, &options, &u.Tokens_used_gpt, &u.Language); err != nil {
 			Logs <- NewLog(nil, "SQL{LoadUserStates}", Error, err.Error())
 		}
 		u.Options = JSONtoMap(options)
@@ -126,6 +127,7 @@ func SQL_SaveUserStates() {
 
 	if db == nil {
 		Logs <- NewLog(nil, "SQL{SaveUserStates}", Error, "lost connection to DB")
+		return
 	}
 
 	tx, _ := db.Begin()
@@ -138,12 +140,12 @@ func SQL_SaveUserStates() {
 		return
 	}
 
-	stmt = `insert into user_states (user_name, chat_id, path, options, tokens_used_gpt)
-	values ($1, $2, $3, $4, $5)`
+	stmt = `INSERT INTO user_states (user_name, chat_id, path, options, tokens_used_gpt, language)
+	VALUES ($1, $2, $3, $4, $5, $6)`
 
 	for _, v := range ListOfUsers {
 		optionsJSON := MapToJSON(v.Options)
-		_, err = tx.Exec(stmt, v.Username, v.ChatID, v.Path, optionsJSON, v.Tokens_used_gpt)
+		_, err = tx.Exec(stmt, v.Username, v.ChatID, v.Path, optionsJSON, v.Tokens_used_gpt, v.Language)
 		if err != nil {
 			Logs <- NewLog(nil, "SQL{SaveUserStates}", Error, err.Error())
 			return
@@ -167,8 +169,8 @@ func SQL_GetInfoOnDate(timestamp time.Time) (result map[string]int, errStr strin
 	var count int
 
 	Statement := `
-	select count(distinct username) from operations where date > '$1';
-	select count(*), model from operations where date > '$1' group by model;
+	SELECT count(distinct username) FROM operations WHERE date > '$1';
+	SELECT count(*), model FROM operations WHERE date > '$1' GROUP BY model;
 	`
 	Statement = strings.ReplaceAll(Statement, "$1", timestamp.Format(time.DateTime))
 

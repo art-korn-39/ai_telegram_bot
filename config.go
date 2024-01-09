@@ -11,6 +11,8 @@ type config struct {
 	TelegramBotToken  string
 	OpenAIToken       string
 	GeminiKey         string
+	Kandinsky_Key     string
+	Kandinsky_Secret  string
 	DailyLimitTokens  int
 	DB_name           string
 	DB_host           string

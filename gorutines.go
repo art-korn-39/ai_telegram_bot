@@ -1,7 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -27,13 +31,17 @@ func SaveLogs() {
 }
 
 func SaveUserStates() {
+
+	delay := time.Tick(time.Minute * 1) // 1 RPM
+
 	for {
-		<-delay_SaveUserStates
+		<-delay
 		if UserInfoChanged {
 			UserInfoChanged = false
 			SQL_SaveUserStates()
 		}
 	}
+
 }
 
 func ClearTokensEveryDay() {
@@ -54,6 +62,39 @@ func ClearTokensEveryDay() {
 
 		SQL_SaveUserStates()
 		Logs <- NewLog(nil, "System", Info, "tokens = 0")
+
+	}
+
+}
+
+func Kandinsky_CheckModelID() {
+
+	delay := time.Tick(time.Minute * 30)
+
+	for {
+
+		url := "https://api-key.fusionbrain.ai/key/api/v1/models"
+		req, _ := http.NewRequest(http.MethodGet, url, nil)
+
+		req.Header.Add("X-Key", "Key "+Cfg.Kandinsky_Key)
+		req.Header.Add("X-Secret", "Secret "+Cfg.Kandinsky_Secret)
+
+		res, err := http.DefaultClient.Do(req)
+		if err != nil {
+			Logs <- NewLog(nil, "kandinsky", 1, "Не удалось получить model_id")
+			return
+		}
+		defer res.Body.Close()
+
+		resBytes, _ := io.ReadAll(res.Body)
+		var dat []map[string]any
+		json.Unmarshal(resBytes, &dat)
+
+		kand_Model_id = strconv.Itoa(int(dat[0]["id"].(float64)))
+
+		Logs <- NewLog(nil, "kandinsky", 1, "Значение model_id обновлено {"+kand_Model_id+"}")
+
+		<-delay
 
 	}
 
