@@ -10,20 +10,7 @@ import (
 )
 
 var (
-	styles_knd    = map[string]string{"Без стиля": "DEFAULT", "Art": "KANDINSKY", "4K": "UHD", "Anime": "ANIME"}
-	buttons_style = tgbotapi.NewReplyKeyboard(
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("Без стиля"),
-			tgbotapi.NewKeyboardButton("Art"),
-			tgbotapi.NewKeyboardButton("4K"),
-			tgbotapi.NewKeyboardButton("Anime"),
-		),
-	)
-	button_newGenerate = tgbotapi.NewReplyKeyboard(
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("Генерация по тексту"),
-		),
-	)
+	kand_Styles = map[string]string{"Без стиля": "DEFAULT", "Art": "KANDINSKY", "4K": "UHD", "Anime": "ANIME"}
 )
 
 // После команды "/kandinsky" или при вводе текста = "kandinsky"
@@ -42,7 +29,7 @@ func kand_text(user *UserInfo, text string) {
 	user.Options["text"] = text
 
 	msgText := `Выберите стиль, в котором генерировать изображение.`
-	SendMessage(user, msgText, buttons_style, "")
+	SendMessage(user, msgText, buttons_kandStyles, "")
 
 	user.Path = "kandinsky/text/style"
 
@@ -51,10 +38,10 @@ func kand_text(user *UserInfo, text string) {
 // После выбора стиля пользователем
 func kand_style(user *UserInfo, text string) {
 
-	style, ok := styles_knd[text]
+	style, ok := kand_Styles[text]
 	if !ok {
 		msgText := "Выберите стиль из предложенных вариантов."
-		SendMessage(user, msgText, buttons_style, "")
+		SendMessage(user, msgText, buttons_kandStyles, "")
 		return
 	}
 
@@ -70,11 +57,11 @@ func kand_style(user *UserInfo, text string) {
 	res, isError := SendRequestToKandinsky(inputText, style, user.ChatID)
 	if isError {
 		// в errors уже записали в самой функции "SendRequestToKandinsky()"
-		SendMessage(user, res, button_newGenerate, "")
+		SendMessage(user, res, button_kandNewgen, "")
 	} else {
 		Message := tgbotapi.NewPhotoUpload(user.ChatID, res)
 		Message.Caption = fmt.Sprintf(`Результат генерации по запросу "%s", стиль: "%s"`, inputText, text)
-		Message.ReplyMarkup = button_newGenerate
+		Message.ReplyMarkup = button_kandNewgen
 		Bot.Send(Message)
 		Logs <- NewLog(user, "kandinsky", Info, res)
 	}
@@ -86,13 +73,17 @@ func kand_style(user *UserInfo, text string) {
 // После получения результата генерации
 func kand_newgen(user *UserInfo, text string) {
 
-	if text != "Генерация по тексту" {
-		msgText := "Неизвестная команда."
-		SendMessage(user, msgText, buttons_style, "")
-		return
+	switch text {
+	case "Изменить текст запроса":
+		SendMessage(user, "Введите свой запрос:", button_RemoveKeyboard, "")
+		user.Path = "kandinsky/text"
+	case "Выбрать другой стиль":
+		SendMessage(user, "Выберите стиль, в котором генерировать изображение.", buttons_kandStyles, "")
+		user.Path = "kandinsky/text/style"
+	default:
+		// Предполагаем, что там новый вопрос к загруженным картинкам
+		kand_text(user, text)
 	}
-
-	kand_start(user)
 
 }
 
@@ -100,8 +91,6 @@ func SendRequestToKandinsky(text string, style string, chatid int64) (result str
 
 	<-delay_Kandinsky
 
-	//	_, callerFile, _, _ := runtime.Caller(0)
-	//	dir := strings.ReplaceAll(filepath.Dir(callerFile), "\\", "/")
 	scriptPath := WorkDir + "/scripts/generate_image.py"
 	dataFolder := WorkDir + "/data"
 

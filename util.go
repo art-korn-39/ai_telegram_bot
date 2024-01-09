@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -17,20 +16,6 @@ import (
 
 var WorkDir string //C:/DEV/GO/ai_telegram_bot
 
-type config struct {
-	TelegramBotToken  string
-	OpenAIToken       string
-	GeminiKey         string
-	DailyLimitTokens  int
-	DB_name           string
-	DB_host           string
-	DB_port           int
-	DB_user           string
-	DB_password       string
-	CheckSubscription bool
-	WhiteList         []string
-}
-
 var (
 	delay_upd            = time.Tick(time.Millisecond * 10)
 	delay_ChatGPT        = time.Tick(time.Second * 15 / 10) // 40 RPM
@@ -42,27 +27,6 @@ var (
 func init() {
 	_, callerFile, _, _ := runtime.Caller(0)
 	WorkDir = strings.ReplaceAll(filepath.Dir(callerFile), "\\", "/")
-}
-
-func LoadConfig() {
-
-	log.Println("Version: " + Version)
-
-	file, err := os.OpenFile("config.txt", os.O_RDONLY, 0600)
-	if err != nil {
-		panic(err)
-	}
-	defer file.Close()
-
-	b, err := io.ReadAll(file)
-	if err != nil {
-		panic(err)
-	}
-
-	json.Unmarshal(b, &Cfg)
-
-	log.Println("Config download complete")
-
 }
 
 func MsgIsCommand(m *tgbotapi.Message) bool {
@@ -106,7 +70,7 @@ func start(user string) string {
 
 }
 
-func mapToJSON(m map[string]string) string {
+func MapToJSON(m map[string]string) string {
 
 	result, _ := json.Marshal(m)
 	return string(result)
@@ -128,7 +92,7 @@ func JSONtoMap(JSON string) map[string]string {
 func GetDurationToNextDay() time.Duration {
 
 	// тек. время по Мск
-	now := time.Now().UTC().Add(3 * time.Hour)
+	now := MskTimeNow()
 
 	// добавили сутки
 	tomorrow := now.Add(time.Hour * 24)
@@ -141,5 +105,18 @@ func GetDurationToNextDay() time.Duration {
 	duration := time.Until(startDay) - (time.Hour * 3)
 
 	return duration
+
+}
+
+func CreateFile(filename string, data io.Reader) error {
+
+	outFile, _ := os.Create(filename)
+	defer outFile.Close()
+	_, err := io.Copy(outFile, data) //res = io.ReadClose
+	if err != nil {
+		return err
+	}
+
+	return nil
 
 }

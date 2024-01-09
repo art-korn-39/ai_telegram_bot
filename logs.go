@@ -7,14 +7,6 @@ import (
 	"time"
 )
 
-// писать логи в БД
-// date | chat_id | author (username/bot/ai) | path | level (info/warning/error) | text
-
-//echo "Write ChatID:"
-//read chat_id
-//psql
-//select distinct username from operations where chat_id = $chat_id;
-
 type LevelOfLog int32
 
 const (
@@ -53,7 +45,7 @@ func NewLog(u *UserInfo, name string, level LevelOfLog, text string) Log {
 	}
 
 	return Log{
-		Date:   time.Now().UTC().Add(3 * time.Hour),
+		Date:   MskTimeNow(),
 		ChatID: chatid,
 		Author: author,
 		Path:   path,
@@ -75,7 +67,7 @@ func WriteIntoFile(values ...any) {
 
 func FinishGorutine(u *UserInfo, text string, main bool) {
 
-	timeNow := time.Now().UTC().Add(3 * time.Hour).Format(time.DateTime)
+	timeNow := MskTimeNow().Format(time.DateTime)
 	if r := recover(); r != nil {
 
 		text := "text: " + text + "\n" + "Error: " + fmt.Sprint(r)

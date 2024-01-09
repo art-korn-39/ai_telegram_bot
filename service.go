@@ -5,6 +5,7 @@ import (
 	"slices"
 	"sort"
 	"strings"
+	"time"
 	"unicode"
 
 	"github.com/sashabaranov/go-openai"
@@ -109,12 +110,8 @@ func gptGetVoice(voice string) (v openai.SpeechVoice, isError bool) {
 
 }
 
-// func SpecialCommand(cmd string) bool {
+func MskTimeNow() time.Time {
 
-// 	if slices.Contains(SpecialCMD, strings.ToLower(cmd)) {
-// 		return true
-// 	}
+	return time.Now().UTC().Add(3 * time.Hour)
 
-// 	return false
-
-// }
+}

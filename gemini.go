@@ -27,26 +27,6 @@ var (
 	model_Gemini  *genai.GenerativeModel
 )
 
-var (
-	buttons_geminiTypes = tgbotapi.NewReplyKeyboard(
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("Начать диалог"),
-			tgbotapi.NewKeyboardButton("Отправить картинку с текстом"),
-		),
-	)
-	buttons_geminiNewgen = tgbotapi.NewReplyKeyboard(
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("Изменить текст вопроса"),
-			tgbotapi.NewKeyboardButton("Загрузить новые изображения"),
-			tgbotapi.NewKeyboardButton("Начать диалог"),
-		),
-	)
-	buttons_geminiEndDialog = tgbotapi.NewReplyKeyboard(
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("Завершить диалог")),
-	)
-)
-
 func NewConnectionGemini() {
 	ctx_Gemini = context.Background()
 	client_Gemini, _ = genai.NewClient(ctx_Gemini, option.WithAPIKey(Cfg.GeminiKey))
@@ -63,7 +43,7 @@ func gen_start(user *UserInfo) {
 	SendMessage(user, msgText, button_RemoveKeyboard, "")
 
 	msgText = `Выберите один из предложенных вариантов:`
-	SendMessage(user, msgText, buttons_geminiTypes, "")
+	SendMessage(user, msgText, buttons_genTypes, "")
 
 	user.Path = "gemini/type"
 
@@ -74,7 +54,7 @@ func gen_type(user *UserInfo, text string) {
 
 	switch text {
 	case "Начать диалог":
-		SendMessage(user, "Привет! Чем могу помочь?", buttons_geminiEndDialog, "")
+		SendMessage(user, "Привет! Чем могу помочь?", buttons_genEndDialog, "")
 		user.Path = "gemini/type/dialog"
 	case "Отправить картинку с текстом":
 		SendMessage(user, "Загрузите одну или несколько картинок", button_RemoveKeyboard, "")
@@ -91,7 +71,7 @@ func gen_dialog(user *UserInfo, text string) {
 
 	if text == "Завершить диалог" {
 		user.Messages_Gemini = []*genai.Content{}
-		SendMessage(user, `Выберите один из предложенных вариантов:`, buttons_geminiTypes, "")
+		SendMessage(user, `Выберите один из предложенных вариантов:`, buttons_genTypes, "")
 		user.Path = "gemini/type"
 		return
 	}
@@ -136,7 +116,6 @@ func gen_dialog(user *UserInfo, text string) {
 
 		// Отправляем сообщение и завершаем процедуру если получили ошибку в ответ
 		if err != nil {
-			//SendMessage(user, msgText, buttons_geminiEndDialog, "")
 			SendMessage(user, msgText, nil, "")
 			return
 		}
@@ -145,7 +124,6 @@ func gen_dialog(user *UserInfo, text string) {
 	if resp.Candidates[0].Content == nil {
 		Logs <- NewLog(user, "gemini", Error, "resp.Candidates[0].Content = nil")
 		msgText = "Не удалось получить ответ от сервиса. Попробуйте изменить текст запроса."
-		//SendMessage(user, msgText, buttons_geminiEndDialog, "")
 		SendMessage(user, msgText, nil, "")
 		return
 	}
@@ -170,7 +148,6 @@ func gen_dialog(user *UserInfo, text string) {
 	user.Messages_Gemini = history
 
 	msgText = string(result)
-	//SendMessage(user, msgText, buttons_geminiEndDialog, "")
 	SendMessage(user, msgText, nil, "")
 
 }
@@ -279,7 +256,7 @@ func gen_imgtext(user *UserInfo, text string) {
 	if err != nil {
 		Logs <- NewLog(user, "gemini{img}", Error, err.Error())
 		msgText := "Не удалось получить ответ от сервиса. Попробуйте изменить текст запроса или использовать другие изображения."
-		SendMessage(user, msgText, buttons_geminiNewgen, "")
+		SendMessage(user, msgText, buttons_genNewgen, "")
 		user.Path = "gemini/type/image/text/newgen"
 		return
 	}
@@ -287,14 +264,14 @@ func gen_imgtext(user *UserInfo, text string) {
 	if resp.Candidates[0].Content == nil {
 		Logs <- NewLog(user, "gemini{img}", Error, "resp.Candidates[0].Content = nil")
 		msgText := "Не удалось получить ответ от сервиса. Попробуйте изменить текст запроса или использовать другие изображения."
-		SendMessage(user, msgText, buttons_geminiNewgen, "")
+		SendMessage(user, msgText, buttons_genNewgen, "")
 		user.Path = "gemini/type/image/text/newgen"
 		return
 	}
 
 	result := resp.Candidates[0].Content.Parts[0].(genai.Text)
 
-	SendMessage(user, string(result), buttons_geminiNewgen, "")
+	SendMessage(user, string(result), buttons_genNewgen, "")
 
 	user.Path = "gemini/type/image/text/newgen"
 
@@ -313,7 +290,7 @@ func gen_imgtext_newgen(user *UserInfo, text string) {
 		user.Path = "gemini/type/image"
 	case "Начать диалог":
 		user.DeleteImages() // на всякий почистим, если что-то осталось
-		SendMessage(user, "Привет! Чем могу помочь?", buttons_geminiEndDialog, "")
+		SendMessage(user, "Привет! Чем могу помочь?", buttons_genEndDialog, "")
 		user.Path = "gemini/type/dialog"
 	default:
 		// Предполагаем, что там новый вопрос к загруженным картинкам

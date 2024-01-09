@@ -11,7 +11,7 @@ import (
 // art39 : 403059287
 
 const (
-	Version       = "2.1.1"
+	Version       = "2.1.4"
 	ChannelChatID = -1001997602646
 	ChannelURL    = "https://t.me/+6ZMACWRgFdRkNGEy"
 )
@@ -141,7 +141,6 @@ func ValidMessage(upd *tgbotapi.Update) bool {
 			From: upd.CallbackQuery.From,
 			Text: upd.CallbackQuery.Data,
 			Chat: upd.CallbackQuery.Message.Chat,
-			//Date: upd.CallbackQuery.Message.Date,
 			Date: int(time.Now().Unix()),
 		}
 		upd.Message = &Message
@@ -165,7 +164,7 @@ func HandleMessage(u *UserInfo, m *tgbotapi.Message) {
 	// 3. Формируем ответ
 	switch u.Path {
 	case "start":
-		SendMessage(u, start(m.From.FirstName), buttons_start, "HTML")
+		SendMessage(u, start(m.From.FirstName), buttons_Models, "HTML")
 
 	case "gemini":
 		gen_start(u)
@@ -204,16 +203,16 @@ func HandleMessage(u *UserInfo, m *tgbotapi.Message) {
 		gpt_type(u, m.Text)
 
 	case "chatgpt/type/dialog":
-		gpt_dialog(u, m.Text, true)
+		gpt_dialog(u, m.Text)
 
-	case "chatgpt/type/audio_text":
-		gpt_audio_text(u, m.Text)
+	case "chatgpt/type/speech_text":
+		gpt_speech_text(u, m.Text)
 
-	case "chatgpt/type/audio_text/voice":
-		gpt_speech(u, m.Text)
+	case "chatgpt/type/speech_text/voice":
+		gpt_speech_voice(u, m.Text)
 
-	case "chatgpt/type/audio_text/voice/newgen":
-		gpt_audio_newgen(u, m.Text)
+	case "chatgpt/type/speech_text/voice/newgen":
+		gpt_speech_newgen(u, m.Text)
 
 	default:
 		if slices.Contains(admins, u.Username) {
@@ -223,9 +222,11 @@ func HandleMessage(u *UserInfo, m *tgbotapi.Message) {
 			case "updconf":
 				LoadConfig()
 				SendMessage(u, "Config updated.", button_RemoveKeyboard, "")
+			default:
+				SendMessage(u, "Не выбрана нейросеть для обработки запроса.", buttons_Models, "")
 			}
 		} else {
-			SendMessage(u, "Не выбрана нейросеть для обработки запроса.", buttons_start, "")
+			SendMessage(u, "Не выбрана нейросеть для обработки запроса.", buttons_Models, "")
 		}
 	}
 

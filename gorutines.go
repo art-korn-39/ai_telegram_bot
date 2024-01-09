@@ -40,19 +40,6 @@ func ClearTokensEveryDay() {
 
 	for {
 
-		// // тек. время по Мск
-		// now := time.Now().UTC().Add(3 * time.Hour)
-
-		// // добавили сутки
-		// tomorrow := now.Add(time.Hour * 24)
-
-		// // округлили до начала дня
-		// startDay := tomorrow.Truncate(time.Hour * 24)
-
-		// // сколько времени до след. итерации
-		// // т.к. берется текущее время в UTC, то вычитаем 3 часа
-		// duration := time.Until(startDay) - (time.Hour * 3)
-
 		duration := GetDurationToNextDay()
 
 		fmt.Println("до след. итерации часов:", duration.Hours())
@@ -62,7 +49,7 @@ func ClearTokensEveryDay() {
 
 		// Очистка токенов у пользователей
 		for _, u := range ListOfUsers {
-			u.TokensUsed_ChatGPT = 0
+			u.Tokens_used_gpt = 0
 		}
 
 		SQL_SaveUserStates()

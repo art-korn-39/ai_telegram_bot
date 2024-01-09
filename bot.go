@@ -47,6 +47,17 @@ func SendMessage(user *UserInfo, text string, ReplyMarkup any, ParseMod string) 
 
 }
 
+func SendAudioMessage(user *UserInfo, filename string, caption string, ReplyMarkup any) {
+
+	Message := tgbotapi.NewAudioUpload(user.ChatID, filename)
+	Message.Caption = caption
+	Message.ReplyMarkup = ReplyMarkup
+	Bot.Send(Message)
+
+	Logs <- NewLog(user, "bot", Info, filename)
+
+}
+
 func DownloadFile(FileID, name string) (string, error) {
 
 	dataFolder := WorkDir + "/data"

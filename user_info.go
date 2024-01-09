@@ -11,17 +11,17 @@ import (
 )
 
 type UserInfo struct {
-	Username           string
-	ChatID             int64
-	IsRunning          bool
-	Path               string
-	Options            map[string]string
-	Messages_ChatGPT   []openai.ChatCompletionMessage
-	Messages_Gemini    []*genai.Content
-	Images_Gemini      map[int]string // удалять не забыть
-	TokensUsed_ChatGPT int
-	Mutex              sync.Mutex
-	WG                 sync.WaitGroup
+	Username         string
+	ChatID           int64
+	IsRunning        bool
+	Path             string
+	Options          map[string]string
+	Messages_ChatGPT []openai.ChatCompletionMessage
+	Messages_Gemini  []*genai.Content
+	Images_Gemini    map[int]string // удалять не забыть
+	Tokens_used_gpt  int
+	Mutex            sync.Mutex
+	WG               sync.WaitGroup
 }
 
 func NewUserInfo(u *tgbotapi.User, id int64) *UserInfo {
@@ -70,16 +70,8 @@ func AccessIsAllowed(upd tgbotapi.Update, u *UserInfo) bool {
 	if !(chatMember.IsCreator() ||
 		chatMember.IsAdministrator() ||
 		chatMember.IsMember()) && upd.Message.Text != "/start" {
-
-		var button = tgbotapi.NewInlineKeyboardMarkup(
-			tgbotapi.NewInlineKeyboardRow(
-				tgbotapi.NewInlineKeyboardButtonURL("✅Подписаться", ChannelURL),
-			),
-		)
-
 		msgText := "Для использования бота необходимо подписаться на канал👇"
-		SendMessage(u, msgText, button, "")
-
+		SendMessage(u, msgText, buttons_Subscribe, "")
 		result = false
 	}
 
