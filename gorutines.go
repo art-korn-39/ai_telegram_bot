@@ -89,7 +89,7 @@ func Kandinsky_CheckModelID() {
 
 		res, err := http.DefaultClient.Do(req)
 		if err != nil {
-			Logs <- NewLog(nil, "kandinsky", 1, "Не удалось получить model_id")
+			Logs <- NewLog(nil, "kandinsky", Error, "Не удалось получить model_id")
 			return
 		}
 		defer res.Body.Close()
@@ -100,7 +100,7 @@ func Kandinsky_CheckModelID() {
 
 		kand_Model_id = strconv.Itoa(int(dat[0]["id"].(float64)))
 
-		Logs <- NewLog(nil, "kandinsky", 1, "Значение model_id обновлено {"+kand_Model_id+"}")
+		Logs <- NewLog(nil, "kandinsky", Info, "Значение model_id обновлено {"+kand_Model_id+"}")
 
 		<-delay
 
