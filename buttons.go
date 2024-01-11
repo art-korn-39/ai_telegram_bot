@@ -15,8 +15,8 @@ var (
 	buttons_Models = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton("Gemini"),
-			tgbotapi.NewKeyboardButton("Kandinsky"),
 			tgbotapi.NewKeyboardButton("ChatGPT"),
+			tgbotapi.NewKeyboardButton("Kandinsky"),
 		),
 	)
 

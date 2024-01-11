@@ -56,7 +56,7 @@ func ClearTokensEveryDay() {
 
 		duration := GetDurationToNextDay()
 
-		fmt.Println("до след. итерации часов:", duration.Hours())
+		fmt.Printf("Следующая операция по очистке токенов через: %f ч.\n", duration.Hours())
 
 		// Ожидание до начала след. дня (Мск 00:00)
 		<-time.After(duration)
@@ -67,7 +67,7 @@ func ClearTokensEveryDay() {
 		}
 
 		SQL_SaveUserStates()
-		Logs <- NewLog(nil, "System", Info, "tokens = 0")
+		Logs <- NewLog(nil, "System", Info, "Счетчик использованных токенов очищен")
 
 	}
 
@@ -82,25 +82,42 @@ func Kandinsky_CheckModelID() {
 	for {
 
 		url := "https://api-key.fusionbrain.ai/key/api/v1/models"
-		req, _ := http.NewRequest(http.MethodGet, url, nil)
+		req, err := http.NewRequest(http.MethodGet, url, nil)
+		if err != nil {
+			Logs <- NewLog(nil, "kandinsky", Error, "Не удалось получить model_id {1}")
+			Logs <- NewLog(nil, "kandinsky", Error, err.Error())
+			return
+		}
 
 		req.Header.Add("X-Key", "Key "+Cfg.Kandinsky_Key)
 		req.Header.Add("X-Secret", "Secret "+Cfg.Kandinsky_Secret)
 
 		res, err := http.DefaultClient.Do(req)
 		if err != nil {
-			Logs <- NewLog(nil, "kandinsky", Error, "Не удалось получить model_id")
+			Logs <- NewLog(nil, "kandinsky", Error, "Не удалось получить model_id {2}")
+			Logs <- NewLog(nil, "kandinsky", Error, err.Error())
 			return
 		}
 		defer res.Body.Close()
 
-		resBytes, _ := io.ReadAll(res.Body)
+		resBytes, err := io.ReadAll(res.Body)
+		if err != nil {
+			Logs <- NewLog(nil, "kandinsky", Error, "Не удалось получить model_id {3}")
+			Logs <- NewLog(nil, "kandinsky", Error, err.Error())
+			return
+		}
+
 		var dat []map[string]any
-		json.Unmarshal(resBytes, &dat)
+		err = json.Unmarshal(resBytes, &dat)
+		if err != nil {
+			Logs <- NewLog(nil, "kandinsky", Error, "Не удалось получить model_id {4}")
+			Logs <- NewLog(nil, "kandinsky", Error, err.Error())
+			return
+		}
 
 		kand_Model_id = strconv.Itoa(int(dat[0]["id"].(float64)))
 
-		Logs <- NewLog(nil, "kandinsky", Info, "Значение model_id обновлено {"+kand_Model_id+"}")
+		Logs <- NewLog(nil, "kandinsky", Info, "Значение model_id обновлено ["+kand_Model_id+"]")
 
 		<-delay
 

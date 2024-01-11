@@ -11,7 +11,7 @@ import (
 // art39 : 403059287
 
 const (
-	Version       = "2.1.7"
+	Version       = "2.1.8"
 	ChannelChatID = -1001997602646
 	ChannelURL    = "https://t.me/+6ZMACWRgFdRkNGEy"
 )
@@ -24,7 +24,6 @@ var (
 	ListOfUsers     = map[int64]*UserInfo{}
 	Models          = []string{"gemini", "kandinsky", "chatgpt"}
 	admins          = []string{"Art_Korn_39", "MnNik0"}
-	SpecialCMD      = []string{"gpt_samples"}
 	recoveryChatID  = []int64{}
 	UserInfoChanged = false
 )
@@ -140,6 +139,7 @@ func ValidMessage(upd *tgbotapi.Update) bool {
 		}
 	}
 
+	// Переносим данные из CallbackQuery в Message
 	if upd.Message == nil && upd.CallbackQuery != nil {
 		Message := tgbotapi.Message{
 			From: upd.CallbackQuery.From,

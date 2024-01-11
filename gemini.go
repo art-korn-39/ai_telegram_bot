@@ -12,6 +12,9 @@ import (
 	"google.golang.org/api/option"
 )
 
+//https://ai.google.dev/tutorials/go_quickstart?hl=ru
+//https://ai.google.dev/models/gemini?hl=ru
+
 // - FinishReasonSafety означает, что потенциальное содержимое было помечено по соображениям безопасности.
 // - BlockReasonSafety означает, что промт был заблокирован по соображениям безопасности. Вы можете проверить
 // `safety_ratings`, чтобы понять, какая категория безопасности заблокировала его.
@@ -36,11 +39,11 @@ func NewConnectionGemini() {
 // После команды "/gemini" или при вводе текста = "gemini"
 func gen_start(user *UserInfo) {
 
-	msgText := `Вас приветствует Gemini Pro от компании Google 🚀
-На текущий момент я умею вести диалог и отвечать на вопросы по картинкам.
-В отличии от моего конкурента (ChatGPT) - у меня нет ограничений на использование, так что можешь развлекаться сколько пожелаешь 😎`
+	msgText := `Вас приветствует Gemini Pro от компании Google 🚀`
+	//На текущий момент я умею вести диалог и отвечать на вопросы по картинкам.`
+	//В отличии от моего конкурента (ChatGPT) - у меня нет ограничений на использование, так что можешь развлекаться сколько пожелаешь 😎`
 
-	SendMessage(user, msgText, button_RemoveKeyboard, "")
+	SendMessage(user, msgText, nil, "")
 
 	msgText = `Выберите один из предложенных вариантов:`
 	SendMessage(user, msgText, buttons_genTypes, "")
@@ -178,7 +181,7 @@ func gen_image(user *UserInfo, message *tgbotapi.Message) {
 	filename, err := DownloadFile(photos[len(photos)-1].FileID, name)
 	if err != nil {
 		Logs <- NewLog(user, "gemini", Error, err.Error())
-		msgText := "Не удалось загрузить, попробуйте ещё раз."
+		msgText := "Не удалось загрузить изображение, попробуйте ещё раз."
 		SendMessage(user, msgText, button_RemoveKeyboard, "")
 		user.WG.Done()
 		return
@@ -235,6 +238,8 @@ func gen_imgtext(user *UserInfo, text string) {
 		SendMessage(user, msgText, button_RemoveKeyboard, "")
 		return
 	}
+
+	<-delay_Gemini
 
 	Operation := SQL_NewOperation(user, "gemini", "img", text)
 	SQL_AddOperation(Operation)

@@ -28,7 +28,7 @@ func kand_start(user *UserInfo) {
 func kand_text(user *UserInfo, text string) {
 
 	if utf8.RuneCountInString(text) >= 900 {
-		SendMessage(user, "Текст описания картинки не должен превышать 1000 символов.", nil, "")
+		SendMessage(user, "Текст описания картинки не должен превышать 900 символов.", nil, "")
 		return
 	}
 
@@ -56,6 +56,8 @@ func kand_style(user *UserInfo, text string) {
 
 	msgText := "Запущена генерация картинки, среднее время выполнения 25-30 секунд."
 	SendMessage(user, msgText, button_RemoveKeyboard, "")
+
+	<-delay_Kandinsky
 
 	Operation := SQL_NewOperation(user, "kandinsky", text, inputText)
 	SQL_AddOperation(Operation)
@@ -97,8 +99,6 @@ func kand_newgen(user *UserInfo, text string) {
 // Максимальный размер текстового описания - 1000 символов.
 // "censored": true (возвращая ошибку, когда запрос или изображение не соответствует)
 func SendRequestToKandinsky(text string, style string, user *UserInfo) (result string, err error) {
-
-	<-delay_Kandinsky
 
 	scriptPath := WorkDir + "/scripts/generate_image.py"
 	dataFolder := WorkDir + "/data"

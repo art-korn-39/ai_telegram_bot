@@ -25,7 +25,7 @@ var (
 func gpt_start(user *UserInfo) {
 
 	msgText := gpt_WelcomeTextMessage(user)
-	SendMessage(user, msgText, button_RemoveKeyboard, "HTML")
+	SendMessage(user, msgText, nil, "HTML")
 
 	msgText = `Выберите один из предложенных вариантов:`
 	SendMessage(user, msgText, buttons_gptTypes, "")
@@ -44,7 +44,7 @@ func gpt_type(user *UserInfo, text string) {
 	switch text {
 	case "Начать диалог":
 		msgText := `Запущен диалог с СhatGPT, чтобы очистить контекст от предыдущих сообщений - нажмите кнопку "Очистить контекст". Это позволяет сократить расход токенов.`
-		SendMessage(user, msgText, button_RemoveKeyboard, "")
+		SendMessage(user, msgText, nil, "")
 		SendMessage(user, "Привет! Чем могу помочь?", buttons_gptClearContext, "")
 		user.Path = "chatgpt/type/dialog"
 	case "Сгенерировать аудио из текста":
