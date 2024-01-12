@@ -64,6 +64,7 @@ func ClearTokensEveryDay() {
 		// Очистка токенов у пользователей
 		for _, u := range ListOfUsers {
 			u.Tokens_used_gpt = 0
+			u.Requests_today_gen = 0
 		}
 
 		SQL_SaveUserStates()

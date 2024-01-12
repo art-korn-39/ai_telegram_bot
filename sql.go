@@ -94,7 +94,7 @@ func SQL_LoadUserStates() {
 
 	stmt := `
 	SELECT
-		user_name, chat_id, path, options, tokens_used_gpt, language 
+		user_name, chat_id, path, options, tokens_used_gpt, language, requests_today_gen 
 	FROM 
 		user_states
 	`
@@ -108,7 +108,11 @@ func SQL_LoadUserStates() {
 	for rows.Next() {
 		var u UserInfo
 		var options string
-		if err := rows.Scan(&u.Username, &u.ChatID, &u.Path, &options, &u.Tokens_used_gpt, &u.Language); err != nil {
+		if err := rows.Scan(
+			&u.Username, &u.ChatID,
+			&u.Path, &options,
+			&u.Tokens_used_gpt, &u.Language,
+			&u.Requests_today_gen); err != nil {
 			Logs <- NewLog(nil, "SQL{LoadUserStates}", Error, err.Error())
 		}
 		u.Options = JSONtoMap(options)
@@ -140,12 +144,12 @@ func SQL_SaveUserStates() {
 		return
 	}
 
-	stmt = `INSERT INTO user_states (user_name, chat_id, path, options, tokens_used_gpt, language)
-	VALUES ($1, $2, $3, $4, $5, $6)`
+	stmt = `INSERT INTO user_states (user_name, chat_id, path, options, tokens_used_gpt, language, requests_today_gen)
+	VALUES ($1, $2, $3, $4, $5, $6, $7)`
 
 	for _, v := range ListOfUsers {
 		optionsJSON := MapToJSON(v.Options)
-		_, err = tx.Exec(stmt, v.Username, v.ChatID, v.Path, optionsJSON, v.Tokens_used_gpt, v.Language)
+		_, err = tx.Exec(stmt, v.Username, v.ChatID, v.Path, optionsJSON, v.Tokens_used_gpt, v.Language, v.Requests_today_gen)
 		if err != nil {
 			Logs <- NewLog(nil, "SQL{SaveUserStates}", Error, err.Error())
 			return

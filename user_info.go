@@ -11,18 +11,19 @@ import (
 )
 
 type UserInfo struct {
-	Username         string
-	ChatID           int64
-	Language         string
-	IsRunning        bool
-	Path             string
-	Options          map[string]string
-	Messages_ChatGPT []openai.ChatCompletionMessage
-	Messages_Gemini  []*genai.Content
-	Images_Gemini    map[int]string // удалять не забыть
-	Tokens_used_gpt  int
-	Mutex            sync.Mutex
-	WG               sync.WaitGroup
+	Username           string
+	ChatID             int64
+	Language           string
+	IsRunning          bool
+	Path               string
+	Options            map[string]string
+	Messages_ChatGPT   []openai.ChatCompletionMessage
+	Messages_Gemini    []*genai.Content
+	Images_Gemini      map[int]string // удалять не забыть
+	Tokens_used_gpt    int
+	Requests_today_gen int
+	Mutex              sync.Mutex
+	WG                 sync.WaitGroup
 }
 
 func NewUserInfo(m *tgbotapi.Message) *UserInfo {

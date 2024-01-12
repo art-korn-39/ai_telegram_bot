@@ -1,7 +1,9 @@
 data/
+icons/
 *.txt
 config.txt
 config_debug.txt
 config_prod.txt
 errors.txt
 *.log
+*.exe

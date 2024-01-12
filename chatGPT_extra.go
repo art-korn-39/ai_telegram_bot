@@ -19,7 +19,7 @@ func gpt_WelcomeTextMessage(u *UserInfo) string {
 	return fmt.Sprintf(`Вас приветствует ChatGPT 3.5 Turbo 🤖
 
 Текущий остаток токенов: <b>%d</b> <i>(обновится через: %d ч. %d мин.)</i>`,
-		max(Cfg.DailyLimitTokens-u.Tokens_used_gpt, 0),
+		max(Cfg.TPD_gpt-u.Tokens_used_gpt, 0),
 		hours,
 		minutes)
 
@@ -98,12 +98,13 @@ func gpt_SendSpeechSamples(user *UserInfo) {
 
 func gpt_DailyLimitOfTokensIsOver(u *UserInfo) bool {
 
-	if u.Tokens_used_gpt >= Cfg.DailyLimitTokens {
+	if u.Tokens_used_gpt >= Cfg.TPD_gpt {
 		duration := GetDurationToNextDay()
 		hours := int(duration.Hours())
 		minutes := int(duration.Minutes()) - hours*60
 		msgText := fmt.Sprintf("Превышен дневной лимит токенов, дождитесь обновления лимита (%d ч. %d мин.) или воспользуйтесь другой нейросетью.", hours, minutes)
-		SendMessage(u, msgText, buttons_gptTypes, "")
+		SendMessage(u, msgText, buttons_Models, "")
+		u.Path = "start"
 		return true
 	}
 

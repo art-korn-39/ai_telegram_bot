@@ -11,7 +11,7 @@ import (
 // art39 : 403059287
 
 const (
-	Version       = "2.1.8"
+	Version       = "2.1.9"
 	ChannelChatID = -1001997602646
 	ChannelURL    = "https://t.me/+6ZMACWRgFdRkNGEy"
 )
@@ -74,6 +74,8 @@ func main() {
 
 		go func(upd tgbotapi.Update) {
 
+			// Пустые сообщения и сообщения от ботов - пропускаем
+			// Если это CallbackQuery, то помещаем его в Message
 			if !ValidMessage(&upd) {
 				return
 			}
@@ -89,12 +91,8 @@ func main() {
 			// Запишем panic если горутина завершилась с ошибкой
 			defer FinishGorutine(User, upd.Message.Text, false)
 
-			// Если сообщение было больше 10 минут назад, то один раз отвечаем
-			if time.Since(upd.Message.Time()).Seconds() > 600 {
-				if !slices.Contains(recoveryChatID, User.ChatID) {
-					recoveryChatID = append(recoveryChatID, User.ChatID)
-					SendMessage(User, "Функциональность бота восстановлена. Приносим извинения за неудобства.", nil, "")
-				}
+			// В случае восстановления после простоя - старые сообщения не обрабатываем
+			if IsRecovery(upd, User) {
 				return
 			}
 
@@ -154,12 +152,31 @@ func ValidMessage(upd *tgbotapi.Update) bool {
 
 }
 
+func IsRecovery(upd tgbotapi.Update, User *UserInfo) bool {
+
+	// Если сообщение было больше 100 секунд назад, то один раз отвечаем
+	if time.Since(upd.Message.Time()).Seconds() > 100 {
+		if !slices.Contains(recoveryChatID, User.ChatID) {
+			recoveryChatID = append(recoveryChatID, User.ChatID)
+			if Cfg.Debug {
+				SendMessage(User, "Этот бот предназначен для тестирования и отладки, полностью рабочий и бесплатный находится здесь: @AI_free_chat_bot", nil, "")
+			} else {
+				SendMessage(User, "Функциональность бота восстановлена. Приносим извинения за неудобства.", nil, "")
+			}
+		}
+		return true
+	}
+
+	return false
+
+}
+
 func HandleMessage(u *UserInfo, m *tgbotapi.Message) {
 
 	// 1. Определяем команду
 	cmd := MsgCommand(m)
 
-	// 2. Устанавливаем базовый путь и очищаем данные
+	// 2. Устанавливаем базовый путь и очищаем временные данные пользователя
 	if cmd != "" {
 		u.Path = cmd
 		u.ClearUserData()

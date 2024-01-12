@@ -102,7 +102,7 @@ func gpt_speech_text(user *UserInfo, text string) {
 	}
 
 	length := utf8.RuneCountInString(text)
-	if length*20 > (Cfg.DailyLimitTokens - user.Tokens_used_gpt) {
+	if length*20 > (Cfg.TPD_gpt - user.Tokens_used_gpt) {
 		msgText := "Недостаточно токенов, укажите текст меньшей длины."
 		SendMessage(user, msgText, button_RemoveKeyboard, "")
 		return

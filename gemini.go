@@ -15,14 +15,11 @@ import (
 //https://ai.google.dev/tutorials/go_quickstart?hl=ru
 //https://ai.google.dev/models/gemini?hl=ru
 
+// Gemini_APIKEY = "AIzaSyC0myz4bPIDyx6pPtW0PBZqmJW37A5VJ_k"
+
 // - FinishReasonSafety означает, что потенциальное содержимое было помечено по соображениям безопасности.
 // - BlockReasonSafety означает, что промт был заблокирован по соображениям безопасности. Вы можете проверить
 // `safety_ratings`, чтобы понять, какая категория безопасности заблокировала его.
-
-const (
-	//Gemini_APIKEY = "AIzaSyC0myz4bPIDyx6pPtW0PBZqmJW37A5VJ_k"
-	URL = "https://generativelanguage.googleapis.com/v1beta3/models/text-bison-001:generateText"
-)
 
 var (
 	ctx_Gemini    context.Context
@@ -55,6 +52,10 @@ func gen_start(user *UserInfo) {
 // После выбора пользователем типа взаимодействия
 func gen_type(user *UserInfo, text string) {
 
+	if gen_DailyLimitOfRequestsIsOver(user) {
+		return
+	}
+
 	switch text {
 	case "Начать диалог":
 		SendMessage(user, "Привет! Чем могу помочь?", buttons_genEndDialog, "")
@@ -79,7 +80,13 @@ func gen_dialog(user *UserInfo, text string) {
 		return
 	}
 
+	if gen_DailyLimitOfRequestsIsOver(user) {
+		return
+	}
+
 	<-delay_Gemini
+
+	user.Requests_today_gen++
 
 	Operation := SQL_NewOperation(user, "gemini", "dialog", text)
 	SQL_AddOperation(Operation)
@@ -158,6 +165,10 @@ func gen_dialog(user *UserInfo, text string) {
 // После отправки картинок пользователем
 func gen_image(user *UserInfo, message *tgbotapi.Message) {
 
+	if gen_DailyLimitOfRequestsIsOver(user) {
+		return
+	}
+
 	// Проверяем наличие картинок в сообщении
 	if message.Photo == nil {
 		msgText := "Загрузите одну или несколько картинок."
@@ -232,6 +243,10 @@ func gen_image(user *UserInfo, message *tgbotapi.Message) {
 // После ввода вопроса пользователем
 func gen_imgtext(user *UserInfo, text string) {
 
+	if gen_DailyLimitOfRequestsIsOver(user) {
+		return
+	}
+
 	// Проверяем наличие текста в сообщении
 	if text == "" {
 		msgText := "Напишите свой вопрос к загруженным изображениям."
@@ -240,6 +255,8 @@ func gen_imgtext(user *UserInfo, text string) {
 	}
 
 	<-delay_Gemini
+
+	user.Requests_today_gen++
 
 	Operation := SQL_NewOperation(user, "gemini", "img", text)
 	SQL_AddOperation(Operation)
@@ -284,6 +301,10 @@ func gen_imgtext(user *UserInfo, text string) {
 
 // После ответа пользователя на результат по вопросу и картинкам
 func gen_imgtext_newgen(user *UserInfo, text string) {
+
+	if gen_DailyLimitOfRequestsIsOver(user) {
+		return
+	}
 
 	switch text {
 	case "Изменить текст вопроса":

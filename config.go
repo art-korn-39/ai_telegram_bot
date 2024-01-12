@@ -13,13 +13,15 @@ type config struct {
 	GeminiKey         string
 	Kandinsky_Key     string
 	Kandinsky_Secret  string
-	DailyLimitTokens  int
+	TPD_gpt           int
+	RPD_gen           int
 	DB_name           string
 	DB_host           string
 	DB_port           int
 	DB_user           string
 	DB_password       string
 	CheckSubscription bool
+	Debug             bool
 	WhiteList         []string
 }
 

@@ -54,7 +54,7 @@ func kand_style(user *UserInfo, text string) {
 	user.Options["style"] = style
 	inputText := user.Options["text"]
 
-	msgText := "Запущена генерация картинки, среднее время выполнения 25-30 секунд."
+	msgText := "Запущена генерация картинки, среднее время выполнения 30-40 секунд."
 	SendMessage(user, msgText, button_RemoveKeyboard, "")
 
 	<-delay_Kandinsky
