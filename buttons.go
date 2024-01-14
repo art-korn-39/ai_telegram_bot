@@ -2,90 +2,118 @@ package main
 
 import tgbotapi "github.com/Syfaro/telegram-bot-api"
 
-var (
+type Button int
+
+const (
+	btn_RemoveKeyboard Button = iota
+	btn_Subscribe
+	btn_Models
+
+	btn_KandStyles
+	btn_KandNewgen
+
+	btn_GenTypes
+	btn_GenNewgen
+	btn_GenEndDialog
+
+	btn_GptTypes
+	btn_GptVoices
+	btn_GptClearContext
+	btn_GptSpeechNewgen
+	btn_GptSampleSpeech
+)
+
+func GetButton(btn Button, lang string) (keyboard any) {
+
+	switch btn {
+
 	//COMMON
-	button_RemoveKeyboard = tgbotapi.NewRemoveKeyboard(false)
+	case btn_RemoveKeyboard:
+		keyboard = tgbotapi.NewRemoveKeyboard(false)
 
-	buttons_Subscribe = tgbotapi.NewInlineKeyboardMarkup(
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonURL("✅Подписаться", ChannelURL),
-		),
-	)
-
-	buttons_Models = tgbotapi.NewReplyKeyboard(
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("Gemini"),
-			tgbotapi.NewKeyboardButton("ChatGPT"),
-			tgbotapi.NewKeyboardButton("Kandinsky"),
-		),
-	)
+	case btn_Subscribe:
+		keyboard = tgbotapi.NewInlineKeyboardMarkup(
+			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonURL(GetText(BtnText_Subscribe, lang), ChannelURL),
+			))
+	case btn_Models:
+		keyboard = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton("Gemini"),
+				tgbotapi.NewKeyboardButton("ChatGPT"),
+				tgbotapi.NewKeyboardButton("Kandinsky"),
+			))
 
 	//KANDINSKY
-	buttons_kandStyles = tgbotapi.NewReplyKeyboard(
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("Без стиля"),
-			tgbotapi.NewKeyboardButton("Art"),
-			tgbotapi.NewKeyboardButton("4K"),
-			tgbotapi.NewKeyboardButton("Anime"),
-		),
-	)
-	button_kandNewgen = tgbotapi.NewReplyKeyboard(
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("Изменить текст запроса"),
-			tgbotapi.NewKeyboardButton("Выбрать другой стиль"),
-		),
-	)
+	case btn_KandStyles:
+		keyboard = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton("No style"),
+				tgbotapi.NewKeyboardButton("Art"),
+				tgbotapi.NewKeyboardButton("4K"),
+				tgbotapi.NewKeyboardButton("Anime"),
+			))
+	case btn_KandNewgen:
+		keyboard = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(GetText(BtnText_ChangeQuerryText, lang)),
+				tgbotapi.NewKeyboardButton(GetText(BtnText_ChooseAnotherStyle, lang)),
+			))
 
 	//GEMINI
-	buttons_genTypes = tgbotapi.NewReplyKeyboard(
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("Начать диалог"),
-			tgbotapi.NewKeyboardButton("Отправить картинку с текстом"),
-		),
-	)
-	buttons_genNewgen = tgbotapi.NewReplyKeyboard(
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("Изменить текст вопроса"),
-			tgbotapi.NewKeyboardButton("Загрузить новые изображения"),
-			tgbotapi.NewKeyboardButton("Начать диалог"),
-		),
-	)
-	buttons_genEndDialog = tgbotapi.NewReplyKeyboard(
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("Завершить диалог")),
-	)
+	case btn_GenTypes:
+		keyboard = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(GetText(BtnText_StartDialog, lang)),
+				tgbotapi.NewKeyboardButton(GetText(BtnText_SendPictureWithText, lang)),
+			))
+	case btn_GenNewgen:
+		keyboard = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(GetText(BtnText_ChangeQuestionText, lang)),
+				tgbotapi.NewKeyboardButton(GetText(BtnText_UploadNewImages, lang)),
+				tgbotapi.NewKeyboardButton(GetText(BtnText_StartDialog, lang)),
+			))
+	case btn_GenEndDialog:
+		keyboard = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(GetText(BtnText_EndDialog, lang))))
 
-	//CHAT GPT
-	buttons_gptTypes = tgbotapi.NewReplyKeyboard(
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("Начать диалог"),
-			tgbotapi.NewKeyboardButton("Сгенерировать аудио из текста"),
-		),
-	)
-	buttons_gptVoices = tgbotapi.NewReplyKeyboard(
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("onyx"),
-			tgbotapi.NewKeyboardButton("nova"),
-			tgbotapi.NewKeyboardButton("echo"),
-			tgbotapi.NewKeyboardButton("fable"),
-		),
-	)
-	buttons_gptClearContext = tgbotapi.NewReplyKeyboard(
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("Очистить контекст"),
-			tgbotapi.NewKeyboardButton("Завершить диалог"),
-		),
-	)
-	buttons_gptSpeechNewgen = tgbotapi.NewReplyKeyboard(
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("Изменить текст"),
-			tgbotapi.NewKeyboardButton("Выбрать другой голос"),
-			tgbotapi.NewKeyboardButton("Начать диалог"),
-		),
-	)
-	buttons_gptSampleSpeech = tgbotapi.NewInlineKeyboardMarkup(
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Audio samples", "gpt_speech_samples"),
-		),
-	)
-)
+	//CHATGPT
+	case btn_GptTypes:
+		keyboard = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(GetText(BtnText_StartDialog, lang)),
+				tgbotapi.NewKeyboardButton(GetText(BtnText_GenerateAudioFromText, lang)),
+			))
+	case btn_GptVoices:
+		keyboard = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton("onyx"),
+				tgbotapi.NewKeyboardButton("nova"),
+				tgbotapi.NewKeyboardButton("echo"),
+				tgbotapi.NewKeyboardButton("fable"),
+			))
+	case btn_GptClearContext:
+		keyboard = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(GetText(BtnText_ClearContext, lang)),
+				tgbotapi.NewKeyboardButton(GetText(BtnText_EndDialog, lang)),
+			))
+	case btn_GptSpeechNewgen:
+		keyboard = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(GetText(BtnText_ChangeText, lang)),
+				tgbotapi.NewKeyboardButton(GetText(BtnText_ChooseAnotherVoice, lang)),
+				tgbotapi.NewKeyboardButton(GetText(BtnText_StartDialog, lang)),
+			))
+	case btn_GptSampleSpeech:
+		keyboard = tgbotapi.NewInlineKeyboardMarkup(
+			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData("Audio samples", "gpt_speech_samples"),
+			))
+	}
+
+	return keyboard
+
+}

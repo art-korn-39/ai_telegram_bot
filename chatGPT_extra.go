@@ -16,21 +16,10 @@ func gpt_WelcomeTextMessage(u *UserInfo) string {
 	hours := int(duration.Hours())
 	minutes := int(duration.Minutes()) - hours*60
 
-	return fmt.Sprintf(`Вас приветствует ChatGPT 3.5 Turbo 🤖
-
-Текущий остаток токенов: <b>%d</b> <i>(обновится через: %d ч. %d мин.)</i>`,
+	return fmt.Sprintf(GetText(MsgText_ChatGPTHello, u.Language),
 		max(Cfg.TPD_gpt-u.Tokens_used_gpt, 0),
 		hours,
 		minutes)
-
-	// return fmt.Sprintf(`Вас приветствует ChatGPT 3.5 Turbo 🤖
-
-	// *Каждые сутки вам начисляется <b>%d</b> токенов для использования.
-	// - 1 токен равен примерно 4 символам английского алфавита или 2 символам русского алфавита.
-	// - При создании аудио из текста расходуется приблизительно 1000 токенов на каждые 50 символов.
-
-	// Текущий остаток токенов: <b>%d</b>`, Cfg.DailyLimitTokens, max(Cfg.DailyLimitTokens-u.Tokens_used_gpt, 0))
-
 }
 
 func gpt_DialogSendMessage(user *UserInfo, text string, firstLaunch bool) {
@@ -55,7 +44,7 @@ func gpt_DialogSendMessage(user *UserInfo, text string, firstLaunch bool) {
 		// превышен лимит токенов, очищаем сообщения и отправляем запрос ещё раз
 		if strings.Contains(errString, "This model's maximum context length is 4097 tokens") && firstLaunch { //чтобы в рекурсию не уйти
 
-			SendMessage(user, "Достингут лимит в 4097 токенов, контекст диалога очищен.", nil, "")
+			SendMessage(user, GetText(MsgText_LimitOf4097TokensReached, user.Language), nil, "")
 
 			Logs <- NewLog(user, "chatgpt", Warning, "request: "+text+"\nwarning: "+errString)
 
@@ -65,7 +54,7 @@ func gpt_DialogSendMessage(user *UserInfo, text string, firstLaunch bool) {
 
 		} else {
 			Logs <- NewLog(user, "chatgpt", Error, "request: "+text+"\nerror: "+errString)
-			SendMessage(user, "Во время обработки запроса произошла ошибка. Пожалуйста, попробуйте ещё раз позже.", nil, "")
+			SendMessage(user, GetText(MsgText_ErrorWhileProcessingRequest, user.Language), nil, "")
 			return
 		}
 	}
@@ -102,8 +91,8 @@ func gpt_DailyLimitOfTokensIsOver(u *UserInfo) bool {
 		duration := GetDurationToNextDay()
 		hours := int(duration.Hours())
 		minutes := int(duration.Minutes()) - hours*60
-		msgText := fmt.Sprintf("Превышен дневной лимит токенов, дождитесь обновления лимита (%d ч. %d мин.) или воспользуйтесь другой нейросетью.", hours, minutes)
-		SendMessage(u, msgText, buttons_Models, "")
+		msgText := fmt.Sprintf(GetText(MsgText_DailyTokenLimitExceeded, u.Language), hours, minutes)
+		SendMessage(u, msgText, GetButton(btn_Models, u.Language), "")
 		u.Path = "start"
 		return true
 	}

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"time"
 
 	tgbotapi "github.com/Syfaro/telegram-bot-api"
 	"github.com/google/generative-ai-go/genai"
@@ -36,14 +35,11 @@ func NewConnectionGemini() {
 // После команды "/gemini" или при вводе текста = "gemini"
 func gen_start(user *UserInfo) {
 
-	msgText := `Вас приветствует Gemini Pro от компании Google 🚀`
-	//На текущий момент я умею вести диалог и отвечать на вопросы по картинкам.`
-	//В отличии от моего конкурента (ChatGPT) - у меня нет ограничений на использование, так что можешь развлекаться сколько пожелаешь 😎`
-
+	msgText := GetText(MsgText_GeminiHello, user.Language)
 	SendMessage(user, msgText, nil, "")
 
-	msgText = `Выберите один из предложенных вариантов:`
-	SendMessage(user, msgText, buttons_genTypes, "")
+	msgText = GetText(MsgText_SelectOption, user.Language)
+	SendMessage(user, msgText, GetButton(btn_GenTypes, user.Language), "")
 
 	user.Path = "gemini/type"
 
@@ -57,11 +53,11 @@ func gen_type(user *UserInfo, text string) {
 	}
 
 	switch text {
-	case "Начать диалог":
-		SendMessage(user, "Привет! Чем могу помочь?", buttons_genEndDialog, "")
+	case GetText(BtnText_StartDialog, user.Language):
+		SendMessage(user, GetText(MsgText_HelloCanIHelpYou, user.Language), GetButton(btn_GenEndDialog, user.Language), "")
 		user.Path = "gemini/type/dialog"
-	case "Отправить картинку с текстом":
-		SendMessage(user, "Загрузите одну или несколько картинок", button_RemoveKeyboard, "")
+	case GetText(BtnText_SendPictureWithText, user.Language):
+		SendMessage(user, GetText(MsgText_UploadImages, user.Language), GetButton(btn_RemoveKeyboard, ""), "")
 		user.Path = "gemini/type/image"
 	default:
 		gen_dialog(user, text)
@@ -73,9 +69,9 @@ func gen_type(user *UserInfo, text string) {
 // После ввода сообщения пользователем
 func gen_dialog(user *UserInfo, text string) {
 
-	if text == "Завершить диалог" {
+	if text == GetText(BtnText_EndDialog, user.Language) {
 		user.Messages_Gemini = []*genai.Content{}
-		SendMessage(user, `Выберите один из предложенных вариантов:`, buttons_genTypes, "")
+		SendMessage(user, GetText(MsgText_SelectOption, user.Language), GetButton(btn_GenTypes, user.Language), "")
 		user.Path = "gemini/type"
 		return
 	}
@@ -91,74 +87,7 @@ func gen_dialog(user *UserInfo, text string) {
 	Operation := SQL_NewOperation(user, "gemini", "dialog", text)
 	SQL_AddOperation(Operation)
 
-	var msgText string
-	cs := model_Gemini.StartChat()
-	cs.History = user.Messages_Gemini
-
-	resp, err := cs.SendMessage(ctx_Gemini, genai.Text(text))
-	if err != nil {
-		errorString := err.Error()
-		Logs <- NewLog(user, "gemini", Error, errorString)
-
-		if errorString == "blocked: candidate: FinishReasonSafety" {
-
-			// В случае данного вида ошибки - запускаем новый клиент соединения
-			NewConnectionGemini()
-			msgText = "Не удалось получить ответ от сервиса. Попробуйте изменить текст вопроса или начать новый диалог."
-
-		} else if errorString == "blocked: prompt: BlockReasonSafety" {
-
-			msgText = "Запрос был заблокирован по соображениям безопасности. Попробуйте изменить текст запроса."
-
-		} else if errorString == "googleapi: Error 500:" {
-
-			// Отправляем сообщение повторно
-			time.Sleep(time.Millisecond * 200)
-			Logs <- NewLog(user, "gemini", Error, "Повторная отправка запроса ...")
-			resp, err = cs.SendMessage(ctx_Gemini, genai.Text(text))
-			if err != nil {
-				msgText = "Произошла непредвиденная ошибка. Попробуйте позже."
-			}
-
-		} else {
-			msgText = "Произошла непредвиденная ошибка. Попробуйте позже."
-		}
-
-		// Отправляем сообщение и завершаем процедуру если получили ошибку в ответ
-		if err != nil {
-			SendMessage(user, msgText, nil, "")
-			return
-		}
-	}
-
-	if resp.Candidates[0].Content == nil {
-		Logs <- NewLog(user, "gemini", Error, "resp.Candidates[0].Content = nil")
-		msgText = "Не удалось получить ответ от сервиса. Попробуйте изменить текст запроса."
-		SendMessage(user, msgText, nil, "")
-		return
-	}
-
-	result := resp.Candidates[0].Content.Parts[0].(genai.Text)
-
-	history := append(user.Messages_Gemini,
-		&genai.Content{
-			Parts: []genai.Part{
-				genai.Text(text),
-			},
-			Role: "user",
-		},
-		&genai.Content{
-			Parts: []genai.Part{
-				genai.Text(result),
-			},
-			Role: "model",
-		},
-	)
-
-	user.Messages_Gemini = history
-
-	msgText = string(result)
-	SendMessage(user, msgText, nil, "")
+	gen_DialogSendMessage(user, text)
 
 }
 
@@ -171,8 +100,8 @@ func gen_image(user *UserInfo, message *tgbotapi.Message) {
 
 	// Проверяем наличие картинок в сообщении
 	if message.Photo == nil {
-		msgText := "Загрузите одну или несколько картинок."
-		SendMessage(user, msgText, button_RemoveKeyboard, "")
+		msgText := GetText(MsgText_UploadImages, user.Language)
+		SendMessage(user, msgText, GetButton(btn_RemoveKeyboard, ""), "")
 		return
 	}
 
@@ -192,8 +121,8 @@ func gen_image(user *UserInfo, message *tgbotapi.Message) {
 	filename, err := DownloadFile(photos[len(photos)-1].FileID, name)
 	if err != nil {
 		Logs <- NewLog(user, "gemini", Error, err.Error())
-		msgText := "Не удалось загрузить изображение, попробуйте ещё раз."
-		SendMessage(user, msgText, button_RemoveKeyboard, "")
+		msgText := GetText(MsgText_FailedLoadImages, user.Language)
+		SendMessage(user, msgText, GetButton(btn_RemoveKeyboard, ""), "")
 		user.WG.Done()
 		return
 	}
@@ -220,7 +149,7 @@ func gen_image(user *UserInfo, message *tgbotapi.Message) {
 		return
 	}
 
-	SendMessage(user, "Выполняется загрузка изображений ...", nil, "")
+	SendMessage(user, GetText(MsgText_LoadingImages, user.Language), nil, "")
 
 	// В основной горутине встаём на ожидание, чтобы остальные картинки успели загрузиться
 	user.WG.Wait()
@@ -228,13 +157,8 @@ func gen_image(user *UserInfo, message *tgbotapi.Message) {
 	user.Images_Gemini = SortMap(user.Images_Gemini)
 
 	// Просим написать запрос к ним
-	msgText := fmt.Sprintf(
-		`Загружено фотографий: %d
-Напишите свой вопрос.
-Например:
-"Кто на фотографии?"
-"Чем отличаются эти картинки?"`, len(user.Images_Gemini))
-	SendMessage(user, msgText, button_RemoveKeyboard, "")
+	msgText := fmt.Sprintf(GetText(MsgText_PhotosUploadedWriteQuestion, user.Language), len(user.Images_Gemini))
+	SendMessage(user, msgText, GetButton(btn_RemoveKeyboard, ""), "")
 
 	user.Path = "gemini/type/image/text"
 
@@ -249,8 +173,8 @@ func gen_imgtext(user *UserInfo, text string) {
 
 	// Проверяем наличие текста в сообщении
 	if text == "" {
-		msgText := "Напишите свой вопрос к загруженным изображениям."
-		SendMessage(user, msgText, button_RemoveKeyboard, "")
+		msgText := GetText(MsgText_WriteQuestionToImages, user.Language)
+		SendMessage(user, msgText, GetButton(btn_RemoveKeyboard, ""), "")
 		return
 	}
 
@@ -277,23 +201,23 @@ func gen_imgtext(user *UserInfo, text string) {
 
 	if err != nil {
 		Logs <- NewLog(user, "gemini{img}", Error, err.Error())
-		msgText := "Не удалось получить ответ от сервиса. Попробуйте изменить текст запроса или использовать другие изображения."
-		SendMessage(user, msgText, buttons_genNewgen, "")
+		msgText := GetText(MsgText_BadRequest1, user.Language)
+		SendMessage(user, msgText, GetButton(btn_GenNewgen, user.Language), "")
 		user.Path = "gemini/type/image/text/newgen"
 		return
 	}
 
 	if resp.Candidates[0].Content == nil {
 		Logs <- NewLog(user, "gemini{img}", Error, "resp.Candidates[0].Content = nil")
-		msgText := "Не удалось получить ответ от сервиса. Попробуйте изменить текст запроса или использовать другие изображения."
-		SendMessage(user, msgText, buttons_genNewgen, "")
+		msgText := GetText(MsgText_BadRequest1, user.Language)
+		SendMessage(user, msgText, GetButton(btn_GenNewgen, user.Language), "")
 		user.Path = "gemini/type/image/text/newgen"
 		return
 	}
 
 	result := resp.Candidates[0].Content.Parts[0].(genai.Text)
 
-	SendMessage(user, string(result), buttons_genNewgen, "")
+	SendMessage(user, string(result), GetButton(btn_GenNewgen, user.Language), "")
 
 	user.Path = "gemini/type/image/text/newgen"
 
@@ -307,16 +231,16 @@ func gen_imgtext_newgen(user *UserInfo, text string) {
 	}
 
 	switch text {
-	case "Изменить текст вопроса":
-		SendMessage(user, "Напишите свой вопрос к загруженным изображениям.", button_RemoveKeyboard, "")
+	case GetText(BtnText_ChangeQuestionText, user.Language):
+		SendMessage(user, GetText(MsgText_WriteQuestionToImages, user.Language), GetButton(btn_RemoveKeyboard, ""), "")
 		user.Path = "gemini/type/image/text"
-	case "Загрузить новые изображения":
+	case GetText(BtnText_UploadNewImages, user.Language):
 		user.DeleteImages() // на всякий почистим, если что-то осталось
-		SendMessage(user, "Загрузите одну или несколько картинок.", button_RemoveKeyboard, "")
+		SendMessage(user, GetText(MsgText_UploadImages, user.Language), GetButton(btn_RemoveKeyboard, ""), "")
 		user.Path = "gemini/type/image"
-	case "Начать диалог":
+	case GetText(BtnText_StartDialog, user.Language):
 		user.DeleteImages() // на всякий почистим, если что-то осталось
-		SendMessage(user, "Привет! Чем могу помочь?", buttons_genEndDialog, "")
+		SendMessage(user, GetText(MsgText_HelloCanIHelpYou, user.Language), GetButton(btn_GenEndDialog, user.Language), "")
 		user.Path = "gemini/type/dialog"
 	default:
 		// Предполагаем, что там новый вопрос к загруженным картинкам

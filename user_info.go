@@ -68,7 +68,7 @@ func AccessIsAllowed(upd tgbotapi.Update, u *UserInfo) bool {
 	chatMember, err := Bot.GetChatMember(conf)
 	if err != nil {
 		Logs <- NewLog(u, "bot", Error, "{GetChatMember} "+err.Error())
-		msgText := "Произошла непредвиденная ошибка, попробуйте позже."
+		msgText := GetText(MsgText_UnexpectedError, u.Language)
 		SendMessage(u, msgText, nil, "")
 		result = false
 	}
@@ -76,8 +76,8 @@ func AccessIsAllowed(upd tgbotapi.Update, u *UserInfo) bool {
 	if !(chatMember.IsCreator() ||
 		chatMember.IsAdministrator() ||
 		chatMember.IsMember()) && upd.Message.Text != "/start" {
-		msgText := "Для использования бота необходимо подписаться на канал👇"
-		SendMessage(u, msgText, buttons_Subscribe, "")
+		msgText := GetText(MsgText_SubscribeForUsing, u.Language)
+		SendMessage(u, msgText, GetButton(btn_Subscribe, u.Language), "")
 		result = false
 	}
 
@@ -94,9 +94,8 @@ func (u *UserInfo) CheckUserLock(upd tgbotapi.Update) (isLocking bool) {
 
 	// Проверка на наличие уже обрабатываемого запроса от пользователя
 	if u.IsRunning && !u.ImagesLoading(upd) {
-		msgText := "Последняя операция ещё выполняется, дождитесь её завершения перед отправкой новых запросов."
+		msgText := GetText(MsgText_LastOperationInProgress, u.Language)
 		SendMessage(u, msgText, nil, "")
-		Logs <- NewLog(u, "bot", Info, msgText)
 		return true
 	}
 

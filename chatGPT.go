@@ -27,8 +27,8 @@ func gpt_start(user *UserInfo) {
 	msgText := gpt_WelcomeTextMessage(user)
 	SendMessage(user, msgText, nil, "HTML")
 
-	msgText = `Выберите один из предложенных вариантов:`
-	SendMessage(user, msgText, buttons_gptTypes, "")
+	msgText = GetText(MsgText_SelectOption, user.Language)
+	SendMessage(user, msgText, GetButton(btn_GptTypes, user.Language), "")
 
 	user.Path = "chatgpt/type"
 
@@ -42,13 +42,13 @@ func gpt_type(user *UserInfo, text string) {
 	}
 
 	switch text {
-	case "Начать диалог":
-		msgText := `Запущен диалог с СhatGPT, чтобы очистить контекст от предыдущих сообщений - нажмите кнопку "Очистить контекст". Это позволяет сократить расход токенов.`
+	case GetText(BtnText_StartDialog, user.Language):
+		msgText := GetText(MsgText_ChatGPTDialogStarted, user.Language)
 		SendMessage(user, msgText, nil, "")
-		SendMessage(user, "Привет! Чем могу помочь?", buttons_gptClearContext, "")
+		SendMessage(user, GetText(MsgText_HelloCanIHelpYou, user.Language), GetButton(btn_GptClearContext, user.Language), "")
 		user.Path = "chatgpt/type/dialog"
-	case "Сгенерировать аудио из текста":
-		SendMessage(user, "Введите текст для аудио:", button_RemoveKeyboard, "")
+	case GetText(BtnText_GenerateAudioFromText, user.Language):
+		SendMessage(user, GetText(MsgText_EnterTextForAudio, user.Language), GetButton(btn_RemoveKeyboard, ""), "")
 		user.Path = "chatgpt/type/speech_text"
 	default:
 		gpt_dialog(user, text)
@@ -64,16 +64,16 @@ func gpt_dialog(user *UserInfo, text string) {
 		return
 	}
 
-	if text == "Очистить контекст" {
+	if text == GetText(BtnText_ClearContext, user.Language) {
 		user.Messages_ChatGPT = []openai.ChatCompletionMessage{}
-		SendMessage(user, "Контекст диалога очищен.", nil, "")
-		SendMessage(user, "Привет! Чем могу помочь?", nil, "")
+		SendMessage(user, GetText(MsgText_DialogContextCleared, user.Language), nil, "")
+		SendMessage(user, GetText(MsgText_HelloCanIHelpYou, user.Language), nil, "")
 		return
 	}
 
-	if text == "Завершить диалог" {
+	if text == GetText(BtnText_EndDialog, user.Language) {
 		user.Messages_ChatGPT = []openai.ChatCompletionMessage{}
-		SendMessage(user, "Выберите один из предложенных вариантов:", buttons_gptTypes, "")
+		SendMessage(user, GetText(MsgText_SelectOption, user.Language), GetButton(btn_GptTypes, user.Language), "")
 		user.Path = "chatgpt/type"
 		return
 	}
@@ -96,25 +96,25 @@ func gpt_speech_text(user *UserInfo, text string) {
 
 	// Проверяем наличие текста в сообщении
 	if text == "" {
-		msgText := "Напишите текст для озвучивания."
-		SendMessage(user, msgText, button_RemoveKeyboard, "")
+		msgText := GetText(MsgText_WriteTextForVoicing, user.Language)
+		SendMessage(user, msgText, GetButton(btn_RemoveKeyboard, ""), "")
 		return
 	}
 
 	length := utf8.RuneCountInString(text)
 	if length*20 > (Cfg.TPD_gpt - user.Tokens_used_gpt) {
-		msgText := "Недостаточно токенов, укажите текст меньшей длины."
-		SendMessage(user, msgText, button_RemoveKeyboard, "")
+		msgText := GetText(MsgText_NotEnoughTokensWriteShorterTextLength, user.Language)
+		SendMessage(user, msgText, GetButton(btn_RemoveKeyboard, ""), "")
 		return
 	}
 
 	user.Options["text"] = text
 
-	msgText := `Примеры звучания голосов`
-	SendMessage(user, msgText, buttons_gptSampleSpeech, "")
+	msgText := GetText(MsgText_VoiceExamples, user.Language)
+	SendMessage(user, msgText, GetButton(btn_GptSampleSpeech, ""), "")
 
-	msgText = `Выберите голос для озвучивания текста:`
-	SendMessage(user, msgText, buttons_gptVoices, "")
+	msgText = GetText(MsgText_SelectVoice, user.Language)
+	SendMessage(user, msgText, GetButton(btn_GptVoices, ""), "")
 
 	user.Path = "chatgpt/type/speech_text/voice"
 
@@ -134,8 +134,8 @@ func gpt_speech_voice(user *UserInfo, text string) {
 
 	voice, isErr := gpt_GetSpeechVoice(text)
 	if isErr {
-		msgText := "Выберите голос из предложенных вариантов."
-		SendMessage(user, msgText, buttons_gptVoices, "")
+		msgText := GetText(MsgText_SelectVoiceFromOptions, user.Language)
+		SendMessage(user, msgText, GetButton(btn_GptVoices, ""), "")
 		return
 	}
 
@@ -145,7 +145,7 @@ func gpt_speech_voice(user *UserInfo, text string) {
 	Operation := SQL_NewOperation(user, "chatgpt", "speech", text)
 	SQL_AddOperation(Operation)
 
-	SendMessage(user, "Запущено создание аудиофайла ...", nil, "")
+	SendMessage(user, GetText(MsgText_AudioFileCreationStarted, user.Language), nil, "")
 
 	// Отправка запроса в openai
 	res, err := clientOpenAI.CreateSpeech(context.Background(),
@@ -157,8 +157,8 @@ func gpt_speech_voice(user *UserInfo, text string) {
 
 	if err != nil {
 		Logs <- NewLog(user, "chatgpt", 1, "{speech1} "+err.Error())
-		msgText := "Произошла непредвиденная ошибка. Попробуйте позже."
-		SendMessage(user, msgText, buttons_gptTypes, "")
+		msgText := GetText(MsgText_UnexpectedError, user.Language)
+		SendMessage(user, msgText, GetButton(btn_GptTypes, user.Language), "")
 		user.Path = "chatgpt/type"
 		return
 	}
@@ -168,8 +168,8 @@ func gpt_speech_voice(user *UserInfo, text string) {
 	err = CreateFile(filename, res)
 	if err != nil {
 		Logs <- NewLog(user, "chatgpt", 1, "{speech2} "+err.Error())
-		msgText := "Произошла непредвиденная ошибка. Попробуйте позже."
-		SendMessage(user, msgText, buttons_gptTypes, "")
+		msgText := GetText(MsgText_UnexpectedError, user.Language)
+		SendMessage(user, msgText, GetButton(btn_GptTypes, user.Language), "")
 		user.Path = "chatgpt/type"
 		return
 	}
@@ -177,11 +177,11 @@ func gpt_speech_voice(user *UserInfo, text string) {
 	tokensForRequest := utf8.RuneCountInString(inputText) * 20
 	user.Tokens_used_gpt = user.Tokens_used_gpt + tokensForRequest
 
-	caption := fmt.Sprintf(`Результат генерации по тексту "%s", голос: "%s"`, inputText, voice)
-	err = SendAudioMessage(user, filename, caption, buttons_gptSpeechNewgen)
+	caption := fmt.Sprintf(GetText(MsgText_ResultAudioGeneration, user.Language), inputText, voice)
+	err = SendAudioMessage(user, filename, caption, GetButton(btn_GptSpeechNewgen, user.Language))
 	if err != nil {
 		Logs <- NewLog(user, "chatgpt", Error, "{AudioSend} "+err.Error())
-		SendMessage(user, "При отправке аудиофайла возникла ошибка, попробуйте ещё раз позже.", nil, "")
+		SendMessage(user, GetText(MsgText_ErrorSendingAudioFile, user.Language), nil, "")
 	}
 
 	user.Path = "chatgpt/type/speech_text/voice/newgen"
@@ -196,18 +196,18 @@ func gpt_speech_newgen(user *UserInfo, text string) {
 	}
 
 	switch text {
-	case "Изменить текст":
-		SendMessage(user, "Напишите текст для озвучивания:", button_RemoveKeyboard, "")
+	case GetText(BtnText_ChangeText, user.Language):
+		SendMessage(user, GetText(MsgText_WriteTextForVoicing, user.Language), GetButton(btn_RemoveKeyboard, ""), "")
 		user.Path = "chatgpt/type/speech_text"
-	case "Выбрать другой голос":
-		SendMessage(user, "Выберите голос для озвучивания текста:", buttons_gptVoices, "")
+	case GetText(BtnText_ChooseAnotherVoice, user.Language):
+		SendMessage(user, GetText(MsgText_SelectVoice, user.Language), GetButton(btn_GptVoices, ""), "")
 		user.Path = "chatgpt/type/speech_text/voice"
-	case "Начать диалог":
+	case GetText(BtnText_StartDialog, user.Language):
 		user.ClearUserData()
-		SendMessage(user, "Привет! Чем могу помочь?", buttons_gptClearContext, "")
+		SendMessage(user, GetText(MsgText_HelloCanIHelpYou, user.Language), GetButton(btn_GptClearContext, user.Language), "")
 		user.Path = "chatgpt/type/dialog"
 	default:
-		SendMessage(user, "Неизвестная команда.", buttons_gptSpeechNewgen, "")
+		SendMessage(user, GetText(MsgText_UnknownCommand, user.Language), GetButton(btn_GptSpeechNewgen, user.Language), "")
 	}
 
 }

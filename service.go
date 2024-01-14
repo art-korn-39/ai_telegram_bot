@@ -62,15 +62,6 @@ func IsRusByUnicode(str string) bool {
 	return false
 }
 
-// func Tokenizer(s string) int {
-
-// 	runes := []rune(s)
-// 	for _, r := range runes {
-// //		utf8.
-// 	}
-
-// }
-
 func SortMap(m map[int]string) (result map[int]string) {
 
 	result = map[int]string{}

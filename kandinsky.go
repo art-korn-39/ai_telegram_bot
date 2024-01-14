@@ -10,15 +10,15 @@ import (
 )
 
 var (
-	kand_Styles   = map[string]string{"Без стиля": "DEFAULT", "Art": "KANDINSKY", "4K": "UHD", "Anime": "ANIME"}
+	kand_Styles   = map[string]string{"No style": "DEFAULT", "Art": "KANDINSKY", "4K": "UHD", "Anime": "ANIME"}
 	kand_Model_id = "4"
 )
 
 // После команды "/kandinsky" или при вводе текста = "kandinsky"
 func kand_start(user *UserInfo) {
 
-	msgText := `Введите свой запрос:`
-	SendMessage(user, msgText, button_RemoveKeyboard, "")
+	msgText := GetText(MsgText_EnterYourRequest, user.Language)
+	SendMessage(user, msgText, GetButton(btn_RemoveKeyboard, ""), "")
 
 	user.Path = "kandinsky/text"
 
@@ -28,14 +28,14 @@ func kand_start(user *UserInfo) {
 func kand_text(user *UserInfo, text string) {
 
 	if utf8.RuneCountInString(text) >= 900 {
-		SendMessage(user, "Текст описания картинки не должен превышать 900 символов.", nil, "")
+		SendMessage(user, GetText(MsgText_DescriptionTextNotExceed900Char, user.Language), nil, "")
 		return
 	}
 
 	user.Options["text"] = text
 
-	msgText := `Выберите стиль, в котором генерировать изображение.`
-	SendMessage(user, msgText, buttons_kandStyles, "")
+	msgText := GetText(MsgText_SelectStyleForImage, user.Language)
+	SendMessage(user, msgText, GetButton(btn_KandStyles, ""), "")
 
 	user.Path = "kandinsky/text/style"
 
@@ -46,16 +46,16 @@ func kand_style(user *UserInfo, text string) {
 
 	style, ok := kand_Styles[text]
 	if !ok {
-		msgText := "Выберите стиль из предложенных вариантов."
-		SendMessage(user, msgText, buttons_kandStyles, "")
+		msgText := GetText(MsgText_SelectStyleFromOptions, user.Language)
+		SendMessage(user, msgText, GetButton(btn_KandStyles, ""), "")
 		return
 	}
 
 	user.Options["style"] = style
 	inputText := user.Options["text"]
 
-	msgText := "Запущена генерация картинки, среднее время выполнения 30-40 секунд."
-	SendMessage(user, msgText, button_RemoveKeyboard, "")
+	msgText := GetText(MsgText_ImageGenerationStarted, user.Language)
+	SendMessage(user, msgText, GetButton(btn_RemoveKeyboard, ""), "")
 
 	<-delay_Kandinsky
 
@@ -65,13 +65,13 @@ func kand_style(user *UserInfo, text string) {
 	res, err := SendRequestToKandinsky(inputText, style, user)
 	if err != nil {
 		Logs <- NewLog(user, "kandinsky", Error, err.Error())
-		SendMessage(user, res, button_kandNewgen, "")
+		SendMessage(user, res, GetButton(btn_KandNewgen, user.Language), "")
 	} else {
-		caption := fmt.Sprintf(`Результат генерации по запросу "%s", стиль: "%s"`, inputText, text)
-		err := SendPhotoMessage(user, res, caption, button_kandNewgen)
+		caption := fmt.Sprintf(GetText(MsgText_ResultImageGeneration, user.Language), inputText, text)
+		err := SendPhotoMessage(user, res, caption, GetButton(btn_KandNewgen, user.Language))
 		if err != nil {
 			Logs <- NewLog(user, "kandinsky", Error, "{ImgSend} "+err.Error())
-			SendMessage(user, "При отправке картинки возникла ошибка, попробуйте ещё раз позже.", button_kandNewgen, "")
+			SendMessage(user, GetText(MsgText_ErrorWhileSendingPicture, user.Language), GetButton(btn_KandNewgen, user.Language), "")
 		}
 	}
 
@@ -83,11 +83,11 @@ func kand_style(user *UserInfo, text string) {
 func kand_newgen(user *UserInfo, text string) {
 
 	switch text {
-	case "Изменить текст запроса":
-		SendMessage(user, "Введите свой запрос:", button_RemoveKeyboard, "")
+	case GetText(BtnText_ChangeQuerryText, user.Language):
+		SendMessage(user, GetText(MsgText_EnterYourRequest, user.Language), GetButton(btn_RemoveKeyboard, ""), "")
 		user.Path = "kandinsky/text"
-	case "Выбрать другой стиль":
-		SendMessage(user, "Выберите стиль, в котором генерировать изображение.", buttons_kandStyles, "")
+	case GetText(BtnText_ChooseAnotherStyle, user.Language):
+		SendMessage(user, GetText(MsgText_SelectStyleForImage, user.Language), GetButton(btn_KandStyles, ""), "")
 		user.Path = "kandinsky/text/style"
 	default:
 		// Предполагаем, что там новый вопрос к загруженным картинкам
@@ -117,8 +117,7 @@ func SendRequestToKandinsky(text string, style string, user *UserInfo) (result s
 	if cmd.Err != nil {
 		description := fmt.Sprintf("text: %s [%s]\nerror: %s", text, style, cmd.Err.Error())
 		err = errors.New("{cmd} " + description)
-		//Logs <- NewLog(user, "Kandinsky{cmd}", Error, description)
-		return "Не удалось сгенерировать изображение. Попробуйте позже.", err
+		return GetText(MsgText_FailedGenerateImage1, user.Language), err
 	}
 
 	// Получение результата команды
@@ -127,8 +126,7 @@ func SendRequestToKandinsky(text string, style string, user *UserInfo) (result s
 	if err2 != nil {
 		description := fmt.Sprintf("text: %s [%s]\nerror: %s", text, style, err2.Error())
 		err = errors.New("{cmd.Output()} " + description)
-		//Logs <- NewLog(user, "Kandinsky{cmd.Output()}", Error, description)
-		return "Не удалось сгенерировать изображение. Попробуйте изменить текст описания картинки.", err
+		return GetText(MsgText_FailedGenerateImage2, user.Language), err
 	}
 
 	pathToImage := strings.TrimSpace(string(res[:]))
@@ -136,8 +134,7 @@ func SendRequestToKandinsky(text string, style string, user *UserInfo) (result s
 	if pathToImage == "" {
 		description := fmt.Sprintf("text: %s [%s]\nerror: %s", text, style, "скрипт вернул пустой путь до картинки (не успел получит ответ по api)")
 		err = errors.New("{API} " + description)
-		//Logs <- NewLog(user, "Kandinsky{API}", Error, description)
-		return "Не удалось сгенерировать изображение. Попробуйте позже.", err
+		return GetText(MsgText_FailedGenerateImage1, user.Language), err
 	}
 
 	return pathToImage, nil

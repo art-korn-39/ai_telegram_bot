@@ -11,7 +11,7 @@ import (
 // art39 : 403059287
 
 const (
-	Version       = "2.1.9"
+	Version       = "2.2.1"
 	ChannelChatID = -1001997602646
 	ChannelURL    = "https://t.me/+6ZMACWRgFdRkNGEy"
 )
@@ -86,10 +86,11 @@ func main() {
 				User = NewUserInfo(upd.Message)
 				ListOfUsers[upd.Message.Chat.ID] = User
 			}
-			User.Language = upd.Message.From.LanguageCode // может меняться
 
 			// Запишем panic если горутина завершилась с ошибкой
 			defer FinishGorutine(User, upd.Message.Text, false)
+
+			User.Language = upd.Message.From.LanguageCode // может меняться
 
 			// В случае восстановления после простоя - старые сообщения не обрабатываем
 			if IsRecovery(upd, User) {
@@ -152,16 +153,16 @@ func ValidMessage(upd *tgbotapi.Update) bool {
 
 }
 
-func IsRecovery(upd tgbotapi.Update, User *UserInfo) bool {
+func IsRecovery(upd tgbotapi.Update, user *UserInfo) bool {
 
 	// Если сообщение было больше 100 секунд назад, то один раз отвечаем
 	if time.Since(upd.Message.Time()).Seconds() > 100 {
-		if !slices.Contains(recoveryChatID, User.ChatID) {
-			recoveryChatID = append(recoveryChatID, User.ChatID)
+		if !slices.Contains(recoveryChatID, user.ChatID) {
+			recoveryChatID = append(recoveryChatID, user.ChatID)
 			if Cfg.Debug {
-				SendMessage(User, "Этот бот предназначен для тестирования и отладки, полностью рабочий и бесплатный находится здесь: @AI_free_chat_bot", nil, "")
+				SendMessage(user, GetText(MsgText_AfterRecoveryDebug, user.Language), nil, "")
 			} else {
-				SendMessage(User, "Функциональность бота восстановлена. Приносим извинения за неудобства.", nil, "")
+				SendMessage(user, GetText(MsgText_AfterRecoveryProd, user.Language), nil, "")
 			}
 		}
 		return true
@@ -185,7 +186,8 @@ func HandleMessage(u *UserInfo, m *tgbotapi.Message) {
 	// 3. Формируем ответ
 	switch u.Path {
 	case "start":
-		SendMessage(u, start(m.From.FirstName), buttons_Models, "HTML")
+		//SendMessage(u, start(m.From.FirstName), buttons_Models, "HTML")
+		SendMessage(u, start(m.From.FirstName, u.Language), GetButton(btn_Models, ""), "HTML")
 
 	case "gemini":
 		gen_start(u)
@@ -239,15 +241,15 @@ func HandleMessage(u *UserInfo, m *tgbotapi.Message) {
 		if slices.Contains(admins, u.Username) {
 			switch cmd {
 			case "info":
-				SendMessage(u, GetInfo(), button_RemoveKeyboard, "")
+				SendMessage(u, GetInfo(), GetButton(btn_RemoveKeyboard, ""), "")
 			case "updconf":
 				LoadConfig()
-				SendMessage(u, "Config updated.", button_RemoveKeyboard, "")
+				SendMessage(u, "Config updated.", GetButton(btn_RemoveKeyboard, ""), "")
 			default:
-				SendMessage(u, "Не выбрана нейросеть для обработки запроса.", buttons_Models, "")
+				SendMessage(u, GetText(MsgText_AiNotSelected, u.Language), GetButton(btn_Models, ""), "")
 			}
 		} else {
-			SendMessage(u, "Не выбрана нейросеть для обработки запроса.", buttons_Models, "")
+			SendMessage(u, GetText(MsgText_AiNotSelected, u.Language), GetButton(btn_Models, ""), "")
 		}
 	}
 
