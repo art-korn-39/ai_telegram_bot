@@ -1,5 +1,7 @@
 package main
 
+import "strconv"
+
 type Text int
 
 type MultiText struct {
@@ -248,8 +250,8 @@ func GetText(key Text, lang string) string {
 
 	element, exists := dictionary[key]
 	if !exists {
-		// нет значения по ключу
-		return ""
+		Logs <- NewLog(nil, "System", FatalError, "По ключу нет значения в словаре. Ключ:"+strconv.Itoa(int(key)))
+		return "Not found"
 	}
 
 	if lang == "ru" {
