@@ -108,6 +108,12 @@ func (u *UserInfo) SetIsRunning(v bool) {
 	u.IsRunning = v
 }
 
+func (u *UserInfo) FillLanguage(lang string) {
+	if u.Language == "" {
+		u.Language = lang
+	}
+}
+
 func (u *UserInfo) ImagesLoading(upd tgbotapi.Update) bool {
 	if u.Path == "gemini/type/image" && upd.Message.Photo != nil {
 		return true

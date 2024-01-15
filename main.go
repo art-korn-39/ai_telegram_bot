@@ -11,7 +11,7 @@ import (
 // art39 : 403059287
 
 const (
-	Version       = "2.2.3"
+	Version       = "2.2.4"
 	ChannelChatID = -1001997602646
 	ChannelURL    = "https://t.me/+6ZMACWRgFdRkNGEy"
 )
@@ -90,7 +90,8 @@ func main() {
 			// Запишем panic если горутина завершилась с ошибкой
 			defer FinishGorutine(User, upd.Message.Text, false)
 
-			User.Language = upd.Message.From.LanguageCode // может меняться
+			// Если язык пустой, то заполним из данных сообщения
+			User.FillLanguage(upd.Message.From.LanguageCode)
 
 			// В случае восстановления после простоя - старые сообщения не обрабатываем
 			if IsRecovery(upd, User) {
@@ -186,8 +187,13 @@ func HandleMessage(u *UserInfo, m *tgbotapi.Message) {
 	// 3. Формируем ответ
 	switch u.Path {
 	case "start":
-		//SendMessage(u, start(m.From.FirstName), buttons_Models, "HTML")
-		SendMessage(u, start(m.From.FirstName, u.Language), GetButton(btn_Models, ""), "HTML")
+		start(u, m)
+
+	case "language":
+		language_start(u)
+
+	case "language/type":
+		language_type(u, m.Text)
 
 	case "gemini":
 		gen_start(u)
@@ -246,10 +252,10 @@ func HandleMessage(u *UserInfo, m *tgbotapi.Message) {
 				LoadConfig()
 				SendMessage(u, "Config updated.", GetButton(btn_RemoveKeyboard, ""), "")
 			default:
-				SendMessage(u, GetText(MsgText_AiNotSelected, u.Language), GetButton(btn_Models, ""), "")
+				SendMessage(u, GetText(MsgText_UnknownCommand, u.Language), GetButton(btn_Models, ""), "")
 			}
 		} else {
-			SendMessage(u, GetText(MsgText_AiNotSelected, u.Language), GetButton(btn_Models, ""), "")
+			SendMessage(u, GetText(MsgText_UnknownCommand, u.Language), GetButton(btn_Models, ""), "")
 		}
 	}
 

@@ -25,6 +25,7 @@ const (
 	MsgText_SelectOption
 	MsgText_UnknownCommand
 	MsgText_EndDialog
+	MsgText_LanguageChanged
 
 	// gemini
 	MsgText_GeminiHello
@@ -228,6 +229,9 @@ func init() {
 	dictionary[MsgText_AfterRecoveryDebug] = MultiText{
 		ru: "Этот бот предназначен для тестирования и отладки, полностью рабочий и бесплатный находится здесь: @AI_free_chat_bot",
 		en: "This bot is intended for testing and debugging, fully working and free, located here: @AI_free_chat_bot"}
+	dictionary[MsgText_LanguageChanged] = MultiText{
+		ru: "Язык успешено изменён!",
+		en: "The language has been successfully changed!"}
 
 	// buttons
 
@@ -254,7 +258,7 @@ func GetText(key Text, lang string) string {
 		return "Not found"
 	}
 
-	if lang == "ru" {
+	if lang == "ru" || lang == "uk" {
 		return element.ru
 	} else {
 		return element.en

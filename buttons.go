@@ -8,6 +8,7 @@ const (
 	btn_RemoveKeyboard Button = iota
 	btn_Subscribe
 	btn_Models
+	btn_Languages
 
 	btn_KandStyles
 	btn_KandNewgen
@@ -42,6 +43,12 @@ func GetButton(btn Button, lang string) (keyboard any) {
 				tgbotapi.NewKeyboardButton("Gemini"),
 				tgbotapi.NewKeyboardButton("ChatGPT"),
 				tgbotapi.NewKeyboardButton("Kandinsky"),
+			))
+	case btn_Languages:
+		keyboard = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton("English"),
+				tgbotapi.NewKeyboardButton("Русский"),
 			))
 
 	//KANDINSKY
