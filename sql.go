@@ -241,3 +241,37 @@ func SQL_AddLog(l Log) {
 	}
 
 }
+
+func SQL_CountOfUserOperations(u *UserInfo) (count int, isErr bool) {
+
+	if db == nil {
+		Logs <- NewLog(nil, "SQL{LoadUserStates}", Error, "lost connection to DB")
+		return 0, true
+	}
+
+	stmt := `
+	select count(*) as cnt
+	from operations 
+	where chat_id = $1
+	`
+	rows, err := db.Query(stmt, u.ChatID)
+	if err != nil {
+		Logs <- NewLog(nil, "SQL{CountOfUserOperations}", Error, err.Error())
+		return 0, true
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		if err := rows.Scan(&count); err != nil {
+			Logs <- NewLog(nil, "SQL{CountOfUserOperations}", Error, err.Error())
+			return 0, true
+		}
+	}
+	if err = rows.Err(); err != nil {
+		Logs <- NewLog(nil, "SQL{CountOfUserOperations}", Error, err.Error())
+		return 0, true
+	}
+
+	return count, false
+
+}

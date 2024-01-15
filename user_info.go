@@ -62,7 +62,12 @@ func AccessIsAllowed(upd tgbotapi.Update, u *UserInfo) bool {
 		return true
 	}
 
-	result := true
+	if upd.Message.Text == "/start" ||
+		upd.Message.Text == "/language" ||
+		//u.Path == "start" ||
+		u.Path == "language/type" {
+		return true
+	}
 
 	conf := tgbotapi.ChatConfigWithUser{ChatID: ChannelChatID, UserID: int(u.ChatID)}
 	chatMember, err := Bot.GetChatMember(conf)
@@ -70,18 +75,28 @@ func AccessIsAllowed(upd tgbotapi.Update, u *UserInfo) bool {
 		Logs <- NewLog(u, "bot", Error, "{GetChatMember} "+err.Error())
 		msgText := GetText(MsgText_UnexpectedError, u.Language)
 		SendMessage(u, msgText, nil, "")
-		result = false
+		return false
 	}
 
-	if !(chatMember.IsCreator() ||
+	if chatMember.IsCreator() ||
 		chatMember.IsAdministrator() ||
-		chatMember.IsMember()) && upd.Message.Text != "/start" {
+		chatMember.IsMember() {
+		return true
+	}
+
+	// Если пользователь сделал больше 2 операций, то без подписки не даем продолжить
+	cnt, isErr := SQL_CountOfUserOperations(u)
+	if isErr {
+		msgText := GetText(MsgText_UnexpectedError, u.Language)
+		SendMessage(u, msgText, GetButton(btn_RemoveKeyboard, ""), "")
+		return false
+	} else if cnt >= 2 {
 		msgText := GetText(MsgText_SubscribeForUsing, u.Language)
 		SendMessage(u, msgText, GetButton(btn_Subscribe, u.Language), "")
-		result = false
+		return false
+	} else { // меньше 2 операций
+		return true
 	}
-
-	return result
 
 }
 

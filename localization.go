@@ -125,8 +125,8 @@ func init() {
 		ru: "Выполняется загрузка изображений...",
 		en: "Loading images..."}
 	dictionary[MsgText_SubscribeForUsing] = MultiText{
-		ru: "Для использования бота необходимо подписаться на канал👇",
-		en: "To using the bot you must subscribe to the channel👇"}
+		ru: "Для продолжения использования бота необходимо подписаться на канал👇",
+		en: "To continue using the bot you must subscribe to the channel👇"}
 	dictionary[MsgText_LimitOf4097TokensReached] = MultiText{
 		ru: "Достигнут лимит в 4097 токенов, контекст диалога очищен.",
 		en: "The limit of 4097 tokens has been reached, the dialog context has been cleared."}
