@@ -22,7 +22,20 @@ func gen_DialogSendMessage(user *UserInfo, text string) {
 
 			// В случае данного вида ошибки - запускаем новый клиент соединения
 			NewConnectionGemini()
-			msgText = GetText(MsgText_BadRequest3, user.Language)
+
+			// Очищаем контекст
+			cs.History = []*genai.Content{}
+			user.Messages_Gemini = []*genai.Content{}
+
+			// Отправляем повторно
+			Logs <- NewLog(user, "gemini", Error, "Повторная отправка запроса ...")
+			resp, err = cs.SendMessage(ctx_Gemini, genai.Text(text))
+			if err != nil {
+				Logs <- NewLog(user, "gemini", Error, err.Error())
+				msgText = GetText(MsgText_BadRequest3, user.Language)
+			} else {
+				Logs <- NewLog(user, "gemini", Error, "После очистки контекста - запрос ушел.")
+			}
 
 		} else if errorString == "blocked: prompt: BlockReasonSafety" {
 

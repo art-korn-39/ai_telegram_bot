@@ -11,7 +11,7 @@ import (
 // art39 : 403059287
 
 const (
-	Version       = "2.2.5"
+	Version       = "2.2.6"
 	ChannelChatID = -1001997602646
 	ChannelURL    = "https://t.me/+6ZMACWRgFdRkNGEy"
 )
@@ -98,6 +98,9 @@ func main() {
 				return
 			}
 
+			// Фиксируем пользователя и входящее сообщение
+			Logs <- NewLog(User, "", Info, upd.Message.Text)
+
 			// Проверка подписки пользователя на канал
 			if !AccessIsAllowed(upd, User) {
 				return
@@ -109,7 +112,7 @@ func main() {
 			}
 
 			// Фиксируем пользователя и входящее сообщение
-			Logs <- NewLog(User, "", Info, upd.Message.Text)
+			//Logs <- NewLog(User, "", Info, upd.Message.Text)
 
 			// Если предыдущий запрос ещё выполняется, то новые команды не обрабатываем
 			if User.CheckUserLock(upd) {
