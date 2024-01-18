@@ -76,6 +76,7 @@ func FinishGorutine(u *UserInfo, text string, main bool) {
 
 		chatid := 0
 		if u != nil {
+			SendMessage(u, GetText(MsgText_UnexpectedError, u.Language), nil, "")
 			chatid = int(u.ChatID)
 		}
 
