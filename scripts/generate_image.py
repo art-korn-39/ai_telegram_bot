@@ -51,6 +51,7 @@ class Text2ImageAPI:
         # меньше 10 секунд не бывает генераций, поэтому не пингуем в начале
         # t - в какой момент времени выполняется запрос, 0 это запуск скрипта
         # d - пауза после запроса
+        # 4 sec. - столько необходимо для прочих функций (кроме check_generation)
         time.sleep(15)
         while attempts > 0:
             response = requests.get(self.URL + 'key/api/v1/text2image/status/' + request_id, headers=self.AUTH_HEADERS)

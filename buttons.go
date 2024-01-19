@@ -22,6 +22,7 @@ const (
 	btn_GptClearContext
 	btn_GptSpeechNewgen
 	btn_GptSampleSpeech
+	btn_GptImageNewgen
 )
 
 func GetButton(btn Button, lang string) (keyboard any) {
@@ -92,6 +93,7 @@ func GetButton(btn Button, lang string) (keyboard any) {
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(GetText(BtnText_StartDialog, lang)),
 				tgbotapi.NewKeyboardButton(GetText(BtnText_GenerateAudioFromText, lang)),
+				tgbotapi.NewKeyboardButton(GetText(BtnText_SendPictureWithText, lang)),
 			))
 	case btn_GptVoices:
 		keyboard = tgbotapi.NewReplyKeyboard(
@@ -118,6 +120,13 @@ func GetButton(btn Button, lang string) (keyboard any) {
 		keyboard = tgbotapi.NewInlineKeyboardMarkup(
 			tgbotapi.NewInlineKeyboardRow(
 				tgbotapi.NewInlineKeyboardButtonData("Audio samples", "gpt_speech_samples"),
+			))
+	case btn_GptImageNewgen:
+		keyboard = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(GetText(BtnText_ChangeQuestionText, lang)),
+				tgbotapi.NewKeyboardButton(GetText(BtnText_UploadNewImage, lang)),
+				tgbotapi.NewKeyboardButton(GetText(BtnText_StartDialog, lang)),
 			))
 	}
 

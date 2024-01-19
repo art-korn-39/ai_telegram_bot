@@ -11,7 +11,7 @@ import (
 // art39 : 403059287
 
 const (
-	Version       = "2.2.7"
+	Version       = "2.3.1"
 	ChannelChatID = -1001997602646
 	ChannelURL    = "https://t.me/+6ZMACWRgFdRkNGEy"
 )
@@ -106,13 +106,10 @@ func main() {
 				return
 			}
 
-			// Пустой текст пропускаем только в случае загрузки картинок у gemini
-			if upd.Message.Text == "" && User.Path != "gemini/type/image" {
+			// Пустой текст пропускаем только в случае загрузки картинок
+			if !MessageWithData(upd.Message.Text, User.Path) {
 				return
 			}
-
-			// Фиксируем пользователя и входящее сообщение
-			//Logs <- NewLog(User, "", Info, upd.Message.Text)
 
 			// Если предыдущий запрос ещё выполняется, то новые команды не обрабатываем
 			if User.CheckUserLock(upd) {
@@ -154,6 +151,20 @@ func ValidMessage(upd *tgbotapi.Update) bool {
 	}
 
 	return true
+
+}
+
+func MessageWithData(text, path string) bool {
+
+	if text != "" {
+		return true
+	} else if path == "gemini/type/image" {
+		return true
+	} else if path == "chatgpt/type/image" {
+		return true
+	}
+
+	return false
 
 }
 
@@ -245,6 +256,15 @@ func HandleMessage(u *UserInfo, m *tgbotapi.Message) {
 
 	case "chatgpt/type/speech_text/voice/newgen":
 		gpt_speech_newgen(u, m.Text)
+
+	case "chatgpt/type/image":
+		gpt_image(u, m)
+
+	case "chatgpt/type/image/text":
+		gpt_imgtext(u, m.Text)
+
+	case "chatgpt/type/image/text/newgen":
+		gpt_imgtext_newgen(u, m.Text)
 
 	default:
 		if slices.Contains(admins, u.Username) {
