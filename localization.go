@@ -84,18 +84,18 @@ const (
 	// BUTTONS
 
 	BtnText_Subscribe             // ✅Подписаться
-	BtnText_ChangeQuerryText      // Изменить текст запроса
-	BtnText_ChooseAnotherStyle    // Выбрать другой стиль
-	BtnText_StartDialog           // Начать диалог
 	BtnText_SendPictureWithText   // 🖼 AI Vision
-	BtnText_ChangeQuestionText    // Изменить текст вопроса
+	BtnText_ChangeQuestionText    // Изменить вопрос
+	BtnText_ChooseAnotherVoice    // Изменить голос
+	BtnText_ChangeQuerryText      // Изменить запрос
+	BtnText_ChooseAnotherStyle    // Изменить стиль
+	BtnText_ChangeText            // Изменить текст
 	BtnText_UploadNewImages       // Загрузить новые фото
 	BtnText_UploadNewImage        // Загрузить новое фото
 	BtnText_EndDialog             // Завершить диалог
-	BtnText_GenerateAudioFromText // Сгенерировать аудио из текста
+	BtnText_StartDialog           // Начать диалог
+	BtnText_GenerateAudioFromText // Озвучить текст
 	BtnText_ClearContext          // Очистить контекст
-	BtnText_ChangeText            // Изменить текст
-	BtnText_ChooseAnotherVoice    // Выбрать другой голос
 )
 
 func init() {
@@ -259,19 +259,19 @@ func init() {
 
 	// buttons
 
-	dictionary[BtnText_ChooseAnotherVoice] = MultiText{ru: "Выбрать другой голос", en: "Choose another voice"}
-	dictionary[BtnText_ChooseAnotherStyle] = MultiText{ru: "Выбрать другой стиль", en: "Choose another style"}
+	dictionary[BtnText_SendPictureWithText] = MultiText{ru: "🖼 AI Vision", en: "🖼 AI Vision"}
+	dictionary[BtnText_ChangeQuestionText] = MultiText{ru: "Изменить вопрос", en: "Change question"}
+	dictionary[BtnText_ChooseAnotherVoice] = MultiText{ru: "Изменить голос", en: "Change voice"}
+	dictionary[BtnText_ChangeQuerryText] = MultiText{ru: "Изменить запрос", en: "Change request"}
+	dictionary[BtnText_ChooseAnotherStyle] = MultiText{ru: "Изменить стиль", en: "Change style"}
+	dictionary[BtnText_ChangeText] = MultiText{ru: "Изменить текст", en: "Change text"}
 	dictionary[BtnText_EndDialog] = MultiText{ru: "Завершить диалог", en: "End dialog"}
 	dictionary[BtnText_UploadNewImages] = MultiText{ru: "Загрузить новые фото", en: "Upload new images"}
 	dictionary[BtnText_UploadNewImage] = MultiText{ru: "Загрузить новое фото", en: "Upload new image"}
-	dictionary[BtnText_ChangeText] = MultiText{ru: "Изменить текст", en: "Change text"}
-	dictionary[BtnText_ChangeQuestionText] = MultiText{ru: "Изменить текст вопроса", en: "Change question text"}
-	dictionary[BtnText_ChangeQuerryText] = MultiText{ru: "Изменить текст запроса", en: "Change request text"}
 	dictionary[BtnText_StartDialog] = MultiText{ru: "Начать диалог", en: "Start dialog"}
-	dictionary[BtnText_SendPictureWithText] = MultiText{ru: "🖼 AI Vision", en: "🖼 AI Vision"}
+	dictionary[BtnText_GenerateAudioFromText] = MultiText{ru: "Озвучить текст", en: "Audio from text"}
 	dictionary[BtnText_ClearContext] = MultiText{ru: "Очистить контекст", en: "Clear context"}
 	dictionary[BtnText_Subscribe] = MultiText{ru: "✅Подписаться", en: "✅Subscribe"}
-	dictionary[BtnText_GenerateAudioFromText] = MultiText{ru: "Сгенерировать аудио из текста", en: "Generate audio from text"}
 
 }
 
