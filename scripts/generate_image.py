@@ -45,6 +45,7 @@ class Text2ImageAPI:
         return data['uuid']
 
     def check_generation(self, request_id, attempts=9, delay=5):
+        #1.20 - макс время генерации (полное)
         #a 9  8  7  6  5  4  3    2    1
         #t 15 20 26 33 41 50 1.00 1.11 1.23
         #d 5  6  7  8  9  10 11   12   0

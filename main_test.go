@@ -32,6 +32,9 @@ func TestSQL(t *testing.T) {
 	SQL_Connect()
 	defer db.Close()
 
+	SQL_LoadUserStates()
+	SQL_SaveUserStates()
+
 	u := T_GetUser()
 	Operation := SQL_NewOperation(u, "gemini", "img", "test operation")
 	SQL_AddOperation(Operation)

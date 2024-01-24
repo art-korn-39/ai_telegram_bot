@@ -27,7 +27,9 @@ func SaveLogs() {
 				WriteIntoFile(timeNow, v.ChatID, v.Author, v.Text)
 			}
 
-			SQL_AddLog(v)
+			if v.Text != sql_LostConnection {
+				SQL_AddLog(v)
+			}
 		}
 	}
 }

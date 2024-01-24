@@ -158,7 +158,7 @@ func init() {
 		ru: "Загрузите одну или несколько картинок",
 		en: "Upload one or more images"}
 	dictionary[MsgText_UploadImage] = MultiText{
-		ru: "Загрузите одну картинку",
+		ru: "Загрузите картинку",
 		en: "Upload image"}
 	dictionary[MsgText_BadRequest4] = MultiText{
 		ru: "Запрос был заблокирован по соображениям безопасности. Попробуйте изменить текст запроса.",

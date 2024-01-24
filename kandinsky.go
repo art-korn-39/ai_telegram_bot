@@ -9,6 +9,15 @@ import (
 	"unicode/utf8"
 )
 
+// При большой нагрузке или технических работах сервис может быть временно недоступен для приема новых задач.
+// Можно заранее проверить текущее состояние с помощью GET запроса на URL /key/api/v1/text2image/availability.
+// Во время недоступности задачи не будут приниматься и в ответе на запрос к модели вместо uuid вашего задания
+// будет возвращен текущий статус работы сервиса.
+// Пример:
+// {
+//   "model_status": "DISABLED_BY_QUEUE"
+// }
+
 var (
 	kand_Styles   = map[string]string{"No style": "DEFAULT", "Art": "KANDINSKY", "4K": "UHD", "Anime": "ANIME"}
 	kand_Model_id = "4"
@@ -132,7 +141,7 @@ func SendRequestToKandinsky(text string, style string, user *UserInfo) (result s
 	pathToImage := strings.TrimSpace(string(res[:]))
 
 	if pathToImage == "" {
-		description := fmt.Sprintf("text: %s [%s]\nerror: %s", text, style, "скрипт вернул пустой путь до картинки (не успел получит ответ по api)")
+		description := fmt.Sprintf("text: %s [%s]\nerror: %s", text, style, "скрипт вернул пустой путь до картинки (не успел получить ответ по api)")
 		err = errors.New("{API} " + description)
 		return GetText(MsgText_FailedGenerateImage1, user.Language), err
 	}
@@ -140,3 +149,7 @@ func SendRequestToKandinsky(text string, style string, user *UserInfo) (result s
 	return pathToImage, nil
 
 }
+
+// func kand_CheckAvailability() bool {
+
+// }

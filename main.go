@@ -1,23 +1,23 @@
 package main
 
 import (
-	"database/sql"
 	"slices"
 	"time"
 
 	tgbotapi "github.com/Syfaro/telegram-bot-api"
+	"github.com/jmoiron/sqlx"
 )
 
 // art39 : 403059287
 
 const (
-	Version       = "2.3.2"
+	Version       = "2.3.3"
 	ChannelChatID = -1001997602646
 	ChannelURL    = "https://t.me/+6ZMACWRgFdRkNGEy"
 )
 
 var (
-	db              *sql.DB
+	db              *sqlx.DB
 	Bot             *tgbotapi.BotAPI
 	Cfg             config
 	Logs            = make(chan Log, 10)

@@ -64,7 +64,6 @@ func AccessIsAllowed(upd tgbotapi.Update, u *UserInfo) bool {
 
 	if upd.Message.Text == "/start" ||
 		upd.Message.Text == "/language" ||
-		//u.Path == "start" ||
 		u.Path == "language/type" {
 		return true
 	}

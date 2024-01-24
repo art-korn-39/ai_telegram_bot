@@ -1,14 +1,20 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	"log"
 	"strings"
 	"time"
 
+	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 )
+
+// https://habr.com/ru/companies/oleg-bunin/articles/461935/
+// https://github.com/jmoiron/sqlx
+// https://www.sobyte.net/post/2021-06/sqlx-library-usage-guide/
+
+const sql_LostConnection = "lost connection to DB"
 
 type Operation struct {
 	date     time.Time
@@ -28,18 +34,10 @@ func SQL_Connect() {
 
 	// Get a database handle.
 	var err error
-	db, err = sql.Open("postgres", psqlInfo)
-
+	db, err = sqlx.Connect("postgres", psqlInfo)
 	if err != nil {
 		log.Println("Unsuccessful connection to PostgreSQL!")
 		log.Println(err.Error())
-		return
-	}
-
-	pingErr := db.Ping()
-	if pingErr != nil {
-		log.Println("Unsuccessful connection to PostgreSQL!")
-		log.Println(pingErr.Error())
 		return
 	}
 
@@ -62,7 +60,7 @@ func SQL_NewOperation(user *UserInfo, model, class, request string) Operation {
 func SQL_AddOperation(o Operation) {
 
 	if db == nil {
-		Logs <- NewLog(nil, "SQL{AddOperation}", Error, "lost connection to DB")
+		Logs <- NewLog(nil, "SQL{AddOperation}", Error, sql_LostConnection)
 		return
 	}
 
@@ -88,7 +86,7 @@ func SQL_AddOperation(o Operation) {
 func SQL_LoadUserStates() {
 
 	if db == nil {
-		Logs <- NewLog(nil, "SQL{LoadUserStates}", Error, "lost connection to DB")
+		Logs <- NewLog(nil, "SQL{LoadUserStates}", Error, sql_LostConnection)
 		return
 	}
 
@@ -123,14 +121,14 @@ func SQL_LoadUserStates() {
 		return
 	}
 
-	Logs <- NewLog(nil, "SQL{LoadUserStates}", Info, "Loading user_states complete")
+	Logs <- NewLog(nil, "SQL", Info, "Loading user_states complete")
 
 }
 
 func SQL_SaveUserStates() {
 
 	if db == nil {
-		Logs <- NewLog(nil, "SQL{SaveUserStates}", Error, "lost connection to DB")
+		Logs <- NewLog(nil, "SQL{SaveUserStates}", Error, sql_LostConnection)
 		return
 	}
 
@@ -156,7 +154,7 @@ func SQL_SaveUserStates() {
 		}
 	}
 
-	Logs <- NewLog(nil, "SQL{SaveUserStates}", Info, "Saving user states done")
+	Logs <- NewLog(nil, "SQL", Info, "Saving user states done")
 
 	tx.Commit()
 
@@ -165,7 +163,7 @@ func SQL_SaveUserStates() {
 func SQL_GetInfoOnDate(timestamp time.Time) (result map[string]int, errStr string) {
 
 	if db == nil {
-		Logs <- NewLog(nil, "SQL{Info}", Error, "lost connection to DB")
+		Logs <- NewLog(nil, "SQL{Info}", Error, sql_LostConnection)
 		return result, "Отсутствует подключение к БД"
 	}
 
@@ -219,7 +217,7 @@ func SQL_GetInfoOnDate(timestamp time.Time) (result map[string]int, errStr strin
 func SQL_AddLog(l Log) {
 
 	if db == nil {
-		Logs <- NewLog(nil, "SQL{AddLog}", Error, "lost connection to DB")
+		Logs <- NewLog(nil, "SQL{AddLog}", Error, sql_LostConnection)
 		return
 	}
 
@@ -245,7 +243,7 @@ func SQL_AddLog(l Log) {
 func SQL_CountOfUserOperations(u *UserInfo) (count int, isErr bool) {
 
 	if db == nil {
-		Logs <- NewLog(nil, "SQL{LoadUserStates}", Error, "lost connection to DB")
+		Logs <- NewLog(nil, "SQL{LoadUserStates}", Error, sql_LostConnection)
 		return 0, true
 	}
 

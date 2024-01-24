@@ -47,8 +47,9 @@ func gen_DialogSendMessage(user *UserInfo, text string) {
 			// В случае данного вида ошибки - запускаем новый клиент соединения
 			NewConnectionGemini()
 
-			// Очищаем контекст
-			cs.History = []*genai.Content{}
+			// Новый чат
+			cs := model_Gemini.StartChat()
+
 			user.Messages_Gemini = []*genai.Content{}
 
 			// Отправляем повторно
