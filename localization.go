@@ -308,7 +308,7 @@ func textForStarting() MultiText {
 <i>14.01.24 - 🇺🇸 добавлена поддержка английского языка.</i>
 <i>19.01.24 - 🏞 добавлена обработка картинок с вопросами в ChatGPT-4 Vision.</i>
 
-Чтобы начать - просто выбери подходящую нейросеть и задай ей вопрос (или попроси сделать картинку), удачи 🔥`,
+Бот полностью бесплатный, удачных генераций 🔥`,
 
 		en: `Hello, %s! 👋
 		
@@ -324,7 +324,10 @@ With my help you can use the following models:
 <i>14.01.24 - 🇺🇸 added English language support.</i>
 <i>19.01.24 - 🏞 added processing of pictures with questions in ChatGPT-4 Vision.</i>
 
-To get started, just choose a suitable neural network and ask it a question (or ask it to take a picture), good luck 🔥`,
+Bot is absolutely free, successful generations 🔥`,
 	}
+
+	//Чтобы начать - просто выбери подходящую нейросеть и задай ей вопрос (или попроси сделать картинку), удачи 🔥`,
+	//To get started, just choose a suitable neural network and ask it a question (or ask it to take a picture), good luck 🔥`,
 
 }
