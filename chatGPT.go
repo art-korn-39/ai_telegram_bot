@@ -36,8 +36,7 @@ func gpt_type(user *UserInfo, text string) {
 
 	switch text {
 	case GetText(BtnText_StartDialog, user.Language):
-		msgText := GetText(MsgText_ChatGPTDialogStarted, user.Language)
-		SendMessage(user, msgText, nil, "")
+		SendMessage(user, GetText(MsgText_ChatGPTDialogStarted, user.Language), nil, "")
 		SendMessage(user, GetText(MsgText_HelloCanIHelpYou, user.Language), GetButton(btn_GptClearContext, user.Language), "")
 		user.Path = "chatgpt/type/dialog"
 	case GetText(BtnText_GenerateAudioFromText, user.Language):
@@ -47,6 +46,7 @@ func gpt_type(user *UserInfo, text string) {
 		SendMessage(user, GetText(MsgText_UploadImage, user.Language), GetButton(btn_RemoveKeyboard, ""), "")
 		user.Path = "chatgpt/type/image"
 	default:
+		SendMessage(user, "Обработка запроса...", GetButton(btn_GptClearContext, user.Language), "")
 		gpt_dialog(user, text)
 		user.Path = "chatgpt/type/dialog"
 	}

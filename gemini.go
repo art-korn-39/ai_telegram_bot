@@ -54,6 +54,7 @@ func gen_type(user *UserInfo, text string) {
 		SendMessage(user, GetText(MsgText_UploadImages, user.Language), GetButton(btn_RemoveKeyboard, ""), "")
 		user.Path = "gemini/type/image"
 	default:
+		SendMessage(user, "Обработка запроса...", GetButton(btn_GenEndDialog, user.Language), "")
 		gen_dialog(user, text)
 		user.Path = "gemini/type/dialog"
 	}

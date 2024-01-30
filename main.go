@@ -9,9 +9,10 @@ import (
 )
 
 // art39 : 403059287
+// https://elevenlabs.io/voice-lab
 
 const (
-	Version       = "2.3.3"
+	Version       = "2.3.4"
 	ChannelChatID = -1001997602646
 	ChannelURL    = "https://t.me/+6ZMACWRgFdRkNGEy"
 )
@@ -29,10 +30,6 @@ var (
 )
 
 func main() {
-
-	// // лучше использовать location = UTC для корректной работы Truncate()
-	// StartOfDay := time.Date(2023, 12, 31, 2, 45, 0, 0, time.UTC).Truncate(time.Hour * 24)
-	// DateString := StartOfDay.Format(time.DateTime)
 
 	defer FinishGorutine(nil, "", true)
 

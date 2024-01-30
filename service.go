@@ -23,6 +23,7 @@ func FR(v any, err error) any {
 	return v
 }
 
+// С 0 (вкл.) до last (искл.)
 func SubString(s string, first int, last int) string {
 
 	runes := []rune(s)
