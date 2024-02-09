@@ -23,7 +23,7 @@ func gpt_speech_text(user *UserInfo, text string) {
 	}
 
 	length := utf8.RuneCountInString(text)
-	if length*20 > (Cfg.TPD_gpt - user.Tokens_used_gpt) {
+	if length*20 > (Get_TPD_gpt(user) - user.Tokens_used_gpt) {
 		msgText := GetText(MsgText_NotEnoughTokensWriteShorterTextLength, user.Language)
 		SendMessage(user, msgText, GetButton(btn_RemoveKeyboard, ""), "")
 		return

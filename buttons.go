@@ -11,7 +11,10 @@ const (
 	btn_Languages
 
 	btn_KandStyles
-	btn_KandNewgen
+	btn_ImgNewgenFull
+	btn_ImgNewgen
+
+	btn_SDXLStyles
 
 	btn_GenTypes
 	btn_GenNewgen
@@ -41,10 +44,14 @@ func GetButton(btn Button, lang string) (keyboard any) {
 	case btn_Models:
 		keyboard = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton("Gemini"),
-				tgbotapi.NewKeyboardButton("ChatGPT"),
-				tgbotapi.NewKeyboardButton("Kandinsky"),
-			))
+				tgbotapi.NewKeyboardButton(GetText(BtnText_Gemini, "")),
+				tgbotapi.NewKeyboardButton(GetText(BtnText_ChatGPT, "")),
+			),
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(GetText(BtnText_SDXL, "")),
+				tgbotapi.NewKeyboardButton(GetText(BtnText_Kandinsky, "")),
+			),
+		)
 	case btn_Languages:
 		keyboard = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
@@ -61,7 +68,35 @@ func GetButton(btn Button, lang string) (keyboard any) {
 				tgbotapi.NewKeyboardButton("4K"),
 				tgbotapi.NewKeyboardButton("Anime"),
 			))
-	case btn_KandNewgen:
+
+		//SDXL
+	case btn_SDXLStyles:
+		keyboard = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton("No style"),
+				tgbotapi.NewKeyboardButton("3D model"),
+				tgbotapi.NewKeyboardButton("Photo"),
+				tgbotapi.NewKeyboardButton("Neon punk"),
+			),
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton("Cinematic"),
+				tgbotapi.NewKeyboardButton("Analog film"),
+				tgbotapi.NewKeyboardButton("Fantasy art"),
+				tgbotapi.NewKeyboardButton("Anime"),
+			),
+		)
+
+	//IMAGE
+	case btn_ImgNewgenFull:
+		keyboard = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(GetText(BtnText_ChangeQuerryText, lang)),
+				tgbotapi.NewKeyboardButton(GetText(BtnText_ChooseAnotherStyle, lang)),
+			),
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(GetText(BtnText_Upscale, lang)),
+			))
+	case btn_ImgNewgen:
 		keyboard = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(GetText(BtnText_ChangeQuerryText, lang)),

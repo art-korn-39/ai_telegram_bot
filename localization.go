@@ -16,23 +16,24 @@ const (
 
 	// COMMON
 
-	MsgText_Start                   Text = iota
-	MsgText_LastOperationInProgress      // Последняя операция ещё выполняется, дождитесь её завершения перед отправкой новых запросов.
-	MsgText_SubscribeForUsing            // Для продолжения использования бота необходимо подписаться на канал👇
-	MsgText_UnexpectedError              // Произошла непредвиденная ошибка, попробуйте позже.
-	MsgText_AiNotSelected                // Не выбрана нейросеть для обработки запроса.
-	MsgText_AfterRecoveryProd            // Функциональность бота восстановлена. Приносим извинения за неудобства.
-	MsgText_AfterRecoveryDebug           // Этот бот предназначен для тестирования и отладки, полностью рабочий и бесплатный находится здесь: @AI_free_chat_bot
-	MsgText_HelloCanIHelpYou             // Привет! Чем могу помочь?
-	MsgText_SelectOption                 // Выберите один из предложенных вариантов:
-	MsgText_UnknownCommand               // Неизвестная команда
-	MsgText_EndDialog                    // Завершить диалог
-	MsgText_LanguageChanged              // Язык успешено изменён!
+	MsgText_Start                     Text = iota
+	MsgText_Account                        // Описание аккаунта
+	MsgText_LastOperationInProgress        // Последняя операция ещё выполняется, дождитесь её завершения перед отправкой новых запросов.
+	MsgText_SubscribeForUsing              // Для продолжения использования бота необходимо подписаться на канал👇
+	MsgText_UnexpectedError                // Произошла непредвиденная ошибка, попробуйте позже.
+	MsgText_AiNotSelected                  // Не выбрана нейросеть для обработки запроса.
+	MsgText_AfterRecoveryProd              // Функциональность бота восстановлена. Приносим извинения за неудобства.
+	MsgText_AfterRecoveryDebug             // Этот бот предназначен для тестирования и отладки, полностью рабочий и бесплатный находится здесь: @AI_free_chat_bot
+	MsgText_HelloCanIHelpYou               // Привет! Чем могу помочь?
+	MsgText_SelectOption                   // Выберите один из предложенных вариантов:
+	MsgText_UnknownCommand                 // Неизвестная команда
+	MsgText_EndDialog                      // Завершить диалог
+	MsgText_LanguageChanged                // Язык успешено изменён!
+	MsgText_DailyRequestLimitExceeded      // Достигнут дневной лимит запросов, дождитесь обновления лимита (%d ч. %d мин.) или воспользуйтесь другой нейросетью.
 
 	// GEMINI
 
 	MsgText_GeminiHello                 // Вас приветствует Gemini Pro от компании Google 🚀
-	MsgText_DailyRequestLimitExceeded   // Превышен дневной лимит запросов, дождитесь обновления лимита (%d ч. %d мин.) или воспользуйтесь другой нейросетью.
 	MsgText_WriteQuestionToImages       // Напишите свой вопрос к загруженным изображениям
 	MsgText_UploadImages                // Загрузите одну или несколько картинок
 	MsgText_PhotosUploadedWriteQuestion // Загружено фотографий: %d\nНапишите свой вопрос.\nНапример:\n\"Кто на фотографии?\"\n\"Чем отличаются эти картинки?\"
@@ -55,7 +56,7 @@ const (
 	MsgText_ChatGPTDialogStarted                  // Запущен диалог с СhatGPT, чтобы очистить контекст от предыдущих сообщений - нажмите кнопку "Очистить контекст". Это позволяет сократить расход токенов.
 	MsgText_DialogContextCleared                  // Контекст диалога очищен
 	MsgText_GenerateAudioFromText                 // Сгенерировать аудио из текста
-	MsgText_DailyTokenLimitExceeded               // Превышен дневной лимит токенов, дождитесь обновления лимита (%d ч. %d мин.) или воспользуйтесь другой нейросетью.
+	MsgText_DailyTokenLimitExceeded               // Достигнут дневной лимит токенов, дождитесь обновления лимита (%d ч. %d мин.) или воспользуйтесь другой нейросетью.
 	MsgText_ErrorWhileProcessingRequest           // Во время обработки запроса произошла ошибка. Пожалуйста, попробуйте ещё раз позже.
 	MsgText_WriteQuestionToImage                  // Напишите свой вопрос к загруженному изображению.
 	MsgText_UploadImage                           // Загрузите картинку
@@ -64,15 +65,25 @@ const (
 
 	// KANDINSKY
 
-	MsgText_EnterYourRequest                // Введите свой запрос:
+	MsgText_EnterDescriptionOfPicture       // Введите описание картинки:
 	MsgText_DescriptionTextNotExceed900Char // Текст описания картинки не должен превышать 900 символов.
 	MsgText_SelectStyleForImage             // Выберите стиль, в котором генерировать изображение.
 	MsgText_SelectStyleFromOptions          // Выберите стиль из предложенных вариантов.
-	MsgText_ImageGenerationStarted          // Запущена генерация картинки, среднее время выполнения 30-40 секунд.
+	MsgText_ImageGenerationStarted1         // Запущена генерация картинки, среднее время выполнения 30-40 секунд.
 	MsgText_ResultImageGeneration           // Результат генерации по запросу "%s", стиль: "%s"
 	MsgText_ErrorWhileSendingPicture        // При отправке картинки возникла ошибка, попробуйте ещё раз позже.
 	MsgText_FailedGenerateImage1            // Не удалось сгенерировать изображение, попробуйте позже.
 	MsgText_FailedGenerateImage2            // Не удалось сгенерировать изображение. Попробуйте изменить текст описания картинки.
+
+	// SDXL
+
+	MsgText_SDXLinfo                         // Осталось генераций и улучшений: <b>%d</b> <i>(обновится через: %d ч. %d мин.)</i>
+	MsgText_DescriptionTextNotExceed2000Char // Текст описания картинки не должен превышать 2000 символов.
+	MsgText_ErrorTranslatingIntoEnglish      // Возникла ошибка при переводе на английский язык, попробуйте изменить текст запроса.
+	MsgText_ImageGenerationStarted2          // Запущена генерация картинки...
+	MsgText_ImageProcessingStarted           // Запущена обработка картинки...
+	MsgText_NoImageFoundToProcess            // Не найдена картинка для обработки.
+	MsgText_FailedImageUpscale               // Не удалось повысить качество картинки, попробуйте другое изображение.
 
 	// BAD REQUEST
 
@@ -83,7 +94,12 @@ const (
 
 	// BUTTONS
 
-	BtnText_Subscribe             // ✅Подписаться
+	BtnText_Gemini    // 🚀 Gemini
+	BtnText_ChatGPT   // 🤖 ChatGPT
+	BtnText_Kandinsky // 🗿 Kandinsky
+	BtnText_SDXL      // 🏔 SDXL 1.0
+
+	BtnText_Subscribe             // ✅ Подписаться
 	BtnText_SendPictureWithText   // 🖼 AI Vision
 	BtnText_ChangeQuestionText    // Изменить вопрос
 	BtnText_ChooseAnotherVoice    // Изменить голос
@@ -93,31 +109,39 @@ const (
 	BtnText_UploadNewImages       // Загрузить новые фото
 	BtnText_UploadNewImage        // Загрузить новое фото
 	BtnText_EndDialog             // Завершить диалог
-	BtnText_StartDialog           // Начать диалог
-	BtnText_GenerateAudioFromText // Озвучить текст
+	BtnText_StartDialog           // 🎭 Начать диалог
+	BtnText_GenerateAudioFromText // 🗣 Озвучить текст
 	BtnText_ClearContext          // Очистить контекст
+	BtnText_Upscale               // ⭐️ Улучшить (SDXL)
 )
 
 func init() {
 
 	// common
 	dictionary[MsgText_Start] = textForStarting()
+	dictionary[MsgText_Account] = textForAccount()
 
 	dictionary[MsgText_ChatGPTHello] = MultiText{
 		ru: "Вас приветствует ChatGPT 3.5 Turbo 🤖\n\nТекущий остаток токенов: <b>%d</b> <i>(обновится через: %d ч. %d мин.)</i>",
 		en: "Welcome to ChatGPT 3.5 Turbo 🤖\n\nCurrent balance of tokens: <b>%d</b> <i>(updated in: %d hours %d min.)</i>"}
+	dictionary[MsgText_SDXLinfo] = MultiText{
+		ru: "Осталось генераций и улучшений: <b>%d</b> <i>(обновится через: %d ч. %d мин.)</i>",
+		en: "Generations and upscales left: <b>%d</b> <i>(updated in: %d hours %d min.)</i>"}
 	dictionary[MsgText_GeminiHello] = MultiText{
 		ru: "Вас приветствует Gemini Pro от компании Google 🚀",
 		en: "Welcome to Gemini Pro from Google 🚀"}
-	dictionary[MsgText_EnterYourRequest] = MultiText{
-		ru: "Введите свой запрос:",
-		en: "Enter your request:"}
+	dictionary[MsgText_EnterDescriptionOfPicture] = MultiText{
+		ru: "Введите описание картинки:",
+		en: "Enter a description of the picture:"}
 	dictionary[MsgText_EnterTextForAudio] = MultiText{
 		ru: "Введите текст для аудио:",
 		en: "Enter text for audio:"}
 	dictionary[MsgText_ErrorWhileProcessingRequest] = MultiText{
 		ru: "Во время обработки запроса произошла ошибка. Пожалуйста, попробуйте ещё раз позже.",
 		en: "An error occurred while processing the request. Please try again later."}
+	dictionary[MsgText_ErrorTranslatingIntoEnglish] = MultiText{
+		ru: "Возникла ошибка при переводе на английский язык, попробуйте изменить текст запроса.",
+		en: "There was an error translating into English, try changing the text of the request."}
 	dictionary[MsgText_SelectVoice] = MultiText{
 		ru: "Выберите голос для озвучивания текста:",
 		en: "Select a voice to read the text:"}
@@ -145,15 +169,18 @@ func init() {
 	dictionary[MsgText_LimitOf4097TokensReached] = MultiText{
 		ru: "Достигнут лимит в 4097 токенов, контекст диалога очищен.",
 		en: "The limit of 4097 tokens has been reached, the dialog context has been cleared."}
+	dictionary[MsgText_DailyRequestLimitExceeded] = MultiText{
+		ru: "Достигнут дневной лимит запросов, дождитесь обновления лимита (%d ч. %d мин.) или воспользуйтесь другой нейросетью.",
+		en: "The daily request limit has been exceeded, wait until the limit is updated (%d hours %d min.) or use another neural network."}
+	dictionary[MsgText_DailyTokenLimitExceeded] = MultiText{
+		ru: "Достигнут дневной лимит токенов, дождитесь обновления лимита (%d ч. %d мин.) или воспользуйтесь другой нейросетью.",
+		en: "The daily token limit has reached, wait until the limit is updated (%d hours %d min.) or use another neural network."}
 	dictionary[MsgText_EndDialog] = MultiText{
 		ru: "Завершить диалог",
 		en: "End dialog"}
 	dictionary[MsgText_PhotosUploadedWriteQuestion] = MultiText{
 		ru: "Загружено фотографий: %d\nНапишите свой вопрос.\nНапример:\n\"Кто на фотографии?\"\n\"Чем отличаются эти картинки?\"",
 		en: "Photos uploaded: %d\nWrite your question.\nFor example:\n\"Who is in the photo?\"\n\"What is the difference between these pictures?\""}
-	dictionary[MsgText_PhotoUploadedWriteQuestion] = MultiText{
-		ru: "Напишите свой запрос.\nНапример:\n\"Реши тест на картинке\"\n\"Как называется это блюдо?\"",
-		en: "Write your request.\nFor example:\n\"Solve the test in the picture\"\n\"What is the name of this dish?\""}
 	dictionary[MsgText_UploadImages] = MultiText{
 		ru: "Загрузите одну или несколько картинок",
 		en: "Upload one or more images"}
@@ -166,9 +193,15 @@ func init() {
 	dictionary[MsgText_ChatGPTDialogStarted] = MultiText{
 		ru: `Запущен диалог с СhatGPT, чтобы очистить контекст от предыдущих сообщений - нажмите кнопку "Очистить контекст". Это позволяет сократить расход токенов.`,
 		en: `A dialog has started with ChatGPT, to clear the context from previous messages - click the "Clear context" button. This allows you to reduce the consumption of tokens.`}
-	dictionary[MsgText_ImageGenerationStarted] = MultiText{
+	dictionary[MsgText_ImageGenerationStarted1] = MultiText{
 		ru: "Запущена генерация картинки, среднее время выполнения 30-40 секунд.",
-		en: "The generation of the image has started, the average execution time is 30-40 seconds."}
+		en: "Generation of the image has started, the average execution time is 30-40 seconds."}
+	dictionary[MsgText_ImageGenerationStarted2] = MultiText{
+		ru: "Запущена генерация картинки...",
+		en: "Generation of the image has started..."}
+	dictionary[MsgText_ImageProcessingStarted] = MultiText{
+		ru: "Запущена обработка картинки...",
+		en: "Processing of the image has started..."}
 	dictionary[MsgText_AudioFileCreationStarted] = MultiText{
 		ru: "Запущено создание аудиофайла...",
 		en: "Audio file creation started..."}
@@ -181,15 +214,24 @@ func init() {
 	dictionary[MsgText_WriteQuestionToImage] = MultiText{
 		ru: "Напишите свой вопрос к загруженному изображению.",
 		en: "Write your question to the uploaded image."}
+	dictionary[MsgText_PhotoUploadedWriteQuestion] = MultiText{
+		ru: "Напишите свой запрос.\nНапример:\n\"Реши тест на картинке\"\n\"Как называется это блюдо?\"",
+		en: "Write your request.\nFor example:\n\"Solve the test in the picture\"\n\"What is the name of this dish?\""}
 	dictionary[MsgText_WriteTextForVoicing] = MultiText{
 		ru: "Напишите текст для озвучивания:",
 		en: "Write the text for voicing:"}
 	dictionary[MsgText_AiNotSelected] = MultiText{
 		ru: "Не выбрана нейросеть для обработки запроса.",
 		en: "The neural network for processing requests has not been selected."}
+	dictionary[MsgText_NoImageFoundToProcess] = MultiText{
+		ru: "Не найдена картинка для обработки.",
+		en: "No image found to process."}
 	dictionary[MsgText_FailedLoadImages] = MultiText{
 		ru: "Не удалось загрузить изображение, попробуйте ещё раз.",
 		en: "Failed to load image, try again. Failed to load image, try again."}
+	dictionary[MsgText_FailedImageUpscale] = MultiText{
+		ru: "Не удалось повысить качество картинки, попробуйте другое изображение.",
+		en: "Could not improve picture quality, try another image."}
 	dictionary[MsgText_BadRequest1] = MultiText{
 		ru: "Не удалось получить ответ от сервиса. Попробуйте изменить текст запроса или использовать другие изображения.",
 		en: "Failed to receive a response from the service. Try changing your request text or using different images."}
@@ -214,12 +256,6 @@ func init() {
 	dictionary[MsgText_LastOperationInProgress] = MultiText{
 		ru: "Последняя операция ещё выполняется, дождитесь её завершения перед отправкой новых запросов.",
 		en: "The last operation is still in progress, please wait until it completes before sending new requests."}
-	dictionary[MsgText_DailyRequestLimitExceeded] = MultiText{
-		ru: "Превышен дневной лимит запросов, дождитесь обновления лимита (%d ч. %d мин.) или воспользуйтесь другой нейросетью.",
-		en: "The daily request limit has been exceeded, wait until the limit is updated (%d hours %d min.) or use another neural network."}
-	dictionary[MsgText_DailyTokenLimitExceeded] = MultiText{
-		ru: "Превышен дневной лимит токенов, дождитесь обновления лимита (%d ч. %d мин.) или воспользуйтесь другой нейросетью.",
-		en: "The daily token limit has been exceeded, wait until the limit is updated (%d hours %d min.) or use another neural network."}
 	dictionary[MsgText_ErrorSendingAudioFile] = MultiText{
 		ru: "При отправке аудиофайла возникла ошибка, попробуйте ещё раз позже.",
 		en: "There was an error sending the audio file, please try again later."}
@@ -247,6 +283,9 @@ func init() {
 	dictionary[MsgText_DescriptionTextNotExceed900Char] = MultiText{
 		ru: "Текст описания картинки не должен превышать 900 символов.",
 		en: "The description text of the picture should not exceed 900 characters."}
+	dictionary[MsgText_DescriptionTextNotExceed2000Char] = MultiText{
+		ru: "Текст описания картинки не должен превышать 2000 символов.",
+		en: "The description text of the picture should not exceed 2000 characters."}
 	dictionary[MsgText_AfterRecoveryProd] = MultiText{
 		ru: "Функциональность бота восстановлена. Приносим извинения за неудобства.",
 		en: "The bot's functionality has been restored. We apologize for the inconvenience."}
@@ -259,6 +298,11 @@ func init() {
 
 	// buttons
 
+	dictionary[BtnText_Gemini] = MultiText{ru: "🚀 Gemini", en: "🚀 Gemini"}
+	dictionary[BtnText_ChatGPT] = MultiText{ru: "🤖 ChatGPT", en: "🤖 ChatGPT"}
+	dictionary[BtnText_Kandinsky] = MultiText{ru: "🗿 Kandinsky", en: "🗿 Kandinsky"}
+	dictionary[BtnText_SDXL] = MultiText{ru: "🏔 Stable Diffusion XL", en: "🏔 Stable Diffusion XL"}
+
 	dictionary[BtnText_SendPictureWithText] = MultiText{ru: "🖼 AI Vision", en: "🖼 AI Vision"}
 	dictionary[BtnText_ChangeQuestionText] = MultiText{ru: "Изменить вопрос", en: "Change question"}
 	dictionary[BtnText_ChooseAnotherVoice] = MultiText{ru: "Изменить голос", en: "Change voice"}
@@ -268,10 +312,11 @@ func init() {
 	dictionary[BtnText_EndDialog] = MultiText{ru: "Завершить диалог", en: "End dialog"}
 	dictionary[BtnText_UploadNewImages] = MultiText{ru: "Загрузить новые фото", en: "Upload new images"}
 	dictionary[BtnText_UploadNewImage] = MultiText{ru: "Загрузить новое фото", en: "Upload new image"}
-	dictionary[BtnText_StartDialog] = MultiText{ru: "Начать диалог", en: "Start dialog"}
-	dictionary[BtnText_GenerateAudioFromText] = MultiText{ru: "Озвучить текст", en: "Audio from text"}
+	dictionary[BtnText_StartDialog] = MultiText{ru: "🎭 Начать диалог", en: "🎭 Start dialog"}
+	dictionary[BtnText_GenerateAudioFromText] = MultiText{ru: "🗣 Озвучить текст", en: "🗣 Audio from text"}
 	dictionary[BtnText_ClearContext] = MultiText{ru: "Очистить контекст", en: "Clear context"}
-	dictionary[BtnText_Subscribe] = MultiText{ru: "✅Подписаться", en: "✅Subscribe"}
+	dictionary[BtnText_Subscribe] = MultiText{ru: "✅ Подписаться", en: "✅ Subscribe"}
+	dictionary[BtnText_Upscale] = MultiText{ru: "⭐️ Улучшить (SDXL)", en: "⭐️ Upscale (SDXL)"}
 
 }
 
@@ -291,43 +336,139 @@ func GetText(key Text, lang string) string {
 
 }
 
+func GetLevelName(level UserLevel, lang string) string {
+
+	var result string
+	if level == Basic {
+		if lang == "ru" || lang == "uk" {
+			result = "Базовый"
+		} else {
+			result = "Basic"
+		}
+	} else if level == Advanced {
+		if lang == "ru" || lang == "uk" {
+			result = "Продвинутый"
+		} else {
+			result = "Advanced"
+		}
+	}
+
+	return result
+
+}
+
 func textForStarting() MultiText {
 
 	return MultiText{
 		ru: `Привет, %s! 👋
 		
-Я бот для работы с нейросетями (v%s).
+Я бот для работы с нейросетями.
 С моей помощью ты можешь использовать следующие модели:
 	
 <b>Gemini</b> - генерация текста и анализ изображений <i>(Google)</i>
 <b>ChatGPT</b> - генерация текста, аудио и анализ изображений <i>(OpenAI)</i>
 <b>Kandinsky</b> - создание изображений по текстовому описанию <i>(Sber AI)</i>
+<b>Stable Diffusion XL</b> - создание изображений по текстовому описанию
 	
 <u>Последние обновления:</u>
-<i>09.01.24 - 🎧 добавлена генерация аудио из текста в ChatGPT.</i>
 <i>14.01.24 - 🇺🇸 добавлена поддержка английского языка.</i>
 <i>19.01.24 - 🏞 добавлена обработка картинок с вопросами в ChatGPT-4 Vision.</i>
+<i>06.02.24 - 🏔 добавлен Stable Diffusion XL для получения изображений высокого качества.</i>
 
 Бот полностью бесплатный, удачных генераций 🔥`,
 
 		en: `Hello, %s! 👋
 		
-I am a bot for working with neural networks (v%s).
+I am a bot for working with neural networks.
 With my help you can use the following models:
 			
 <b>Gemini</b> - text generation and image analysis <i>(Google)</i>
 <b>ChatGPT</b> - text & audio generation and image analysis <i>(OpenAI)</i>
 <b>Kandinsky</b> - creating images based on text description <i>(Sber AI)</i>
+<b>Stable Diffusion XL</b> - creating images based on text description
 			
 <u>Latest updates:</u>
-<i>09.01.24 - 🎧 added generation of audio from text in ChatGPT.</i>
 <i>14.01.24 - 🇺🇸 added English language support.</i>
 <i>19.01.24 - 🏞 added processing of pictures with questions in ChatGPT-4 Vision.</i>
+<i>06.02.24 - 🏔 added Stable Diffusion XL for high quality images.</i>
 
 Bot is absolutely free, successful generations 🔥`,
 	}
 
-	//Чтобы начать - просто выбери подходящую нейросеть и задай ей вопрос (или попроси сделать картинку), удачи 🔥`,
-	//To get started, just choose a suitable neural network and ask it a question (or ask it to take a picture), good luck 🔥`,
+}
+
+func textForAccount() MultiText {
+
+	return MultiText{
+		ru: `
+👤 ID Пользователя: <b>%d</b>
+⭐️ Уровень: <b>%s</b>
+✌️ Посещений подряд (дней): <b>%d</b>
+✅ Дата первого использования: <b>%s</b>
+----------------------------------------------
+Дневные лимиты:     
+🚀 Gemini запросы: <b>%d</b> (осталось <b>%d</b>)
+🤖 ChatGPT токены: <b>%d</b> (осталось <b>%d</b>)
+🗿 Kandinsky: <b>без ограничений</b>
+🏔 Stable Diffusion: <b>%d</b> (осталось <b>%d</b>)
+----------------------------------------------                
+		
+<i>Лимиты обновятся через : %d ч. %d мин.</i>
+			
+Регулярные пользователи бота (%d дней подряд и более) получают <b>%s</b> уровень, на котором доступно <b>%d</b> генераций Stable Diffusion и <b>%d</b> токенов ChatGPT в сутки 🔥`,
+
+		en: `
+👤 User ID: <b>%d</b>
+⭐️ Level: <b>%s</b>
+✌️ Consecutive visits (days): <b>%d</b>
+✅ Date of first use: <b>%s</b>
+----------------------------------------------
+Daily limits:
+🚀 Gemini requests: <b>%d</b> (<b>%d</b> left)
+🤖 ChatGPT tokens: <b>%d</b> (<b>%d</b> left)
+🗿 Kandinsky: <b>no limits</b>
+🏔 Stable Diffusion: <b>%d</b> (<b>%d</b> left)
+----------------------------------------------
+		
+<i>Limits will be updated in: %d hours %d minutes</i>
+		
+Regular users of the bot (%d days in a row or more) receive a <b>%s</b> level at which <b>%d</b> generations of Stable Diffusion and <b>%d</b> ChatGPT tokens are available per day 🔥`,
+	}
+
+}
+
+func textForAccount_tmp() MultiText {
+
+	return MultiText{
+		ru: `
+👤 ID Пользователя: <b>%d</b>
+⭐️ Уровень: <b>%s</b>
+✌️ Посещений подряд (дней): <b>%d</b>
+✅ Дата первого использования: <b>%s</b>
+----------------------------------------------
+Дневные лимиты:     
+🚀 Gemini запросы: <b>%d</b> (осталось <b>%d</b>)
+🤖 ChatGPT токены: <b>%d</b> (осталось <b>%d</b>)
+🗿 Kandinsky: <b>без ограничений</b>
+🏔 Stable Diffusion: <b>%d</b> (осталось <b>%d</b>)
+----------------------------------------------                
+		
+<i>Лимиты обновятся через : %d ч. %d мин.</i>`,
+
+		en: `
+👤 User ID: <b>%d</b>
+⭐️ Level: <b>%s</b>
+✌️ Consecutive visits (days): <b>%d</b>
+✅ Date of first use: <b>%s</b>
+----------------------------------------------
+Daily limits:
+🚀 Gemini requests: <b>%d</b> (<b>%d</b> left)
+🤖 ChatGPT tokens: <b>%d</b> (<b>%d</b> left)
+🗿 Kandinsky: <b>no limits</b>
+🏔 Stable Diffusion: <b>%d</b> (<b>%d</b> left)
+----------------------------------------------
+		
+<i>Limits will be updated in: %d hours %d minutes</i>`,
+	}
 
 }

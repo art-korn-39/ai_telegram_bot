@@ -11,20 +11,30 @@ import (
 )
 
 type UserInfo struct {
-	Username           string
-	ChatID             int64
-	Language           string
-	IsRunning          bool
-	Path               string
-	Options            map[string]string
-	Messages_ChatGPT   []openai.ChatCompletionMessage
-	Messages_Gemini    []*genai.Content
-	Images_Gemini      map[int]string // удалять не забыть
-	Tokens_used_gpt    int
-	Requests_today_gen int
-	Mutex              sync.Mutex
-	WG                 sync.WaitGroup
+	Username            string
+	ChatID              int64  `db:"chat_id"`
+	Language            string `db:"language"`
+	IsRunning           bool
+	Path                string
+	Options             map[string]string
+	Messages_ChatGPT    []openai.ChatCompletionMessage
+	Messages_Gemini     []*genai.Content
+	Images_Gemini       map[int]string // Удалять не забыть
+	Tokens_used_gpt     int
+	Requests_today_gen  int
+	Requests_today_sdxl int
+	Level               UserLevel
+	LevelChecked        bool // Если false, то выполняем EditLevel()
+	Mutex               sync.Mutex
+	WG                  sync.WaitGroup
 }
+
+type UserLevel int
+
+const (
+	Basic UserLevel = iota
+	Advanced
+)
 
 func NewUserInfo(m *tgbotapi.Message) *UserInfo {
 
@@ -64,6 +74,7 @@ func AccessIsAllowed(upd tgbotapi.Update, u *UserInfo) bool {
 
 	if upd.Message.Text == "/start" ||
 		upd.Message.Text == "/language" ||
+		upd.Message.Text == "/account" ||
 		u.Path == "language/type" {
 		return true
 	}
@@ -83,17 +94,17 @@ func AccessIsAllowed(upd tgbotapi.Update, u *UserInfo) bool {
 		return true
 	}
 
-	// Если пользователь сделал больше 2 операций, то без подписки не даем продолжить
+	// Если пользователь сделал больше 3 операций, то без подписки не даем продолжить
 	cnt, isErr := SQL_CountOfUserOperations(u)
 	if isErr {
 		msgText := GetText(MsgText_UnexpectedError, u.Language)
 		SendMessage(u, msgText, GetButton(btn_RemoveKeyboard, ""), "")
 		return false
-	} else if cnt >= 2 {
+	} else if cnt >= 3 {
 		msgText := GetText(MsgText_SubscribeForUsing, u.Language)
 		SendMessage(u, msgText, GetButton(btn_Subscribe, u.Language), "")
 		return false
-	} else { // меньше 2 операций
+	} else { // меньше 3 операций
 		return true
 	}
 
@@ -122,6 +133,10 @@ func (u *UserInfo) SetIsRunning(v bool) {
 	u.IsRunning = v
 }
 
+func (u *UserInfo) SetPath(v string) {
+	u.Path = v
+}
+
 func (u *UserInfo) FillLanguage(lang string) {
 	if u.Language == "" {
 		u.Language = lang
@@ -133,4 +148,39 @@ func (u *UserInfo) ImagesLoading(upd tgbotapi.Update) bool {
 		return true
 	}
 	return false
+}
+
+func (u *UserInfo) ClearTokens() {
+	u.Tokens_used_gpt = 0
+	u.Requests_today_gen = 0
+	u.Requests_today_sdxl = 0
+}
+
+// Выполняет обновление уровня пользователя
+// Если выполняется регламентно (с флагом customOperation = false),
+// то после установки уровня - флаг выполненной проверки не ставится
+func (u *UserInfo) EditLevel(customOperation bool) {
+
+	if customOperation {
+		if u.LevelChecked {
+			return
+		} else {
+			// Для подстраховки сразу запишем пустой лог пользователя, чтобы сегодняшний день попал в серию
+			SQL_AddLog(NewLog(u, "", Info, "first log today by user"))
+		}
+	}
+
+	days, _ := SQL_UserDayStreak(u)
+
+	//fmt.Println(days, u.Username)
+	if days >= Cfg.DaysForAdvancedStatus {
+		u.Level = Advanced
+	} else {
+		u.Level = Basic
+	}
+
+	if customOperation {
+		u.LevelChecked = true
+	}
+
 }

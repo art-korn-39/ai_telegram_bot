@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	tgbotapi "github.com/Syfaro/telegram-bot-api"
 )
@@ -13,8 +14,102 @@ func start(user *UserInfo, message *tgbotapi.Message) {
 		name = user.Username
 	}
 
-	msgtxt := fmt.Sprintf(GetText(MsgText_Start, user.Language), name, Version)
+	msgtxt := fmt.Sprintf(GetText(MsgText_Start, user.Language), name)
 	SendMessage(user, msgtxt, GetButton(btn_Models, ""), "HTML")
+
+}
+
+func account(user *UserInfo) {
+
+	if Cfg.RPD_sdxl == Cfg.RPD_advanced_sdxl {
+		account_tmp(user)
+		return
+	}
+
+	// пример +++
+	sample :=
+		`
+👤 ID Пользователя: <b>%d</b>
+⭐️ Уровень: <b>%s</b>
+✌️ Посещений подряд (дней): <b>%d</b>
+✅ Дата первого использования: <b>%s</b>
+----------------------------------------------
+Дневные лимиты:     
+🚀 Gemini запросы: <b>%d</b> (осталось <b>%d</b>)
+🤖 ChatGPT токены: <b>%d</b> (осталось <b>%d</b>)
+🗿 Kandinsky: <b>без ограничений</b>
+🏔 Stable Diffusion: <b>%d</b> (осталось <b>%d</b>)
+----------------------------------------------                
+
+<i>Лимиты обновятся через : %d ч. %d мин.</i>
+	
+Регулярные пользователи бота (%d дней подряд и более) получают <b>%s</b> уровень, на котором доступно <b>%d</b> 
+генераций Stable Diffusion и <b>%d</b> токенов ChatGPT в сутки 🔥`
+
+	// пример ---
+
+	sample = GetText(MsgText_Account, user.Language)
+
+	duration := GetDurationToNextDay()
+	hours := int(duration.Hours())
+	minutes := int(duration.Minutes()) - hours*60
+	DayStreak, _ := SQL_UserDayStreak(user)
+	FirstDate, _ := SQL_GetFirstDate(user)
+
+	msgText := fmt.Sprintf(sample,
+		user.ChatID,                             // ID Пользователя
+		GetLevelName(user.Level, user.Language), // Уровень
+		DayStreak,                               // Посещений подряд (дней)
+		FirstDate.Format(time.DateOnly),         // Дата первого использования
+		Cfg.RPD_gen,                             // Gemini на день у пользователя
+		max(Cfg.RPD_gen-user.Requests_today_gen, 0), // Gemini остаток
+		Get_TPD_gpt(user), // ChatGPT на день у пользователя
+		max(Get_TPD_gpt(user)-user.Tokens_used_gpt, 0), // ChatGPT остаток
+		Get_RPD_sdxl(user), // Stable Diffusion на день у пользователя
+		max(Get_RPD_sdxl(user)-user.Requests_today_sdxl, 0), // Stable Diffusion остаток
+		hours, minutes, // time to refresh
+		Cfg.DaysForAdvancedStatus,             // дней для продвинутого уровня
+		GetLevelName(Advanced, user.Language), // Уровень строкой
+		Cfg.RPD_advanced_sdxl,                 // Stable Diffusion продвинутый
+		Cfg.TPD_advanced_gpt,                  // ChatGPT продвинутый
+	)
+
+	SendMessage(user, msgText, GetButton(btn_Models, ""), "HTML")
+
+}
+
+func account_tmp(user *UserInfo) {
+
+	MT := textForAccount_tmp()
+
+	var sample string
+	if user.Language == "ru" || user.Language == "uk" {
+		sample = MT.ru
+	} else {
+		sample = MT.en
+	}
+
+	duration := GetDurationToNextDay()
+	hours := int(duration.Hours())
+	minutes := int(duration.Minutes()) - hours*60
+	DayStreak, _ := SQL_UserDayStreak(user)
+	FirstDate, _ := SQL_GetFirstDate(user)
+
+	msgText := fmt.Sprintf(sample,
+		user.ChatID,                             // ID Пользователя
+		GetLevelName(user.Level, user.Language), // Уровень
+		DayStreak,                               // Посещений подряд (дней)
+		FirstDate.Format(time.DateOnly),         // Дата первого использования
+		Cfg.RPD_gen,                             // Gemini на день у пользователя
+		max(Cfg.RPD_gen-user.Requests_today_gen, 0), // Gemini остаток
+		Get_TPD_gpt(user), // ChatGPT на день у пользователя
+		max(Get_TPD_gpt(user)-user.Tokens_used_gpt, 0), // ChatGPT остаток
+		Get_RPD_sdxl(user), // Stable Diffusion на день у пользователя
+		max(Get_RPD_sdxl(user)-user.Requests_today_sdxl, 0), // Stable Diffusion остаток
+		hours, minutes, // time to refresh
+	)
+
+	SendMessage(user, msgText, GetButton(btn_Models, ""), "HTML")
 
 }
 

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"errors"
+	"fmt"
 	"time"
 
 	"github.com/google/generative-ai-go/genai"
@@ -116,5 +118,31 @@ func gen_DialogSendMessage(user *UserInfo, text string) {
 
 	msgText = string(result)
 	SendMessage(user, msgText, nil, "")
+
+}
+
+func gen_TranslateToEnglish(text string) (string, error) {
+
+	if IsEngByLoop(text) {
+		return text, nil
+	}
+
+	prompt := fmt.Sprintf(`translate to english next text:
+%s`, text)
+
+	chatSession := model_Gemini.StartChat()
+	resp, err := chatSession.SendMessage(ctx_Gemini, genai.Text(prompt))
+	if err != nil {
+		return "", err
+	}
+
+	if resp.Candidates[0].Content == nil {
+		err := errors.New("{gemini} resp.Candidates[0].Content = nil")
+		return "", err
+	}
+
+	result := resp.Candidates[0].Content.Parts[0].(genai.Text)
+
+	return string(result), nil
 
 }

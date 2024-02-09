@@ -27,9 +27,10 @@ func SaveLogs() {
 				WriteIntoFile(timeNow, v.ChatID, v.Author, v.Text)
 			}
 
-			if v.Text != sql_LostConnection {
+			if v.Author != sql_AddLog {
 				SQL_AddLog(v)
 			}
+
 		}
 	}
 }
@@ -50,9 +51,9 @@ func SaveUserStates() {
 
 }
 
-func ClearTokensEveryDay() {
+func EveryDayAt2400() {
 
-	defer FinishGorutine(nil, "panic in ClearTokensEveryDay()", false)
+	defer FinishGorutine(nil, "panic in EveryDayAt2400()", false)
 
 	for {
 
@@ -63,14 +64,16 @@ func ClearTokensEveryDay() {
 		// Ожидание до начала след. дня (Мск 00:00)
 		<-time.After(duration)
 
-		// Очистка токенов у пользователей
+		// Обход пользователей
 		for _, u := range ListOfUsers {
-			u.Tokens_used_gpt = 0
-			u.Requests_today_gen = 0
+			u.ClearTokens()        // Очистка токенов
+			u.LevelChecked = false // Сбрасываем флаг проверки уровня
+			u.EditLevel(false)     // Изменить уровень
 		}
 
 		SQL_SaveUserStates()
-		Logs <- NewLog(nil, "System", Info, "Счетчик использованных токенов очищен")
+
+		Logs <- NewLog(nil, "System", Info, "Счетчик использованных токенов очищен, пользовательские уровни обновлены")
 
 	}
 

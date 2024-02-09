@@ -9,6 +9,9 @@ from sys import argv
 
 script, datapath, text, style, userid, model_id, api, secret = argv
 
+# cd C:\DEV\GO\ai_telegram_bot
+# python C:/DEV/GO/ai_telegram_bot/scripts/generate_image.py C:/DEV/GO/ai_telegram_bot/data "Green forest near lake" "ANIME" "111" "4" "1B189E2CFA69FFD2130FC56294B96DA9" "7C0B7C7FE4FFA4F6EE9DF0CFA257167C"
+
 class Text2ImageAPI:
 
     def __init__(self, url, api_key, secret_key):
@@ -44,11 +47,10 @@ class Text2ImageAPI:
         #print(data)
         return data['uuid']
 
-    def check_generation(self, request_id, attempts=9, delay=5):
-        #1.20 - макс время генерации (полное)
-        #a 9  8  7  6  5  4  3    2    1
-        #t 15 20 26 33 41 50 1.00 1.11 1.23
-        #d 5  6  7  8  9  10 11   12   0
+    def check_generation(self, request_id, attempts=13, delay=5):
+        #a 13  12  11  10  9   8   7     6     5     4     3     2     1
+        #t 15  20  26  33  41  50  1.00  1.11  1.23  1.36  1.50  2.05  2.21
+        #d 5   6   7   8   9   10  11    12    13    14    15    16    0
         # меньше 10 секунд не бывает генераций, поэтому не пингуем в начале
         # t - в какой момент времени выполняется запрос, 0 это запуск скрипта
         # d - пауза после запроса
@@ -60,6 +62,8 @@ class Text2ImageAPI:
             if data['status'] == 'DONE':
                 #print(data)
                 return data['images']
+            #else:
+                #print(data)                    
 
             attempts -= 1
             
@@ -81,7 +85,7 @@ if __name__ == '__main__':
         base64_img  = images[0]
         base64_img_bytes = base64_img.encode('utf-8')
             
-        file_path = datapath+'/img_'+userid+'_kand_0.jpg'
+        file_path = datapath+'/img_'+userid+'_0.png'
             
         with open(file_path, 'wb') as file_to_save:
             decoded_image_data = base64.decodebytes(base64_img_bytes)

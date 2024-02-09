@@ -6,7 +6,6 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
-	"slices"
 	"strings"
 	"time"
 
@@ -27,21 +26,33 @@ func init() {
 	WorkDir = strings.ReplaceAll(filepath.Dir(callerFile), "\\", "/")
 }
 
-func MsgIsCommand(m *tgbotapi.Message) bool {
+// func MsgIsCommand(m *tgbotapi.Message) bool {
 
-	if slices.Contains(Models, strings.ToLower(m.Text)) {
-		return true
-	}
+// 	if slices.Contains(Models, strings.ToLower(m.Text)) {
+// 		return true
+// 	}
 
-	return m.IsCommand()
+// 	return m.IsCommand()
 
-}
+// }
 
 func MsgCommand(m *tgbotapi.Message) string {
 
-	if slices.Contains(Models, strings.ToLower(m.Text)) {
-		return strings.ToLower(m.Text)
+	Models := map[string]string{
+		GetText(BtnText_Gemini, ""):    "gemini",
+		GetText(BtnText_ChatGPT, ""):   "chatgpt",
+		GetText(BtnText_Kandinsky, ""): "kandinsky",
+		GetText(BtnText_SDXL, ""):      "sdxl",
 	}
+
+	value, ok := Models[m.Text]
+	if ok {
+		return value
+	}
+
+	// if slices.Contains(Models, strings.ToLower(m.Text)) {
+	// 	return strings.ToLower(m.Text)
+	// }
 
 	return m.Command()
 
@@ -77,7 +88,7 @@ func GetDurationToNextDay() time.Duration {
 	// округлили до начала дня
 	startDay := tomorrow.Truncate(time.Hour * 24)
 
-	// сколько времени до начала дня
+	// сколько времени до начала след. дня
 	// т.к. берется текущее время в UTC, то вычитаем 3 часа
 	duration := time.Until(startDay) - (time.Hour * 3)
 

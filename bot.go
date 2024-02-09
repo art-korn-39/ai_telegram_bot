@@ -40,6 +40,8 @@ func SendMessage(user *UserInfo, text string, ReplyMarkup any, ParseMod string) 
 		text = "/start for " + user.Username
 	} else if user.Path == "info" {
 		text = "/info for " + user.Username
+	} else if user.Path == "account" {
+		text = "/account for " + user.Username
 	}
 	Logs <- NewLog(user, "bot", Info, text)
 
@@ -61,6 +63,19 @@ func SendAudioMessage(user *UserInfo, filename string, caption string, ReplyMark
 func SendPhotoMessage(user *UserInfo, filename string, caption string, ReplyMarkup any) error {
 
 	Message := tgbotapi.NewPhotoUpload(user.ChatID, filename)
+	Message.Caption = caption
+	Message.ReplyMarkup = ReplyMarkup
+	_, err := Bot.Send(Message)
+
+	Logs <- NewLog(user, "bot", Info, filename)
+
+	return err
+
+}
+
+func SendFileMessage(user *UserInfo, filename string, caption string, ReplyMarkup any) error {
+
+	Message := tgbotapi.NewDocumentUpload(user.ChatID, filename)
 	Message.Caption = caption
 	Message.ReplyMarkup = ReplyMarkup
 	_, err := Bot.Send(Message)

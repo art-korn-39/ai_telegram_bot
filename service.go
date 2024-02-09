@@ -86,4 +86,8 @@ func MskTimeNow() time.Time {
 
 	return time.Now().UTC().Add(3 * time.Hour)
 
+	//UTC = 06:20
+	//UTC + 14 = 20:20 -> (PQ) 09.02 00:20
+	//UTC + 13 = 19:20 -> (PQ) 08.02 23:20
+
 }

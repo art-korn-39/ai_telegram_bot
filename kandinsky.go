@@ -28,7 +28,7 @@ var (
 // После команды "/kandinsky" или при вводе текста = "kandinsky"
 func kand_start(user *UserInfo) {
 
-	msgText := GetText(MsgText_EnterYourRequest, user.Language)
+	msgText := GetText(MsgText_EnterDescriptionOfPicture, user.Language)
 	SendMessage(user, msgText, GetButton(btn_RemoveKeyboard, ""), "")
 
 	user.Path = "kandinsky/text"
@@ -65,7 +65,7 @@ func kand_style(user *UserInfo, text string) {
 	user.Options["style"] = style
 	inputText := user.Options["text"]
 
-	msgText := GetText(MsgText_ImageGenerationStarted, user.Language)
+	msgText := GetText(MsgText_ImageGenerationStarted1, user.Language)
 	SendMessage(user, msgText, GetButton(btn_RemoveKeyboard, ""), "")
 
 	<-delay_Kandinsky
@@ -76,13 +76,15 @@ func kand_style(user *UserInfo, text string) {
 	res, err := SendRequestToKandinsky(inputText, style, user)
 	if err != nil {
 		Logs <- NewLog(user, "kandinsky", Error, err.Error())
-		SendMessage(user, res, GetButton(btn_KandNewgen, user.Language), "")
+		SendMessage(user, res, GetButton(btn_ImgNewgen, user.Language), "")
 	} else {
 		caption := fmt.Sprintf(GetText(MsgText_ResultImageGeneration, user.Language), inputText, text)
-		err := SendPhotoMessage(user, res, caption, GetButton(btn_KandNewgen, user.Language))
+		err := SendPhotoMessage(user, res, caption, GetButton(btn_ImgNewgenFull, user.Language))
 		if err != nil {
 			Logs <- NewLog(user, "kandinsky", Error, "{ImgSend} "+err.Error())
-			SendMessage(user, GetText(MsgText_ErrorWhileSendingPicture, user.Language), GetButton(btn_KandNewgen, user.Language), "")
+			SendMessage(user, GetText(MsgText_ErrorWhileSendingPicture, user.Language), GetButton(btn_ImgNewgen, user.Language), "")
+		} else {
+			user.Options["image"] = res
 		}
 	}
 
@@ -95,13 +97,17 @@ func kand_newgen(user *UserInfo, text string) {
 
 	switch text {
 	case GetText(BtnText_ChangeQuerryText, user.Language):
-		SendMessage(user, GetText(MsgText_EnterYourRequest, user.Language), GetButton(btn_RemoveKeyboard, ""), "")
+		SendMessage(user, GetText(MsgText_EnterDescriptionOfPicture, user.Language), GetButton(btn_RemoveKeyboard, ""), "")
 		user.Path = "kandinsky/text"
 	case GetText(BtnText_ChooseAnotherStyle, user.Language):
 		SendMessage(user, GetText(MsgText_SelectStyleForImage, user.Language), GetButton(btn_KandStyles, ""), "")
 		user.Path = "kandinsky/text/style"
+	case GetText(BtnText_Upscale, user.Language):
+		sdxl_Upscale(user)
+		user.Path = "kandinsky/text/style/newgen"
 	default:
-		// Предполагаем, что там новый вопрос к загруженным картинкам
+		// Предполагаем, что там новый запрос
+		user.Path = "kandinsky/text"
 		kand_text(user, text)
 	}
 

@@ -9,10 +9,11 @@ import (
 )
 
 // art39 : 403059287
+// apolo39 : 6648171361
 // https://elevenlabs.io/voice-lab
 
 const (
-	Version       = "2.3.4"
+	Version       = "2.4.0"
 	ChannelChatID = -1001997602646
 	ChannelURL    = "https://t.me/+6ZMACWRgFdRkNGEy"
 )
@@ -23,7 +24,6 @@ var (
 	Cfg             config
 	Logs            = make(chan Log, 10)
 	ListOfUsers     = map[int64]*UserInfo{}
-	Models          = []string{"gemini", "kandinsky", "chatgpt"}
 	admins          = []string{"Art_Korn_39", "MnNik0"}
 	recoveryChatID  = []int64{}
 	UserInfoChanged = false
@@ -58,8 +58,8 @@ func main() {
 	// При наличии изменений - регулярно обновляем инфо по юзерам в БД
 	go SaveUserStates()
 
-	// Каждый день в 00:00 по Мск очищаем счетчик токенов chat GPT
-	go ClearTokensEveryDay()
+	// Каждый день в 00:00 по Мск
+	go EveryDayAt2400()
 
 	// Обновление model_id каждые 20 минут
 	go Kandinsky_CheckModelID()
@@ -97,6 +97,9 @@ func main() {
 
 			// Фиксируем пользователя и входящее сообщение
 			Logs <- NewLog(User, "", Info, upd.Message.Text)
+
+			// Обновим уровень пользователя
+			User.EditLevel(true)
 
 			// Проверка подписки пользователя на канал
 			if !AccessIsAllowed(upd, User) {
@@ -200,6 +203,9 @@ func HandleMessage(u *UserInfo, m *tgbotapi.Message) {
 	case "start":
 		start(u, m)
 
+	case "account":
+		account(u)
+
 	case "language":
 		language_start(u)
 
@@ -263,6 +269,18 @@ func HandleMessage(u *UserInfo, m *tgbotapi.Message) {
 	case "chatgpt/type/image/text/newgen":
 		gpt_imgtext_newgen(u, m.Text)
 
+	case "sdxl":
+		sdxl_start(u)
+
+	case "sdxl/text":
+		sdxl_text(u, m.Text)
+
+	case "sdxl/text/style":
+		sdxl_style(u, m.Text)
+
+	case "sdxl/text/style/newgen":
+		sdxl_newgen(u, m.Text)
+
 	default:
 		if slices.Contains(admins, u.Username) {
 			switch cmd {
@@ -271,6 +289,8 @@ func HandleMessage(u *UserInfo, m *tgbotapi.Message) {
 			case "updconf":
 				LoadConfig()
 				SendMessage(u, "Config updated.", GetButton(btn_RemoveKeyboard, ""), "")
+			case "sendMessageToAllUsers":
+				sendMessageToAllUsers(u)
 			default:
 				SendMessage(u, GetText(MsgText_UnknownCommand, u.Language), GetButton(btn_Models, ""), "")
 			}

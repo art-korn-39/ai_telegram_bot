@@ -15,6 +15,7 @@ import (
 // https://www.sobyte.net/post/2021-06/sqlx-library-usage-guide/
 
 const sql_LostConnection = "lost connection to DB"
+const sql_AddLog = "SQL{AddLog}"
 
 type Operation struct {
 	date     time.Time
@@ -92,7 +93,8 @@ func SQL_LoadUserStates() {
 
 	stmt := `
 	SELECT
-		user_name, chat_id, path, options, tokens_used_gpt, language, requests_today_gen 
+		user_name, chat_id, path, options, tokens_used_gpt, 
+		language, requests_today_gen, requests_today_sdxl, level 
 	FROM 
 		user_states
 	`
@@ -110,7 +112,8 @@ func SQL_LoadUserStates() {
 			&u.Username, &u.ChatID,
 			&u.Path, &options,
 			&u.Tokens_used_gpt, &u.Language,
-			&u.Requests_today_gen); err != nil {
+			&u.Requests_today_gen, &u.Requests_today_sdxl,
+			&u.Level); err != nil {
 			Logs <- NewLog(nil, "SQL{LoadUserStates}", Error, err.Error())
 		}
 		u.Options = JSONtoMap(options)
@@ -142,12 +145,19 @@ func SQL_SaveUserStates() {
 		return
 	}
 
-	stmt = `INSERT INTO user_states (user_name, chat_id, path, options, tokens_used_gpt, language, requests_today_gen)
-	VALUES ($1, $2, $3, $4, $5, $6, $7)`
+	stmt = `INSERT INTO user_states (user_name, chat_id, path, options, 
+									 tokens_used_gpt, language, requests_today_gen, requests_today_sdxl, 
+									 level)
+	VALUES ($1, $2, $3, $4, 
+			$5, $6, $7, $8, 
+			$9)`
 
 	for _, v := range ListOfUsers {
 		optionsJSON := MapToJSON(v.Options)
-		_, err = tx.Exec(stmt, v.Username, v.ChatID, v.Path, optionsJSON, v.Tokens_used_gpt, v.Language, v.Requests_today_gen)
+		_, err = tx.Exec(stmt,
+			v.Username, v.ChatID, v.Path, optionsJSON,
+			v.Tokens_used_gpt, v.Language, v.Requests_today_gen, v.Requests_today_sdxl,
+			v.Level)
 		if err != nil {
 			Logs <- NewLog(nil, "SQL{SaveUserStates}", Error, err.Error())
 			return
@@ -217,7 +227,7 @@ func SQL_GetInfoOnDate(timestamp time.Time) (result map[string]int, errStr strin
 func SQL_AddLog(l Log) {
 
 	if db == nil {
-		Logs <- NewLog(nil, "SQL{AddLog}", Error, sql_LostConnection)
+		Logs <- NewLog(nil, sql_AddLog, Error, sql_LostConnection)
 		return
 	}
 
@@ -234,7 +244,7 @@ func SQL_AddLog(l Log) {
 		l.Text)
 
 	if err != nil {
-		Logs <- NewLog(nil, "SQL{AddLog}", Error, err.Error())
+		Logs <- NewLog(nil, sql_AddLog, Error, err.Error())
 		return
 	}
 
@@ -243,7 +253,7 @@ func SQL_AddLog(l Log) {
 func SQL_CountOfUserOperations(u *UserInfo) (count int, isErr bool) {
 
 	if db == nil {
-		Logs <- NewLog(nil, "SQL{LoadUserStates}", Error, sql_LostConnection)
+		Logs <- NewLog(nil, "SQL{CountOfUserOperations}", Error, sql_LostConnection)
 		return 0, true
 	}
 
@@ -271,5 +281,127 @@ func SQL_CountOfUserOperations(u *UserInfo) (count int, isErr bool) {
 	}
 
 	return count, false
+
+}
+
+func SQL_GetAllUsers() (users []*UserInfo, isErr bool) {
+
+	if db == nil {
+		Logs <- NewLog(nil, "SQL{GetAllUsers}", Error, sql_LostConnection)
+		return nil, true
+	}
+
+	stmt := `
+	WITH chats as 
+		(select chat_id 
+		from user_states
+		union
+		select chat_id 
+		from logs
+		union
+		select chat_id 
+		from operations)
+
+	select 
+		c.chat_id as chat_id, 
+		COALESCE(us.language, '') as language
+	from chats c
+		left join user_states us 
+		on c.chat_id = us.chat_id
+	order by c.chat_id;`
+
+	err := db.Select(&users, stmt)
+	if err != nil {
+		Logs <- NewLog(nil, "SQL{GetAllUsers}", Error, err.Error())
+		return nil, true
+	}
+
+	return users, false
+
+}
+
+// Возвращает длину последней серии дней
+// Вернёт 0 если вчера и сегодня не было записей в логах
+// Вернёт 1 если записи были сегодня, а вчера нет
+func SQL_UserDayStreak(user *UserInfo) (days int, isErr bool) {
+
+	if db == nil {
+		Logs <- NewLog(nil, "SQL{UserDayStreak}", Error, sql_LostConnection)
+		return 0, true
+	}
+
+	Statement := `
+	-- все дни использования и предыдущий день
+	with tmp1 as (select distinct 
+		DATE(date) as day,
+		DATE(date - interval '1 day') as prevDay
+		from logs 	
+	where chat_id = $1
+		order by day),
+			
+	-- все дни использования и метка начала каждой серии
+	tmp2 as (select t1.day as day, t2.day is null as firstDay
+		from tmp1 t1
+		left join tmp1 t2 on t1.prevDay = t2.day),
+			
+	-- первый день самой последней серии использования
+	tmp3 as (select max(day) as day 
+		from (select day from tmp2 where firstDay = true) ),
+	
+	-- последний день использования бота
+	lastDay	as ( select max(day) as day from tmp1 ),
+	
+	-- были операции за день до момента среза
+	prevDayHasLogs as ( select day >= ( date_trunc('day', $2::timestamp) - interval '1 day' ) as stat from lastDay )
+			
+	select 
+	count(*) as days
+	from tmp1 t 
+	inner join tmp3 filter 
+	on t.day >= filter.day
+	inner join prevDayHasLogs prevDayHasLogs
+	on true
+	where prevDayHasLogs.stat = true;`
+
+	//fmt.Println(MskTimeNow().Format(time.DateTime))
+
+	var days64 int64
+	err := db.Get(&days64, Statement, user.ChatID, MskTimeNow())
+	if err != nil {
+		Logs <- NewLog(nil, "SQL{UserDayStreak}", Error, err.Error())
+		return 0, true
+	}
+
+	return int(days64), false
+
+}
+
+func SQL_GetFirstDate(user *UserInfo) (date time.Time, isErr bool) {
+
+	if db == nil {
+		Logs <- NewLog(nil, "SQL{GetFirstDate}", Error, sql_LostConnection)
+		return time.Time{}, true
+	}
+
+	stmt := `
+	with t as (select date as date 
+		from operations
+		where chat_id = $1 
+		union 
+		select date 
+		from logs
+		where chat_id = $1)
+
+	select 
+	DATE(min(date)) as date 
+	from t;`
+
+	err := db.Get(&date, stmt, user.ChatID)
+	if err != nil {
+		Logs <- NewLog(nil, "SQL{GetFirstDate}", Error, err.Error())
+		return date, true
+	}
+
+	return date, false
 
 }

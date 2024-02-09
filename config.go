@@ -8,21 +8,26 @@ import (
 )
 
 type config struct {
-	TelegramBotToken  string
-	OpenAIToken       string
-	GeminiKey         string
-	Kandinsky_Key     string
-	Kandinsky_Secret  string
-	TPD_gpt           int
-	RPD_gen           int
-	DB_name           string
-	DB_host           string
-	DB_port           int
-	DB_user           string
-	DB_password       string
-	CheckSubscription bool
-	Debug             bool
-	WhiteList         []string
+	TelegramBotToken      string
+	OpenAIToken           string
+	GeminiKey             string
+	Kandinsky_Key         string
+	Kandinsky_Secret      string
+	Stability_Key         string
+	TPD_gpt               int
+	RPD_gen               int
+	RPD_sdxl              int
+	TPD_advanced_gpt      int
+	RPD_advanced_sdxl     int
+	DaysForAdvancedStatus int
+	DB_name               string
+	DB_host               string
+	DB_port               int
+	DB_user               string
+	DB_password           string
+	CheckSubscription     bool
+	Debug                 bool
+	WhiteList             []string
 }
 
 func LoadConfig() {
@@ -53,4 +58,22 @@ func LoadConfig() {
 
 	log.Println("Config download complete")
 
+}
+
+func Get_TPD_gpt(u *UserInfo) (res int) {
+	if u.Level == Basic {
+		res = Cfg.TPD_gpt
+	} else if u.Level == Advanced {
+		res = Cfg.TPD_advanced_gpt
+	}
+	return
+}
+
+func Get_RPD_sdxl(u *UserInfo) (res int) {
+	if u.Level == Basic {
+		res = Cfg.RPD_sdxl
+	} else if u.Level == Advanced {
+		res = Cfg.RPD_advanced_sdxl
+	}
+	return
 }
