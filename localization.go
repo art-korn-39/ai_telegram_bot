@@ -373,7 +373,7 @@ func textForStarting() MultiText {
 <u>Последние обновления:</u>
 <i>14.01.24 - 🇺🇸 добавлена поддержка английского языка.</i>
 <i>19.01.24 - 🏞 добавлена обработка картинок с вопросами в ChatGPT-4 Vision.</i>
-<i>06.02.24 - 🏔 добавлен Stable Diffusion XL для получения изображений высокого качества.</i>
+<i>09.02.24 - 🏔 добавлен Stable Diffusion XL для получения изображений высокого качества.</i>
 
 Бот полностью бесплатный, удачных генераций 🔥`,
 
@@ -390,7 +390,7 @@ With my help you can use the following models:
 <u>Latest updates:</u>
 <i>14.01.24 - 🇺🇸 added English language support.</i>
 <i>19.01.24 - 🏞 added processing of pictures with questions in ChatGPT-4 Vision.</i>
-<i>06.02.24 - 🏔 added Stable Diffusion XL for high quality images.</i>
+<i>09.02.24 - 🏔 added Stable Diffusion XL for high quality images.</i>
 
 Bot is absolutely free, successful generations 🔥`,
 	}

@@ -340,13 +340,20 @@ func SQL_UserDayStreak(user *UserInfo) (days int, isErr bool) {
 		order by day),
 			
 	-- все дни использования и метка начала каждой серии
-	tmp2 as (select t1.day as day, t2.day is null as firstDay
+	tmp2 as (select 
+		t1.day as day, 
+		t2.day is null as firstDay
 		from tmp1 t1
-		left join tmp1 t2 on t1.prevDay = t2.day),
+		left join tmp1 t2 
+			on t1.prevDay = t2.day),
 			
 	-- первый день самой последней серии использования
-	tmp3 as (select max(day) as day 
-		from (select day from tmp2 where firstDay = true) ),
+	tmp3 as (select 
+		max(day) as day 
+		from (select 
+			day 
+			from tmp2 
+			where firstDay = true) as t ),
 	
 	-- последний день использования бота
 	lastDay	as ( select max(day) as day from tmp1 ),
