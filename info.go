@@ -35,22 +35,23 @@ func GetInfo() string {
 
 	return fmt.Sprintf(
 		`All time
-Gemini: %d | ChatGPT: %d | Kandinsky: %d
+Gemini: %d | ChatGPT: %d | Kandinsky: %d | SDXL: %d
 
 From 30.12.23
 Users: %d
-Gemini: %d | ChatGPT: %d | Kandinsky: %d
+Gemini: %d | ChatGPT: %d | Kandinsky: %d | SDXL: %d
 
 Last 24h
 Users: %d
-Gemini: %d | ChatGPT: %d | Kandinsky: %d
+Gemini: %d | ChatGPT: %d | Kandinsky: %d | SDXL: %d
 
 Today
 Users: %d
-Gemini: %d | ChatGPT: %d | Kandinsky: %d`,
-		result_dec25["gemini"], result_dec25["chatgpt"], result_dec25["kandinsky"],
-		result_dec30["users"], result_dec30["gemini"], result_dec30["chatgpt"], result_dec30["kandinsky"],
-		result_24h["users"], result_24h["gemini"], result_24h["chatgpt"], result_24h["kandinsky"],
-		result_Today["users"], result_Today["gemini"], result_Today["chatgpt"], result_Today["kandinsky"])
+Gemini: %d | ChatGPT: %d | Kandinsky: %d | SDXL: %d`,
+		result_dec25["gemini"], result_dec25["chatgpt"], result_dec25["kandinsky"], result_dec25["sdxl"],
+		result_dec30["users"], result_dec30["gemini"], result_dec30["chatgpt"], result_dec30["kandinsky"], result_dec30["sdxl"],
+		result_24h["users"], result_24h["gemini"], result_24h["chatgpt"], result_24h["kandinsky"], result_24h["sdxl"],
+		result_Today["users"], result_Today["gemini"], result_Today["chatgpt"], result_Today["kandinsky"], result_Today["sdxl"],
+	)
 
 }
