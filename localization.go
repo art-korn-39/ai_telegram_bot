@@ -30,6 +30,7 @@ const (
 	MsgText_EndDialog                      // Завершить диалог
 	MsgText_LanguageChanged                // Язык успешено изменён!
 	MsgText_DailyRequestLimitExceeded      // Достигнут дневной лимит запросов, дождитесь обновления лимита (%d ч. %d мин.) или воспользуйтесь другой нейросетью.
+	MsgText_APIdead                        // Сервис временно недоступен из-за технических неполадок :(\nПриносим изменения за неудобства.
 
 	// GEMINI
 
@@ -280,6 +281,9 @@ func init() {
 	dictionary[MsgText_GenerateAudioFromText] = MultiText{
 		ru: "Сгенерировать аудио из текста",
 		en: "Generate audio from text"}
+	dictionary[MsgText_APIdead] = MultiText{
+		ru: "Сервис временно недоступен из-за технических неполадок :(\nПриносим изменения за неудобства.",
+		en: "The service is temporarily unavailable due to technical problems :(\nWe apologize for the inconvenience."}
 	dictionary[MsgText_DescriptionTextNotExceed900Char] = MultiText{
 		ru: "Текст описания картинки не должен превышать 900 символов.",
 		en: "The description text of the picture should not exceed 900 characters."}

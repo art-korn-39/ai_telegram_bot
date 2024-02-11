@@ -94,17 +94,17 @@ func AccessIsAllowed(upd tgbotapi.Update, u *UserInfo) bool {
 		return true
 	}
 
-	// Если пользователь сделал больше 3 операций, то без подписки не даем продолжить
+	// Если пользователь сделал X или больше операций, то без подписки не даем продолжить
 	cnt, isErr := SQL_CountOfUserOperations(u)
 	if isErr {
 		msgText := GetText(MsgText_UnexpectedError, u.Language)
 		SendMessage(u, msgText, GetButton(btn_RemoveKeyboard, ""), "")
 		return false
-	} else if cnt >= 3 {
+	} else if cnt >= Cfg.OperationsWithoutSubscription {
 		msgText := GetText(MsgText_SubscribeForUsing, u.Language)
 		SendMessage(u, msgText, GetButton(btn_Subscribe, u.Language), "")
 		return false
-	} else { // меньше 3 операций
+	} else { // меньше Х операций
 		return true
 	}
 

@@ -121,20 +121,25 @@ func sdxl_Text2image(user *UserInfo) (result string, err error) {
 	defer res.Body.Close()
 
 	if res.StatusCode != 200 {
+
+		msgText := GetText(MsgText_FailedGenerateImage2, user.Language)
 		var body map[string]interface{}
-		if err = json.NewDecoder(res.Body).Decode(&body); err != nil {
-			err = errors.New("{Decode(&body)} " + err.Error())
+		if res.StatusCode == 522 || res.StatusCode == 520 {
+			err = errors.New("522 status code =/")
+			msgText = GetText(MsgText_APIdead, user.Language)
+		} else if err = json.NewDecoder(res.Body).Decode(&body); err != nil {
+			err = errors.New("{Decode(&body) 1} " + err.Error())
 		} else {
 			err = errors.New("{StatusCode != 200} " + fmt.Sprintf("%s", body))
 		}
-		msgText := GetText(MsgText_FailedGenerateImage2, user.Language)
+
 		return msgText, err
 	}
 
 	// Decode the JSON body
 	var body TextToImageResponse
 	if err = json.NewDecoder(res.Body).Decode(&body); err != nil {
-		err = errors.New("{Decode(&body)} " + err.Error())
+		err = errors.New("{Decode(&body) 2} " + err.Error())
 		msgText := GetText(MsgText_UnexpectedError, user.Language)
 		return msgText, err
 	}
@@ -147,6 +152,10 @@ func sdxl_Text2image(user *UserInfo) (result string, err error) {
 			msgText := GetText(MsgText_UnexpectedError, user.Language)
 			return msgText, err
 		}
+	} else {
+		err = errors.New("len(body.Images) = 0")
+		msgText := GetText(MsgText_UnexpectedError, user.Language)
+		return msgText, err
 	}
 
 	return result, nil
@@ -171,10 +180,6 @@ func sdxl_Image2ImageUpscale(user *UserInfo, filepath string) (result string, er
 	// Write the options to the request
 	writer.WriteField("width", "2048")
 
-	// +++
-	//writer.WriteField("text_prompts[0][text]", "highly detailed")
-	// ---
-
 	writer.Close()
 
 	// Execute the request
@@ -194,13 +199,18 @@ func sdxl_Image2ImageUpscale(user *UserInfo, filepath string) (result string, er
 	defer res.Body.Close()
 
 	if res.StatusCode != 200 {
+
+		msgText := GetText(MsgText_FailedGenerateImage2, user.Language)
 		var body map[string]interface{}
-		if err = json.NewDecoder(res.Body).Decode(&body); err != nil {
-			err = errors.New("{Decode(&body)} " + err.Error())
+		if res.StatusCode == 522 || res.StatusCode == 520 {
+			err = errors.New("522 status code =/")
+			msgText = GetText(MsgText_APIdead, user.Language)
+		} else if err = json.NewDecoder(res.Body).Decode(&body); err != nil {
+			err = errors.New("{Decode(&body) 1} " + err.Error())
 		} else {
 			err = errors.New("{StatusCode != 200} " + fmt.Sprintf("%s", body))
 		}
-		msgText := GetText(MsgText_FailedGenerateImage2, user.Language)
+
 		return msgText, err
 	}
 

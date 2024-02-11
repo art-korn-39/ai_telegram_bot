@@ -8,26 +8,27 @@ import (
 )
 
 type config struct {
-	TelegramBotToken      string
-	OpenAIToken           string
-	GeminiKey             string
-	Kandinsky_Key         string
-	Kandinsky_Secret      string
-	Stability_Key         string
-	TPD_gpt               int
-	RPD_gen               int
-	RPD_sdxl              int
-	TPD_advanced_gpt      int
-	RPD_advanced_sdxl     int
-	DaysForAdvancedStatus int
-	DB_name               string
-	DB_host               string
-	DB_port               int
-	DB_user               string
-	DB_password           string
-	CheckSubscription     bool
-	Debug                 bool
-	WhiteList             []string
+	TelegramBotToken              string
+	OpenAIToken                   string
+	GeminiKey                     string
+	Kandinsky_Key                 string
+	Kandinsky_Secret              string
+	Stability_Key                 string
+	TPD_gpt                       int
+	RPD_gen                       int
+	RPD_sdxl                      int
+	TPD_advanced_gpt              int
+	RPD_advanced_sdxl             int
+	DaysForAdvancedStatus         int
+	DB_name                       string
+	DB_host                       string
+	DB_port                       int
+	DB_user                       string
+	DB_password                   string
+	CheckSubscription             bool
+	OperationsWithoutSubscription int
+	Debug                         bool // для функции recovery()
+	WhiteList                     []string
 }
 
 func LoadConfig() {
