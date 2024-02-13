@@ -17,6 +17,8 @@ func start(user *UserInfo, message *tgbotapi.Message) {
 	msgtxt := fmt.Sprintf(GetText(MsgText_Start, user.Language), name)
 	SendMessage(user, msgtxt, GetButton(btn_Models, ""), "HTML")
 
+	user.Path = ""
+
 }
 
 func account(user *UserInfo) {
@@ -75,6 +77,8 @@ func account(user *UserInfo) {
 	)
 
 	SendMessage(user, msgText, GetButton(btn_Models, ""), "HTML")
+
+	user.Path = ""
 
 }
 

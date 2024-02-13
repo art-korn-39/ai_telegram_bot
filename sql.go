@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"strings"
@@ -221,6 +222,42 @@ func SQL_GetInfoOnDate(timestamp time.Time) (result map[string]int, errStr strin
 	}
 
 	return
+
+}
+
+func SQL_GetNewUsersForDay(timestamp time.Time) (cnt int, errStr string) {
+
+	if db == nil {
+		Logs <- NewLog(nil, "SQL{SQL_GetNewUsersForToday}", Error, sql_LostConnection)
+		return 0, "Отсутствует подключение к БД"
+	}
+
+	Statement := `
+	with first_days_by_users as (select 
+		min(date_trunc('day', date)) as date, 
+		chat_id 
+		from operations 
+		group by chat_id)
+
+	select 
+	count(*) as cnt  
+	from first_days_by_users
+	where date = date_trunc('day', $1::timestamp)
+	group by date;`
+
+	err := db.Get(&cnt, Statement, timestamp)
+	if err != nil {
+
+		if err == sql.ErrNoRows {
+			return 0, ""
+		} else {
+			Logs <- NewLog(nil, "SQL{SQL_GetNewUsersForToday}", Error, err.Error())
+			return 0, err.Error()
+		}
+
+	}
+
+	return cnt, ""
 
 }
 

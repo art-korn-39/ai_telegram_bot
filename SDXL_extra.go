@@ -10,6 +10,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
+	"slices"
 )
 
 var (
@@ -41,6 +42,10 @@ func sdxl_WelcomeTextMessage(u *UserInfo) string {
 }
 
 func sdxl_DailyLimitOfRequestsIsOver(u *UserInfo, btn Button) bool {
+
+	if slices.Contains(Cfg.WhiteList, u.Username) {
+		return false
+	}
 
 	if u.Requests_today_sdxl >= Get_RPD_sdxl(u) {
 		duration := GetDurationToNextDay()

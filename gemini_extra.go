@@ -2,9 +2,14 @@ package main
 
 import (
 	"fmt"
+	"slices"
 )
 
 func gen_DailyLimitOfRequestsIsOver(u *UserInfo) bool {
+
+	if slices.Contains(Cfg.WhiteList, u.Username) {
+		return false
+	}
 
 	if u.Requests_today_gen >= Cfg.RPD_gen {
 		duration := GetDurationToNextDay()

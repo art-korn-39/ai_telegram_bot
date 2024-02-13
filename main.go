@@ -13,7 +13,7 @@ import (
 // https://elevenlabs.io/voice-lab
 
 const (
-	Version       = "2.4.0"
+	Version       = "2.4.1"
 	ChannelChatID = -1001997602646
 	ChannelURL    = "https://t.me/+6ZMACWRgFdRkNGEy"
 )
@@ -285,7 +285,7 @@ func HandleMessage(u *UserInfo, m *tgbotapi.Message) {
 		if slices.Contains(admins, u.Username) {
 			switch cmd {
 			case "info":
-				SendMessage(u, GetInfo(), GetButton(btn_RemoveKeyboard, ""), "")
+				SendMessage(u, GetInfo(false), GetButton(btn_RemoveKeyboard, ""), "")
 			case "updconf":
 				LoadConfig()
 				SendMessage(u, "Config updated.", GetButton(btn_RemoveKeyboard, ""), "")

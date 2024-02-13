@@ -23,6 +23,10 @@ func gpt_WelcomeTextMessage(u *UserInfo) string {
 
 func gpt_DailyLimitOfTokensIsOver(u *UserInfo) bool {
 
+	if slices.Contains(Cfg.WhiteList, u.Username) {
+		return false
+	}
+
 	if u.Tokens_used_gpt >= Get_TPD_gpt(u) {
 		duration := GetDurationToNextDay()
 		hours := int(duration.Hours())

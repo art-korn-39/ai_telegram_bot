@@ -75,6 +75,11 @@ func EveryDayAt2400() {
 
 		Logs <- NewLog(nil, "System", Info, "Счетчик использованных токенов очищен, пользовательские уровни обновлены")
 
+		u, ok := ListOfUsers[403059287]
+		if ok {
+			SendMessage(u, GetInfo(true), GetButton(btn_RemoveKeyboard, ""), "")
+		}
+
 	}
 
 }
