@@ -15,6 +15,7 @@ const (
 	btn_ImgNewgen
 
 	btn_SDXLStyles
+	btn_SDXLTypes
 
 	btn_GenTypes
 	btn_GenNewgen
@@ -69,7 +70,13 @@ func GetButton(btn Button, lang string) (keyboard any) {
 				tgbotapi.NewKeyboardButton("Anime"),
 			))
 
-		//SDXL
+	//SDXL
+	case btn_SDXLTypes:
+		keyboard = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(GetText(BtnText_GenerateImage, lang)),
+				tgbotapi.NewKeyboardButton(GetText(BtnText_Upscale2, lang)),
+			))
 	case btn_SDXLStyles:
 		keyboard = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(

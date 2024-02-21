@@ -90,6 +90,13 @@ func gen_DialogSendMessage(user *UserInfo, text string) {
 		}
 	}
 
+	if resp == nil {
+		Logs <- NewLog(user, "gemini", Error, "resp = nil")
+		msgText = GetText(MsgText_BadRequest2, user.Language)
+		SendMessage(user, msgText, nil, "")
+		return
+	}
+
 	if resp.Candidates[0].Content == nil {
 		Logs <- NewLog(user, "gemini", Error, "resp.Candidates[0].Content = nil")
 		msgText = GetText(MsgText_BadRequest2, user.Language)

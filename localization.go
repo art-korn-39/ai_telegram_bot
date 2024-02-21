@@ -31,6 +31,7 @@ const (
 	MsgText_LanguageChanged                // Язык успешено изменён!
 	MsgText_DailyRequestLimitExceeded      // Достигнут дневной лимит запросов, дождитесь обновления лимита (%d ч. %d мин.) или воспользуйтесь другой нейросетью.
 	MsgText_APIdead                        // Сервис временно недоступен из-за технических неполадок :(\nПриносим изменения за неудобства.
+	MsgText_AvailiableImageFormats         // Некорретный формат файла, поддерживаются изображения с расширениями: png, jpeg и bmp.
 
 	// GEMINI
 
@@ -85,6 +86,7 @@ const (
 	MsgText_ImageProcessingStarted           // Запущена обработка картинки...
 	MsgText_NoImageFoundToProcess            // Не найдена картинка для обработки.
 	MsgText_FailedImageUpscale               // Не удалось повысить качество картинки, попробуйте другое изображение.
+	MsgText_UploadImage2                     // Загрузите картинку (рекомендуется с разрешением не больше 1024х1024)
 
 	// BAD REQUEST
 
@@ -104,8 +106,8 @@ const (
 	BtnText_SendPictureWithText   // 🖼 AI Vision
 	BtnText_ChangeQuestionText    // Изменить вопрос
 	BtnText_ChooseAnotherVoice    // Изменить голос
-	BtnText_ChangeQuerryText      // Изменить запрос
-	BtnText_ChooseAnotherStyle    // Изменить стиль
+	BtnText_ChangeQuerryText      // 🎮 Изменить запрос
+	BtnText_ChooseAnotherStyle    // 🎨 Изменить стиль
 	BtnText_ChangeText            // Изменить текст
 	BtnText_UploadNewImages       // Загрузить новые фото
 	BtnText_UploadNewImage        // Загрузить новое фото
@@ -114,6 +116,8 @@ const (
 	BtnText_GenerateAudioFromText // 🗣 Озвучить текст
 	BtnText_ClearContext          // Очистить контекст
 	BtnText_Upscale               // ⭐️ Улучшить (SDXL)
+	BtnText_Upscale2              // ⭐️ Улучшить мою картинку
+	BtnText_GenerateImage         // 🏞 Создать картинку
 )
 
 func init() {
@@ -188,6 +192,9 @@ func init() {
 	dictionary[MsgText_UploadImage] = MultiText{
 		ru: "Загрузите картинку",
 		en: "Upload image"}
+	dictionary[MsgText_UploadImage2] = MultiText{
+		ru: "Загрузите картинку (рекомендуется с разрешением не больше 1024х1024)",
+		en: "Upload image (recommended with a resolution of no more than 1024x1024)"}
 	dictionary[MsgText_BadRequest4] = MultiText{
 		ru: "Запрос был заблокирован по соображениям безопасности. Попробуйте изменить текст запроса.",
 		en: "The request was blocked for security reasons. Try changing the request text."}
@@ -229,7 +236,7 @@ func init() {
 		en: "No image found to process."}
 	dictionary[MsgText_FailedLoadImages] = MultiText{
 		ru: "Не удалось загрузить изображение, попробуйте ещё раз.",
-		en: "Failed to load image, try again. Failed to load image, try again."}
+		en: "Failed to load image, try again."}
 	dictionary[MsgText_FailedImageUpscale] = MultiText{
 		ru: "Не удалось повысить качество картинки, попробуйте другое изображение.",
 		en: "Could not improve picture quality, try another image."}
@@ -254,6 +261,9 @@ func init() {
 	dictionary[MsgText_UnknownCommand] = MultiText{
 		ru: "Неизвестная команда",
 		en: "Unknown command"}
+	dictionary[MsgText_AvailiableImageFormats] = MultiText{
+		ru: "Некорретный формат файла, поддерживаются изображения с расширениями: png and jpeg.",
+		en: "Incorrect file format, supported images with extensions: png and jpeg."}
 	dictionary[MsgText_LastOperationInProgress] = MultiText{
 		ru: "Последняя операция ещё выполняется, дождитесь её завершения перед отправкой новых запросов.",
 		en: "The last operation is still in progress, please wait until it completes before sending new requests."}
@@ -310,8 +320,8 @@ func init() {
 	dictionary[BtnText_SendPictureWithText] = MultiText{ru: "🖼 AI Vision", en: "🖼 AI Vision"}
 	dictionary[BtnText_ChangeQuestionText] = MultiText{ru: "Изменить вопрос", en: "Change question"}
 	dictionary[BtnText_ChooseAnotherVoice] = MultiText{ru: "Изменить голос", en: "Change voice"}
-	dictionary[BtnText_ChangeQuerryText] = MultiText{ru: "Изменить запрос", en: "Change request"}
-	dictionary[BtnText_ChooseAnotherStyle] = MultiText{ru: "Изменить стиль", en: "Change style"}
+	dictionary[BtnText_ChangeQuerryText] = MultiText{ru: "🎮 Изменить запрос", en: "🎮 Change request"}
+	dictionary[BtnText_ChooseAnotherStyle] = MultiText{ru: "🎨 Изменить стиль", en: "🎨 Change style"}
 	dictionary[BtnText_ChangeText] = MultiText{ru: "Изменить текст", en: "Change text"}
 	dictionary[BtnText_EndDialog] = MultiText{ru: "Завершить диалог", en: "End dialog"}
 	dictionary[BtnText_UploadNewImages] = MultiText{ru: "Загрузить новые фото", en: "Upload new images"}
@@ -321,6 +331,8 @@ func init() {
 	dictionary[BtnText_ClearContext] = MultiText{ru: "Очистить контекст", en: "Clear context"}
 	dictionary[BtnText_Subscribe] = MultiText{ru: "✅ Подписаться", en: "✅ Subscribe"}
 	dictionary[BtnText_Upscale] = MultiText{ru: "⭐️ Улучшить (SDXL)", en: "⭐️ Upscale (SDXL)"}
+	dictionary[BtnText_Upscale2] = MultiText{ru: "⭐️ Улучшить мою картинку", en: "⭐ Upscale my picture"}
+	dictionary[BtnText_GenerateImage] = MultiText{ru: "🏞 Создать картинку", en: "🏞 Create a picture"}
 
 }
 
@@ -369,15 +381,14 @@ func textForStarting() MultiText {
 Я бот для работы с нейросетями.
 С моей помощью ты можешь использовать следующие модели:
 	
-<b>Gemini</b> - генерация текста и анализ изображений <i>(Google)</i>
-<b>ChatGPT</b> - генерация текста, аудио и анализ изображений <i>(OpenAI)</i>
-<b>Kandinsky</b> - создание изображений по текстовому описанию <i>(Sber AI)</i>
-<b>Stable Diffusion XL</b> - создание изображений по текстовому описанию
+🚀 <b>Gemini</b> - генерация текста и анализ изображений <i>(Google)</i>
+🤖 <b>ChatGPT</b> - генерация текста, аудио и анализ изображений <i>(OpenAI)</i>
+🗿 <b>Kandinsky</b> - создание изображений по текстовому описанию <i>(Sber AI)</i>
+🏔 <b>Stable Diffusion XL</b> - создание изображений по текстовому описанию
 	
 <u>Последние обновления:</u>
-<i>14.01.24 - 🇺🇸 добавлена поддержка английского языка.</i>
-<i>19.01.24 - 🏞 добавлена обработка картинок с вопросами в ChatGPT-4 Vision.</i>
-<i>09.02.24 - 🏔 добавлен Stable Diffusion XL для получения изображений высокого качества.</i>
+<i>09.02.24 - добавлен Stable Diffusion XL для получения изображений высокого качества.</i>
+<i>21.02.24 - добавлена опция по улучшению собственных картинок при помощи Stable Diffusion.</i>
 
 Бот полностью бесплатный, удачных генераций 🔥`,
 
@@ -386,15 +397,14 @@ func textForStarting() MultiText {
 I am a bot for working with neural networks.
 With my help you can use the following models:
 			
-<b>Gemini</b> - text generation and image analysis <i>(Google)</i>
-<b>ChatGPT</b> - text & audio generation and image analysis <i>(OpenAI)</i>
-<b>Kandinsky</b> - creating images based on text description <i>(Sber AI)</i>
-<b>Stable Diffusion XL</b> - creating images based on text description
+🚀 <b>Gemini</b> - text generation and image analysis <i>(Google)</i>
+🤖 <b>ChatGPT</b> - text & audio generation and image analysis <i>(OpenAI)</i>
+🗿 <b>Kandinsky</b> - creating images based on text description <i>(Sber AI)</i>
+🏔 <b>Stable Diffusion XL</b> - creating images based on text description
 			
 <u>Latest updates:</u>
-<i>14.01.24 - 🇺🇸 added English language support.</i>
-<i>19.01.24 - 🏞 added processing of pictures with questions in ChatGPT-4 Vision.</i>
-<i>09.02.24 - 🏔 added Stable Diffusion XL for high quality images.</i>
+<i>09.02.24 - added Stable Diffusion XL for high quality images.</i>
+<i>21.02.24 - added an option to improve your own pictures using Stable Diffusion.</i>
 
 Bot is absolutely free, successful generations 🔥`,
 	}

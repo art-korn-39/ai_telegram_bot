@@ -13,7 +13,7 @@ import (
 // https://elevenlabs.io/voice-lab
 
 const (
-	Version       = "2.4.1"
+	Version       = "2.4.2"
 	ChannelChatID = -1001997602646
 	ChannelURL    = "https://t.me/+6ZMACWRgFdRkNGEy"
 )
@@ -99,7 +99,7 @@ func main() {
 			Logs <- NewLog(User, "", Info, upd.Message.Text)
 
 			// Обновим уровень пользователя
-			User.EditLevel(true)
+			User.EditLevelManualy()
 
 			// Проверка подписки пользователя на канал
 			if !AccessIsAllowed(upd, User) {
@@ -162,6 +162,8 @@ func MessageWithData(text, path string) bool {
 		return true
 	} else if path == "chatgpt/type/image" {
 		return true
+	} else if path == "sdxl/type/image" {
+		return true
 	}
 
 	return false
@@ -192,7 +194,7 @@ func HandleMessage(u *UserInfo, m *tgbotapi.Message) {
 	// 1. Определяем команду
 	cmd := MsgCommand(m)
 
-	// 2. Устанавливаем базовый путь и очищаем временные данные пользователя
+	// 2. Если команда, то устанавливаем базовый путь и очищаем временные данные пользователя
 	if cmd != "" {
 		u.Path = cmd
 		u.ClearUserData()
@@ -272,14 +274,20 @@ func HandleMessage(u *UserInfo, m *tgbotapi.Message) {
 	case "sdxl":
 		sdxl_start(u)
 
-	case "sdxl/text":
+	case "sdxl/type":
+		sdxl_type(u, m.Text)
+
+	case "sdxl/type/text":
 		sdxl_text(u, m.Text)
 
-	case "sdxl/text/style":
+	case "sdxl/type/text/style":
 		sdxl_style(u, m.Text)
 
-	case "sdxl/text/style/newgen":
+	case "sdxl/type/text/style/newgen":
 		sdxl_newgen(u, m.Text)
+
+	case "sdxl/type/image":
+		sdxl_image(u, m)
 
 	default:
 		if slices.Contains(admins, u.Username) {

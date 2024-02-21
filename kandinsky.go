@@ -103,7 +103,7 @@ func kand_newgen(user *UserInfo, text string) {
 		SendMessage(user, GetText(MsgText_SelectStyleForImage, user.Language), GetButton(btn_KandStyles, ""), "")
 		user.Path = "kandinsky/text/style"
 	case GetText(BtnText_Upscale, user.Language):
-		sdxl_Upscale(user)
+		sdxl_upscale(user)
 		user.Path = "kandinsky/text/style/newgen"
 	default:
 		// Предполагаем, что там новый запрос

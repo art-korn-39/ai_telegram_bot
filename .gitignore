@@ -1,5 +1,6 @@
 data/
 icons/
+.idea/
 *.txt
 *.log
 *.exe

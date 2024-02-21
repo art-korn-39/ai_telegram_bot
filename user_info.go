@@ -24,7 +24,7 @@ type UserInfo struct {
 	Requests_today_gen  int
 	Requests_today_sdxl int
 	Level               UserLevel
-	LevelChecked        bool // Если false, то выполняем EditLevel()
+	LevelChecked        bool // Если false, то выполняем EditLevelManualy()
 	Mutex               sync.Mutex
 	WG                  sync.WaitGroup
 }
@@ -156,30 +156,44 @@ func (u *UserInfo) ClearTokens() {
 	u.Requests_today_sdxl = 0
 }
 
+// Выполняется индивидуально и только по триггеру от юзера
+func (u *UserInfo) EditLevelManualy() {
+
+	if u.LevelChecked {
+		return
+	} else {
+		// Для подстраховки сразу запишем пустой лог пользователя, чтобы сегодняшний день попал в серию
+		SQL_AddLog(NewLog(u, "", Info, "first log today by user"))
+	}
+
+	mapWithStreak, _ := SQL_UserDayStreak(u)
+	days, _ := mapWithStreak[u.ChatID]
+
+	u.SetLevel(days, true)
+
+}
+
 // Выполняет обновление уровня пользователя
 // Если выполняется регламентно (с флагом customOperation = false),
 // то после установки уровня - флаг выполненной проверки не ставится
-func (u *UserInfo) EditLevel(customOperation bool) {
+func (u *UserInfo) SetLevel(days int, manualyOperation bool) {
 
-	if customOperation {
-		if u.LevelChecked {
-			return
-		} else {
-			// Для подстраховки сразу запишем пустой лог пользователя, чтобы сегодняшний день попал в серию
-			SQL_AddLog(NewLog(u, "", Info, "first log today by user"))
-		}
-	}
+	//if customOperation {
+	//	if u.LevelChecked {
+	//		return
+	//	} else {
+	//		// Для подстраховки сразу запишем пустой лог пользователя, чтобы сегодняшний день попал в серию
+	//		SQL_AddLog(NewLog(u, "", Info, "first log today by user"))
+	//	}
+	//}
 
-	days, _ := SQL_UserDayStreak(u)
-
-	//fmt.Println(days, u.Username)
 	if days >= Cfg.DaysForAdvancedStatus {
 		u.Level = Advanced
 	} else {
 		u.Level = Basic
 	}
 
-	if customOperation {
+	if manualyOperation {
 		u.LevelChecked = true
 	}
 

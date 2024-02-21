@@ -38,7 +38,7 @@ func TestAccessIsAllowed(t *testing.T) {
 	u := T_GetUser()
 
 	if AccessIsAllowed(upd, u) {
-		t.Errorf("AccessIsAllowed() is true for chat_id = 00000001")
+		t.Errorf("AccessIsAllowed() is true for chat_id = %d", u.ChatID)
 	}
 
 }

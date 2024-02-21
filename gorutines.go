@@ -64,11 +64,16 @@ func EveryDayAt2400() {
 		// Ожидание до начала след. дня (Мск 00:00)
 		<-time.After(duration)
 
+		streakDaysByUsers, isErr := SQL_UserDayStreak(nil)
+
 		// Обход пользователей
 		for _, u := range ListOfUsers {
 			u.ClearTokens()        // Очистка токенов
 			u.LevelChecked = false // Сбрасываем флаг проверки уровня
-			u.EditLevel(false)     // Изменить уровень
+			if !isErr {
+				days, _ := streakDaysByUsers[u.ChatID]
+				u.SetLevel(days, false) // Изменить уровень
+			}
 		}
 
 		SQL_SaveUserStates()

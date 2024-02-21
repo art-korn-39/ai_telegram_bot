@@ -15,14 +15,35 @@ func sdxl_start(user *UserInfo) {
 	msgText := sdxl_WelcomeTextMessage(user)
 	SendMessage(user, msgText, nil, "HTML")
 
-	msgText = GetText(MsgText_EnterDescriptionOfPicture, user.Language)
-	SendMessage(user, msgText, GetButton(btn_RemoveKeyboard, ""), "")
+	msgText = GetText(MsgText_SelectOption, user.Language)
+	SendMessage(user, msgText, GetButton(btn_SDXLTypes, user.Language), "")
 
-	user.Path = "sdxl/text"
+	user.Path = "sdxl/type"
 
 }
 
-// После ввода запроса пользователем
+// После выбора пользователем типа взаимодействия
+func sdxl_type(user *UserInfo, text string) {
+
+	if sdxl_DailyLimitOfRequestsIsOver(user, btn_Models) {
+		return
+	}
+
+	switch text {
+	case GetText(BtnText_GenerateImage, user.Language):
+		SendMessage(user, GetText(MsgText_EnterDescriptionOfPicture, user.Language), GetButton(btn_RemoveKeyboard, ""), "")
+		user.Path = "sdxl/type/text"
+	case GetText(BtnText_Upscale2, user.Language):
+		SendMessage(user, GetText(MsgText_UploadImage2, user.Language), GetButton(btn_RemoveKeyboard, ""), "")
+		user.Path = "sdxl/type/image"
+	default:
+		//SendMessage(user, "Обработка запроса...", GetButton(btn_GenEndDialog, user.Language), "")
+		sdxl_text(user, text)
+	}
+
+}
+
+// После ввода описания картинки пользователем
 func sdxl_text(user *UserInfo, text string) {
 
 	if sdxl_DailyLimitOfRequestsIsOver(user, btn_Models) {
@@ -41,7 +62,7 @@ func sdxl_text(user *UserInfo, text string) {
 		SendMessage(user, msgText, GetButton(btn_RemoveKeyboard, ""), "")
 		msgText = GetText(MsgText_EnterDescriptionOfPicture, user.Language)
 		SendMessage(user, msgText, nil, "")
-		user.Path = "sdxl/text"
+		user.Path = "sdxl/type/text"
 		return
 	}
 
@@ -50,7 +71,7 @@ func sdxl_text(user *UserInfo, text string) {
 	msgText := GetText(MsgText_SelectStyleForImage, user.Language)
 	SendMessage(user, msgText, GetButton(btn_SDXLStyles, ""), "")
 
-	user.Path = "sdxl/text/style"
+	user.Path = "sdxl/type/text/style"
 
 }
 
@@ -98,11 +119,11 @@ func sdxl_style(user *UserInfo, text string) {
 		}
 	}
 
-	user.Path = "sdxl/text/style/newgen"
+	user.Path = "sdxl/type/text/style/newgen"
 
 }
 
-func sdxl_Upscale(user *UserInfo) {
+func sdxl_upscale(user *UserInfo) {
 
 	if sdxl_DailyLimitOfRequestsIsOver(user, 0) {
 		return
@@ -150,16 +171,16 @@ func sdxl_newgen(user *UserInfo, text string) {
 	switch text {
 	case GetText(BtnText_ChangeQuerryText, user.Language):
 		SendMessage(user, GetText(MsgText_EnterDescriptionOfPicture, user.Language), GetButton(btn_RemoveKeyboard, ""), "")
-		user.Path = "sdxl/text"
+		user.Path = "sdxl/type/text"
 	case GetText(BtnText_ChooseAnotherStyle, user.Language):
 		SendMessage(user, GetText(MsgText_SelectStyleForImage, user.Language), GetButton(btn_SDXLStyles, ""), "")
-		user.Path = "sdxl/text/style"
+		user.Path = "sdxl/type/text/style"
 	case GetText(BtnText_Upscale, user.Language):
-		sdxl_Upscale(user)
-		user.Path = "sdxl/text/style/newgen"
+		sdxl_upscale(user)
+		user.Path = "sdxl/type/text/style/newgen"
 	default:
 		// Предполагаем, что там новый запрос
-		user.Path = "sdxl/text"
+		user.Path = "sdxl/type/text"
 		sdxl_text(user, text)
 	}
 

@@ -50,7 +50,7 @@ func SendMessage(user *UserInfo, text string, ReplyMarkup any, ParseMod string) 
 func SendAudioMessage(user *UserInfo, filename string, caption string, ReplyMarkup any) error {
 
 	Message := tgbotapi.NewAudioUpload(user.ChatID, filename)
-	Message.Caption = caption
+	Message.Caption = SubString(caption, 0, 1000)
 	Message.ReplyMarkup = ReplyMarkup
 	_, err := Bot.Send(Message)
 
@@ -63,7 +63,7 @@ func SendAudioMessage(user *UserInfo, filename string, caption string, ReplyMark
 func SendPhotoMessage(user *UserInfo, filename string, caption string, ReplyMarkup any) error {
 
 	Message := tgbotapi.NewPhotoUpload(user.ChatID, filename)
-	Message.Caption = caption
+	Message.Caption = SubString(caption, 0, 1000)
 	Message.ReplyMarkup = ReplyMarkup
 	_, err := Bot.Send(Message)
 
@@ -76,7 +76,7 @@ func SendPhotoMessage(user *UserInfo, filename string, caption string, ReplyMark
 func SendFileMessage(user *UserInfo, filename string, caption string, ReplyMarkup any) error {
 
 	Message := tgbotapi.NewDocumentUpload(user.ChatID, filename)
-	Message.Caption = caption
+	Message.Caption = SubString(caption, 0, 1000)
 	Message.ReplyMarkup = ReplyMarkup
 	_, err := Bot.Send(Message)
 

@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"github.com/lib/pq"
 	"log"
 	"strings"
 	"time"
@@ -321,6 +322,7 @@ func SQL_CountOfUserOperations(u *UserInfo) (count int, isErr bool) {
 
 }
 
+// Получает все замеченные chat_id для массовой рассылки в боте
 func SQL_GetAllUsers() (users []*UserInfo, isErr bool) {
 
 	if db == nil {
@@ -358,65 +360,101 @@ func SQL_GetAllUsers() (users []*UserInfo, isErr bool) {
 }
 
 // Возвращает длину последней серии дней
-// Вернёт 0 если вчера и сегодня не было записей в логах
 // Вернёт 1 если записи были сегодня, а вчера нет
-func SQL_UserDayStreak(user *UserInfo) (days int, isErr bool) {
+// Если вчера и сегодня не было записей в логах, то chat_id не будет в ключах мапы-результата
+func SQL_UserDayStreak(user *UserInfo) (daysByUsers map[int64]int, isErr bool) {
+
+	daysByUsers = map[int64]int{}
 
 	if db == nil {
 		Logs <- NewLog(nil, "SQL{UserDayStreak}", Error, sql_LostConnection)
-		return 0, true
+		return daysByUsers, true
+	}
+
+	// Если user не указан, то берем все ID из мапы ListOfUsers
+	var sliceChatID []int64
+	if user == nil {
+		sliceChatID = make([]int64, 0, len(ListOfUsers))
+		for _, v := range ListOfUsers {
+			sliceChatID = append(sliceChatID, v.ChatID)
+		}
+	} else {
+		sliceChatID = make([]int64, 0, 1)
+		sliceChatID = append(sliceChatID, user.ChatID)
 	}
 
 	Statement := `
-	-- все дни использования и предыдущий день
-	with tmp1 as (select distinct 
-		DATE(date) as day,
-		DATE(date - interval '1 day') as prevDay
-		from logs 	
-	where chat_id = $1
-		order by day),
+		-- все дни использования и предыдущий день
+		with tmp1 as (select distinct
+		    chat_id::bigint as chat_id,
+			date_trunc('day', date) as day,
+			date_trunc('day', date) - interval '1 day' as prevDay
+			from logs
+		where chat_id::bigint = ANY($1)
+			order by day),
+				
+		-- все дни использования и метка начала каждой серии
+		tmp2 as (select 
+		    t1.chat_id as chat_id,
+			t1.day as day, 
+			t2.day is null as firstDay
+			from tmp1 t1
+			left join tmp1 t2 
+				on t1.prevDay = t2.day and t1.chat_id = t2.chat_id),
+				
+		-- первый день самой последней серии использования
+		tmp3 as (select 
+			max(day) as day,
+			chat_id as chat_id
+			from (select 
+				day, chat_id 
+				from tmp2 
+				where firstDay = true) as t 
+			group by 
+			    chat_id),
+		
+		-- последний день использования бота
+		lastDays as ( select max(day) as day, chat_id from tmp1 group by chat_id),
+		
+		-- были операции за день до момента среза
+		prevDayHasLogs as ( 
+			select 
+			chat_id as chat_id, 
+		    day >= ( date_trunc('day', $2::timestamp) - interval '1 day' ) as stat 
+			from lastDays )
 			
-	-- все дни использования и метка начала каждой серии
-	tmp2 as (select 
-		t1.day as day, 
-		t2.day is null as firstDay
-		from tmp1 t1
-		left join tmp1 t2 
-			on t1.prevDay = t2.day),
-			
-	-- первый день самой последней серии использования
-	tmp3 as (select 
-		max(day) as day 
-		from (select 
-			day 
-			from tmp2 
-			where firstDay = true) as t ),
-	
-	-- последний день использования бота
-	lastDay	as ( select max(day) as day from tmp1 ),
-	
-	-- были операции за день до момента среза
-	prevDayHasLogs as ( select day >= ( date_trunc('day', $2::timestamp) - interval '1 day' ) as stat from lastDay )
-			
-	select 
-	count(*) as days
-	from tmp1 t 
-	inner join tmp3 filter 
-	on t.day >= filter.day
-	inner join prevDayHasLogs prevDayHasLogs
-	on true
-	where prevDayHasLogs.stat = true;`
+		-- итоговая выборка
+		select 
+		t.chat_id as chat_id,
+		count(*) as days
+		from tmp1 t 
+		inner join tmp3 filter 
+			on t.day >= filter.day and t.chat_id = filter.chat_id
+		inner join prevDayHasLogs
+			on t.chat_id = prevDayHasLogs.chat_id
+		where 
+		    prevDayHasLogs.stat = true
+		group by 
+		    t.chat_id;`
 
-	//fmt.Println(MskTimeNow().Format(time.DateTime))
+	type userDays struct {
+		Days    int64 `db:"days"`
+		Chat_id int64 `db:"chat_id"`
+	}
+	var data []userDays
 
-	var days64 int64
-	err := db.Get(&days64, Statement, user.ChatID, MskTimeNow())
+	err := db.Select(&data, Statement, pq.Array(sliceChatID), MskTimeNow())
 	if err != nil {
+		fmt.Println(err.Error())
 		Logs <- NewLog(nil, "SQL{UserDayStreak}", Error, err.Error())
-		return 0, true
+		return daysByUsers, true
 	}
 
-	return int(days64), false
+	for _, v := range data {
+		daysByUsers[v.Chat_id] = int(v.Days)
+	}
+
+	return daysByUsers, false
 
 }
 
