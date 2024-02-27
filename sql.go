@@ -7,10 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/lib/pq"
-
 	"github.com/jmoiron/sqlx"
-	_ "github.com/lib/pq"
+	"github.com/lib/pq"
 )
 
 // https://habr.com/ru/companies/oleg-bunin/articles/461935/

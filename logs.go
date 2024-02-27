@@ -78,6 +78,7 @@ func FinishGorutine(u *UserInfo, text string, main bool) {
 		if u != nil {
 			SendMessage(u, GetText(MsgText_UnexpectedError, u.Language), nil, "")
 			chatid = int(u.ChatID)
+			u.ClearDialogHistory() // Если произошла необработанная ошибка, то чистим историю диалога
 		}
 
 		WriteIntoFile(timeNow, chatid, Ternary(main, "main", "gorutine"), text)

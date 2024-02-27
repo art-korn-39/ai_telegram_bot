@@ -50,9 +50,13 @@ func NewUserInfo(m *tgbotapi.Message) *UserInfo {
 
 func (u *UserInfo) ClearUserData() {
 	u.Options = map[string]string{}
+	u.ClearDialogHistory()
+	u.DeleteImages()
+}
+
+func (u *UserInfo) ClearDialogHistory() {
 	u.Messages_ChatGPT = []openai.ChatCompletionMessage{}
 	u.Messages_Gemini = []*genai.Content{}
-	u.DeleteImages()
 }
 
 func (u *UserInfo) DeleteImages() {
@@ -167,7 +171,7 @@ func (u *UserInfo) EditLevelManualy() {
 	}
 
 	mapWithStreak, _ := SQL_UserDayStreak(u)
-	days, _ := mapWithStreak[u.ChatID]
+	days := mapWithStreak[u.ChatID]
 
 	u.SetLevel(days, true)
 
