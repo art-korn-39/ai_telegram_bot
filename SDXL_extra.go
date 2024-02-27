@@ -91,23 +91,19 @@ func sdxl_CreateImageFileFromBase64(i int, image TextToImage, user *UserInfo) (s
 func sdxl_CreateImageFileFromBody(user *UserInfo, res *http.Response) (string, error) {
 
 	// Write the response to a file
-	filepath := fmt.Sprintf(WorkDir+"/data/img_%d_0.png", user.ChatID)
-	file, err := os.Create(filepath)
+	outFile := fmt.Sprintf(WorkDir+"/data/img_%d_0.png", user.ChatID)
+	file, err := os.Create(outFile)
 	if err != nil {
 		err = errors.New("{os.Create()} " + err.Error())
-		// msgText := GetText(MsgText_UnexpectedError, user.Language)
-		// return msgText, err
 		return "", err
 	}
 
 	_, err = io.Copy(file, res.Body)
 	if err != nil {
 		err = errors.New("{io.Copy} " + err.Error())
-		// msgText := GetText(MsgText_UnexpectedError, user.Language)
-		// return msgText, err
 		return "", err
 	}
 
-	return filepath, nil
+	return outFile, nil
 
 }

@@ -68,12 +68,14 @@ func EveryDayAt2400() {
 
 		// Обход пользователей
 		for _, u := range ListOfUsers {
+			u.Mutex.Lock()
 			u.ClearTokens()        // Очистка токенов
 			u.LevelChecked = false // Сбрасываем флаг проверки уровня
 			if !isErr {
-				days, _ := streakDaysByUsers[u.ChatID]
+				days := streakDaysByUsers[u.ChatID]
 				u.SetLevel(days, false) // Изменить уровень
 			}
+			u.Mutex.Unlock()
 		}
 
 		SQL_SaveUserStates()

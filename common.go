@@ -56,7 +56,7 @@ func account(user *UserInfo) {
 	hours := int(duration.Hours())
 	minutes := int(duration.Minutes()) - hours*60
 	mapWithStreak, _ := SQL_UserDayStreak(user)
-	DayStreak, _ := mapWithStreak[user.ChatID]
+	DayStreak := mapWithStreak[user.ChatID]
 	FirstDate, _ := SQL_GetFirstDate(user)
 
 	msgText := fmt.Sprintf(sample,

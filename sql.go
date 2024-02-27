@@ -3,10 +3,11 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"github.com/lib/pq"
 	"log"
 	"strings"
 	"time"
+
+	"github.com/lib/pq"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
@@ -131,6 +132,11 @@ func SQL_LoadUserStates() {
 }
 
 func SQL_SaveUserStates() {
+
+	// добавить флаг об изменении информации в userinfo
+	// если флаг есть - то в БД удаляем по нему записи и вставляем актуальные
+	// если флага нет - пропускаем
+	// должно помочь в оптимизации
 
 	if db == nil {
 		Logs <- NewLog(nil, "SQL{SaveUserStates}", Error, sql_LostConnection)

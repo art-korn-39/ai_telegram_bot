@@ -6,6 +6,7 @@ type Button int
 
 const (
 	btn_RemoveKeyboard Button = iota
+	// btn_Empty
 	btn_Subscribe
 	btn_Models
 	btn_Languages
@@ -36,6 +37,9 @@ func GetButton(btn Button, lang string) (keyboard any) {
 	//COMMON
 	case btn_RemoveKeyboard:
 		keyboard = tgbotapi.NewRemoveKeyboard(false)
+
+	// case btn_Empty:
+	// 	keyboard = tgbotapi.NewInlineKeyboardMarkup(tgbotapi.NewInlineKeyboardRow())
 
 	case btn_Subscribe:
 		keyboard = tgbotapi.NewInlineKeyboardMarkup(

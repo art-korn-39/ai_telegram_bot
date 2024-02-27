@@ -178,15 +178,6 @@ func (u *UserInfo) EditLevelManualy() {
 // то после установки уровня - флаг выполненной проверки не ставится
 func (u *UserInfo) SetLevel(days int, manualyOperation bool) {
 
-	//if customOperation {
-	//	if u.LevelChecked {
-	//		return
-	//	} else {
-	//		// Для подстраховки сразу запишем пустой лог пользователя, чтобы сегодняшний день попал в серию
-	//		SQL_AddLog(NewLog(u, "", Info, "first log today by user"))
-	//	}
-	//}
-
 	if days >= Cfg.DaysForAdvancedStatus {
 		u.Level = Advanced
 	} else {

@@ -7,23 +7,55 @@ import (
 	"google.golang.org/api/option"
 )
 
-//https://ai.google.dev/tutorials/go_quickstart?hl=ru
-//https://ai.google.dev/models/gemini?hl=ru
+// https://ai.google.dev/tutorials/go_quickstart?hl=ru
+// https://ai.google.dev/models/gemini?hl=ru
 
 // - FinishReasonSafety означает, что потенциальное содержимое было помечено по соображениям безопасности.
 // - BlockReasonSafety означает, что промт был заблокирован по соображениям безопасности. Вы можете проверить
 // `safety_ratings`, чтобы понять, какая категория безопасности заблокировала его.
 
 var (
-	ctx_Gemini    context.Context
-	client_Gemini *genai.Client
-	model_Gemini  *genai.GenerativeModel
+	gen_ctx                 context.Context
+	gen_client              *genai.Client
+	gen_TextModel           *genai.GenerativeModel
+	gen_TextModelWithCensor *genai.GenerativeModel
+	gen_ImageModel          *genai.GenerativeModel
 )
 
 func NewConnectionGemini() {
-	ctx_Gemini = context.Background()
-	client_Gemini, _ = genai.NewClient(ctx_Gemini, option.WithAPIKey(Cfg.GeminiKey))
-	model_Gemini = client_Gemini.GenerativeModel("gemini-pro")
+
+	gen_ctx = context.Background()
+	gen_client, _ = genai.NewClient(gen_ctx, option.WithAPIKey(Cfg.GeminiKey))
+	gen_TextModel = gen_client.GenerativeModel("gemini-1.0-pro")
+	gen_TextModelWithCensor = gen_client.GenerativeModel("gemini-1.0-pro")
+	gen_ImageModel = gen_client.GenerativeModel("gemini-pro-vision")
+
+	// 1 - блокировать всё
+	// 2 - допускается с незначимым и низким
+	// 3 - допускается незначительные, низкие и средние значения
+	// 4 - не блокировать совсем
+	SafetySettings := []*genai.SafetySetting{
+		{
+			Category:  genai.HarmCategoryHarassment, // домогательство, преследование
+			Threshold: genai.HarmBlockNone,          // 4
+		},
+		{
+			Category:  genai.HarmCategorySexuallyExplicit, // откровенно сексуального характера
+			Threshold: genai.HarmBlockNone,                // 4
+		},
+		{
+			Category:  genai.HarmCategoryHateSpeech,  // разжигание ненависти
+			Threshold: genai.HarmBlockMediumAndAbove, // 2
+		},
+		{
+			Category:  genai.HarmCategoryDangerousContent, // опасный контент
+			Threshold: genai.HarmBlockMediumAndAbove,      // 2
+		},
+	}
+
+	gen_TextModel.SafetySettings = SafetySettings
+	gen_ImageModel.SafetySettings = SafetySettings
+
 }
 
 // После команды "/gemini" или при вводе текста = "gemini"

@@ -103,7 +103,7 @@ func gen_imgtext(user *UserInfo, text string) {
 	Operation := SQL_NewOperation(user, "gemini", "img", text)
 	SQL_AddOperation(Operation)
 
-	model := client_Gemini.GenerativeModel("gemini-pro-vision")
+	//model := gen_client.GenerativeModel("gemini-pro-vision")
 
 	prompt := []genai.Part{genai.Text(text)}
 	for _, v := range user.Images_Gemini {
@@ -115,7 +115,7 @@ func gen_imgtext(user *UserInfo, text string) {
 		prompt = append(prompt, genai.ImageData("jpeg", imgData))
 	}
 
-	resp, err := model.GenerateContent(ctx_Gemini, prompt...)
+	resp, err := gen_ImageModel.GenerateContent(gen_ctx, prompt...)
 
 	if err != nil {
 		Logs <- NewLog(user, "gemini{img}", Error, err.Error())

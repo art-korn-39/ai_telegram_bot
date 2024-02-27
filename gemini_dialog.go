@@ -35,11 +35,13 @@ func gen_dialog(user *UserInfo, text string) {
 
 func gen_DialogSendMessage(user *UserInfo, text string) {
 
+	// возможна ошибка при превышении контекста диалога, проверить
+
 	var msgText string
-	cs := model_Gemini.StartChat()
+	cs := gen_TextModel.StartChat()
 	cs.History = user.Messages_Gemini
 
-	resp, err := cs.SendMessage(ctx_Gemini, genai.Text(text))
+	resp, err := cs.SendMessage(gen_ctx, genai.Text(text))
 	if err != nil {
 		errorString := err.Error()
 		Logs <- NewLog(user, "gemini", Error, errorString)
@@ -50,13 +52,13 @@ func gen_DialogSendMessage(user *UserInfo, text string) {
 			NewConnectionGemini()
 
 			// Новый чат
-			cs := model_Gemini.StartChat()
+			cs := gen_TextModel.StartChat()
 
 			user.Messages_Gemini = []*genai.Content{}
 
 			// Отправляем повторно
 			Logs <- NewLog(user, "gemini", Error, "Повторная отправка запроса ...")
-			resp, err = cs.SendMessage(ctx_Gemini, genai.Text(text))
+			resp, err = cs.SendMessage(gen_ctx, genai.Text(text))
 			if err != nil {
 				Logs <- NewLog(user, "gemini", Error, err.Error())
 				msgText = GetText(MsgText_BadRequest3, user.Language)
@@ -73,7 +75,7 @@ func gen_DialogSendMessage(user *UserInfo, text string) {
 			// Отправляем сообщение повторно
 			time.Sleep(time.Millisecond * 200)
 			Logs <- NewLog(user, "gemini", Error, "Повторная отправка запроса ...")
-			resp, err = cs.SendMessage(ctx_Gemini, genai.Text(text))
+			resp, err = cs.SendMessage(gen_ctx, genai.Text(text))
 			if err != nil {
 				Logs <- NewLog(user, "gemini", Error, err.Error())
 				msgText = GetText(MsgText_UnexpectedError, user.Language)
@@ -88,13 +90,6 @@ func gen_DialogSendMessage(user *UserInfo, text string) {
 			SendMessage(user, msgText, nil, "")
 			return
 		}
-	}
-
-	if resp == nil {
-		Logs <- NewLog(user, "gemini", Error, "resp = nil")
-		msgText = GetText(MsgText_BadRequest2, user.Language)
-		SendMessage(user, msgText, nil, "")
-		return
 	}
 
 	if resp.Candidates[0].Content == nil {
@@ -137,8 +132,8 @@ func gen_TranslateToEnglish(text string) (string, error) {
 	prompt := fmt.Sprintf(`translate to english next text:
 %s`, text)
 
-	chatSession := model_Gemini.StartChat()
-	resp, err := chatSession.SendMessage(ctx_Gemini, genai.Text(prompt))
+	chatSession := gen_TextModelWithCensor.StartChat()
+	resp, err := chatSession.SendMessage(gen_ctx, genai.Text(prompt))
 	if err != nil {
 		return "", err
 	}
