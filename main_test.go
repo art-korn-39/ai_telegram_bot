@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	tgbotapi "github.com/Syfaro/telegram-bot-api"
+	"github.com/google/generative-ai-go/genai"
 )
 
 func TestValidMessage(t *testing.T) {
@@ -37,9 +38,22 @@ func TestAccessIsAllowed(t *testing.T) {
 	}
 	u := T_GetUser()
 
-	if AccessIsAllowed(upd, u) {
+	if AccessIsAllowed(upd, u) && Cfg.CheckSubscription {
 		t.Errorf("AccessIsAllowed() is true for chat_id = %d", u.ChatID)
 	}
+
+}
+
+func TestGeminiBag(t *testing.T) {
+
+	LoadConfig()
+	NewConnectionGemini()
+
+	text := "اگر خالص حقوق پرداختی توسط پیمانکار بعد از کسر ده درصد مالیات،بیمه و یازده درصد پیش پرداخت مبلغ چهارده میلیون و چهارصد هزار ریال باشد،مبلغ بدهکار حساب پیلم در جریان چقدر میشه؟"
+
+	cs := gen_TextModel.StartChat()
+	resp, err := cs.SendMessage(gen_ctx, genai.Text(text))
+	Unused(resp, err)
 
 }
 

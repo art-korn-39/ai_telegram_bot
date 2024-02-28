@@ -12,7 +12,7 @@ import (
 func gen_dialog(user *UserInfo, text string) {
 
 	if text == GetText(BtnText_EndDialog, user.Language) {
-		user.Messages_Gemini = []*genai.Content{}
+		user.Gen_History = []*genai.Content{}
 		SendMessage(user, GetText(MsgText_SelectOption, user.Language), GetButton(btn_GenTypes, user.Language), "")
 		user.Path = "gemini/type"
 		return
@@ -35,64 +35,25 @@ func gen_dialog(user *UserInfo, text string) {
 
 func gen_DialogSendMessage(user *UserInfo, text string) {
 
-	// возможна ошибка при превышении контекста диалога, проверить
-
 	var msgText string
 	cs := gen_TextModel.StartChat()
-	cs.History = user.Messages_Gemini
+	cs.History = user.Gen_History
 
 	resp, err := cs.SendMessage(gen_ctx, genai.Text(text))
 	if err != nil {
-		errorString := err.Error()
-		Logs <- NewLog(user, "gemini", Error, errorString)
 
-		if errorString == "blocked: candidate: FinishReasonSafety" {
+		resp, msgText, err = gen_ProcessErrorsOfResponse(user, err, cs, text)
 
-			// В случае данного вида ошибки - запускаем новый клиент соединения
-			NewConnectionGemini()
-
-			// Новый чат
-			cs := gen_TextModel.StartChat()
-
-			user.Messages_Gemini = []*genai.Content{}
-
-			// Отправляем повторно
-			Logs <- NewLog(user, "gemini", Error, "Повторная отправка запроса ...")
-			resp, err = cs.SendMessage(gen_ctx, genai.Text(text))
-			if err != nil {
-				Logs <- NewLog(user, "gemini", Error, err.Error())
-				msgText = GetText(MsgText_BadRequest3, user.Language)
-			} else {
-				Logs <- NewLog(user, "gemini", Error, "После очистки контекста - запрос ушел.")
-			}
-
-		} else if errorString == "blocked: prompt: BlockReasonSafety" {
-
-			msgText = GetText(MsgText_BadRequest4, user.Language)
-
-		} else if errorString == "googleapi: Error 500:" {
-
-			// Отправляем сообщение повторно
-			time.Sleep(time.Millisecond * 200)
-			Logs <- NewLog(user, "gemini", Error, "Повторная отправка запроса ...")
-			resp, err = cs.SendMessage(gen_ctx, genai.Text(text))
-			if err != nil {
-				Logs <- NewLog(user, "gemini", Error, err.Error())
-				msgText = GetText(MsgText_UnexpectedError, user.Language)
-			}
-
-		} else {
-			msgText = GetText(MsgText_UnexpectedError, user.Language)
-		}
-
-		// Отправляем сообщение и завершаем процедуру если получили ошибку в ответ
+		// Отправляем сообщение и завершаем процедуру если ошибка осталась
 		if err != nil {
+			Logs <- NewLog(user, "gemini", Error, err.Error())
 			SendMessage(user, msgText, nil, "")
 			return
 		}
 	}
 
 	if resp.Candidates[0].Content == nil {
+		user.Gen_History = []*genai.Content{}
 		Logs <- NewLog(user, "gemini", Error, "resp.Candidates[0].Content = nil")
 		msgText = GetText(MsgText_BadRequest2, user.Language)
 		SendMessage(user, msgText, nil, "")
@@ -101,7 +62,7 @@ func gen_DialogSendMessage(user *UserInfo, text string) {
 
 	result := resp.Candidates[0].Content.Parts[0].(genai.Text)
 
-	history := append(user.Messages_Gemini,
+	history := append(user.Gen_History,
 		&genai.Content{
 			Parts: []genai.Part{
 				genai.Text(text),
@@ -116,11 +77,42 @@ func gen_DialogSendMessage(user *UserInfo, text string) {
 		},
 	)
 
-	user.Messages_Gemini = history
+	user.Gen_History = history
 
 	msgText = string(result)
 	SendMessage(user, msgText, nil, "")
 
+}
+
+func gen_ProcessErrorsOfResponse(user *UserInfo, errIn error, cs *genai.ChatSession, text string) (resp *genai.GenerateContentResponse, msgText string, err error) {
+
+	err = errIn
+	errString := errIn.Error()
+
+	switch errString {
+	case "blocked: candidate: FinishReasonSafety":
+		NewConnectionGemini()
+		cs = gen_TextModel.StartChat()
+		user.Gen_History = []*genai.Content{}
+		resp, err = cs.SendMessage(gen_ctx, genai.Text(text))
+		if err != nil {
+			msgText = GetText(MsgText_BadRequest3, user.Language)
+		}
+
+	case "googleapi: Error 500:":
+		time.Sleep(time.Millisecond * 200)
+		resp, err = cs.SendMessage(gen_ctx, genai.Text(text))
+		if err != nil {
+			msgText = GetText(MsgText_UnexpectedError, user.Language)
+		}
+
+	case "blocked: prompt: BlockReasonSafety":
+		msgText = GetText(MsgText_BadRequest4, user.Language)
+	default:
+		msgText = GetText(MsgText_UnexpectedError, user.Language)
+	}
+
+	return
 }
 
 func gen_TranslateToEnglish(text string) (string, error) {

@@ -17,8 +17,8 @@ type UserInfo struct {
 	IsRunning           bool
 	Path                string
 	Options             map[string]string
-	Messages_ChatGPT    []openai.ChatCompletionMessage
-	Messages_Gemini     []*genai.Content
+	Gpt_History         []openai.ChatCompletionMessage
+	Gen_History         []*genai.Content
 	Images_Gemini       map[int]string // Удалять не забыть
 	Tokens_used_gpt     int
 	Requests_today_gen  int
@@ -55,8 +55,8 @@ func (u *UserInfo) ClearUserData() {
 }
 
 func (u *UserInfo) ClearDialogHistory() {
-	u.Messages_ChatGPT = []openai.ChatCompletionMessage{}
-	u.Messages_Gemini = []*genai.Content{}
+	u.Gpt_History = []openai.ChatCompletionMessage{}
+	u.Gen_History = []*genai.Content{}
 }
 
 func (u *UserInfo) DeleteImages() {

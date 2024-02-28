@@ -15,14 +15,14 @@ func gpt_dialog(user *UserInfo, text string) {
 	}
 
 	if text == GetText(BtnText_ClearContext, user.Language) {
-		user.Messages_ChatGPT = []openai.ChatCompletionMessage{}
+		user.Gpt_History = []openai.ChatCompletionMessage{}
 		SendMessage(user, GetText(MsgText_DialogContextCleared, user.Language), nil, "")
 		SendMessage(user, GetText(MsgText_HelloCanIHelpYou, user.Language), nil, "")
 		return
 	}
 
 	if text == GetText(BtnText_EndDialog, user.Language) {
-		user.Messages_ChatGPT = []openai.ChatCompletionMessage{}
+		user.Gpt_History = []openai.ChatCompletionMessage{}
 		SendMessage(user, GetText(MsgText_SelectOption, user.Language), GetButton(btn_GptTypes, user.Language), "")
 		user.Path = "chatgpt/type"
 		return
@@ -39,7 +39,7 @@ func gpt_dialog(user *UserInfo, text string) {
 
 func gpt_DialogSendMessage(user *UserInfo, text string, firstLaunch bool) {
 
-	messages := append(user.Messages_ChatGPT, openai.ChatCompletionMessage{
+	messages := append(user.Gpt_History, openai.ChatCompletionMessage{
 		Role:    openai.ChatMessageRoleUser,
 		Content: text,
 	})
@@ -63,7 +63,7 @@ func gpt_DialogSendMessage(user *UserInfo, text string, firstLaunch bool) {
 
 			Logs <- NewLog(user, "chatgpt", Warning, "request: "+text+"\nwarning: "+errString)
 
-			user.Messages_ChatGPT = []openai.ChatCompletionMessage{}
+			user.Gpt_History = []openai.ChatCompletionMessage{}
 			gpt_DialogSendMessage(user, text, false)
 			return
 
@@ -83,7 +83,7 @@ func gpt_DialogSendMessage(user *UserInfo, text string, firstLaunch bool) {
 		Content: content},
 	)
 
-	user.Messages_ChatGPT = messages
+	user.Gpt_History = messages
 
 	SendMessage(user, content, nil, "")
 

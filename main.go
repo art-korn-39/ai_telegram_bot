@@ -13,7 +13,7 @@ import (
 // https://elevenlabs.io/voice-lab
 
 const (
-	Version       = "2.4.3"
+	Version       = "2.4.4"
 	ChannelChatID = -1001997602646
 	ChannelURL    = "https://t.me/+6ZMACWRgFdRkNGEy"
 )
