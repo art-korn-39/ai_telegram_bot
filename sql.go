@@ -95,7 +95,8 @@ func SQL_LoadUserStates() {
 	stmt := `
 	SELECT
 		user_name, chat_id, path, options, tokens_used_gpt, 
-		language, requests_today_gen, requests_today_sdxl, level 
+		language, requests_today_gen, requests_today_sdxl, level,
+		system_language 
 	FROM 
 		user_states
 	`
@@ -114,7 +115,7 @@ func SQL_LoadUserStates() {
 			&u.Path, &options,
 			&u.Tokens_used_gpt, &u.Language,
 			&u.Requests_today_gen, &u.Requests_today_sdxl,
-			&u.Level); err != nil {
+			&u.Level, &u.System_language); err != nil {
 			Logs <- NewLog(nil, "SQL{LoadUserStates}", Error, err.Error())
 		}
 		u.Options = JSONtoMap(options)
@@ -153,17 +154,17 @@ func SQL_SaveUserStates() {
 
 	stmt = `INSERT INTO user_states (user_name, chat_id, path, options, 
 									 tokens_used_gpt, language, requests_today_gen, requests_today_sdxl, 
-									 level)
+									 level, system_language)
 	VALUES ($1, $2, $3, $4, 
 			$5, $6, $7, $8, 
-			$9)`
+			$9, $10)`
 
 	for _, v := range ListOfUsers {
 		optionsJSON := MapToJSON(v.Options)
 		_, err = tx.Exec(stmt,
 			v.Username, v.ChatID, v.Path, optionsJSON,
 			v.Tokens_used_gpt, v.Language, v.Requests_today_gen, v.Requests_today_sdxl,
-			v.Level)
+			v.Level, v.System_language)
 		if err != nil {
 			Logs <- NewLog(nil, "SQL{SaveUserStates}", Error, err.Error())
 			return

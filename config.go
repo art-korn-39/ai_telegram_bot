@@ -29,6 +29,7 @@ type config struct {
 	OperationsWithoutSubscription int
 	Debug                         bool // для функции recovery()
 	WhiteList                     []string
+	Admins                        []string
 }
 
 func LoadConfig() {

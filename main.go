@@ -13,7 +13,7 @@ import (
 // https://elevenlabs.io/voice-lab
 
 const (
-	Version       = "2.4.4"
+	Version       = "2.4.5"
 	ChannelChatID = -1001997602646
 	ChannelURL    = "https://t.me/+6ZMACWRgFdRkNGEy"
 )
@@ -24,7 +24,6 @@ var (
 	Cfg             config
 	Logs            = make(chan Log, 10)
 	ListOfUsers     = map[int64]*UserInfo{}
-	admins          = []string{"Art_Korn_39", "MnNik0"}
 	recoveryChatID  = []int64{}
 	UserInfoChanged = false
 )
@@ -290,18 +289,8 @@ func HandleMessage(u *UserInfo, m *tgbotapi.Message) {
 		sdxl_image(u, m)
 
 	default:
-		if slices.Contains(admins, u.Username) {
-			switch cmd {
-			case "info":
-				SendMessage(u, GetInfo(false), GetButton(btn_RemoveKeyboard, ""), "")
-			case "updconf":
-				LoadConfig()
-				SendMessage(u, "Config updated.", GetButton(btn_RemoveKeyboard, ""), "")
-			case "sendMessageToAllUsers":
-				sendMessageToAllUsers(u)
-			default:
-				SendMessage(u, GetText(MsgText_UnknownCommand, u.Language), GetButton(btn_Models, ""), "")
-			}
+		if slices.Contains(Cfg.Admins, u.Username) {
+			HandleAdminCommand(u, cmd)
 		} else {
 			SendMessage(u, GetText(MsgText_UnknownCommand, u.Language), GetButton(btn_Models, ""), "")
 		}

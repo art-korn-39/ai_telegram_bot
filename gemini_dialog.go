@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"time"
 
+	tgbotapi "github.com/Syfaro/telegram-bot-api"
 	"github.com/google/generative-ai-go/genai"
+	"google.golang.org/api/iterator"
 )
 
 // После ввода сообщения пользователем
@@ -30,6 +32,7 @@ func gen_dialog(user *UserInfo, text string) {
 	SQL_AddOperation(Operation)
 
 	gen_DialogSendMessage(user, text)
+	//gen_DialogSendMessageStream(user, text)
 
 }
 
@@ -52,26 +55,110 @@ func gen_DialogSendMessage(user *UserInfo, text string) {
 		}
 	}
 
-	if resp.Candidates[0].Content == nil {
-		user.Gen_History = []*genai.Content{}
-		Logs <- NewLog(user, "gemini", Error, "resp.Candidates[0].Content = nil")
-		msgText = GetText(MsgText_BadRequest2, user.Language)
-		SendMessage(user, msgText, nil, "")
+	// Получение результата из ответа
+	result, err := gen_GetResultFromResponse(user, resp)
+	if err != nil {
+		Logs <- NewLog(user, "gemini", Error, err.Error())
+		SendMessage(user, result, nil, "")
 		return
 	}
 
-	result := resp.Candidates[0].Content.Parts[0].(genai.Text)
+	gen_AddToHistory(user, text, result)
+
+	SendMessage(user, result, nil, "")
+
+}
+
+func gen_DialogSendMessageStream(user *UserInfo, text string) {
+
+	//Ошибка: "напиши первые 3000 сиволов из библии"
+
+	cs := gen_TextModel.StartChat()
+	cs.History = user.Gen_History
+	iter := cs.SendMessageStream(gen_ctx, genai.Text(text))
+
+	var resp *genai.GenerateContentResponse
+	var M tgbotapi.Message
+	var resultFull string
+	var err error
+	withoutStream := false
+
+	for {
+		resp, err = iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+
+			// Пробуем ещё раз отправить запрос с другим контекстом
+			var msgText string
+			resp, msgText, err = gen_ProcessErrorsOfResponse(user, err, cs, text)
+
+			// Завершаем процедуру если ошибка осталась
+			if err != nil {
+				Logs <- NewLog(user, "gemini", Error, err.Error())
+				SendMessage(user, msgText, nil, "")
+				return
+				// Если удалось получить ответ, то выходим из цикла, т.к. результат уже есть
+			} else {
+				withoutStream = true
+				break
+			}
+
+		}
+
+		// Получение результата из ответа
+		result, err := gen_GetResultFromResponse(user, resp)
+		if err != nil {
+			Logs <- NewLog(user, "gemini", Error, err.Error())
+			SendMessage(user, result, nil, "")
+			return
+		}
+
+		resultFull = resultFull + result
+
+		if (M == tgbotapi.Message{}) {
+			M = SendMessage(user, resultFull, nil, "")
+		} else {
+			SendEditMessage(user, M.MessageID, resultFull)
+		}
+
+	}
+
+	// Было прерывание потока
+	if withoutStream {
+		result, err := gen_GetResultFromResponse(user, resp)
+		if err != nil {
+			Logs <- NewLog(user, "gemini", Error, err.Error())
+			SendMessage(user, result, nil, "")
+			return
+		}
+
+		resultFull = result
+
+		if (M == tgbotapi.Message{}) {
+			M = SendMessage(user, resultFull, nil, "")
+		} else {
+			SendEditMessage(user, M.MessageID, resultFull)
+		}
+	}
+
+	gen_AddToHistory(user, text, resultFull)
+
+}
+
+func gen_AddToHistory(user *UserInfo, t1, t2 string) {
 
 	history := append(user.Gen_History,
 		&genai.Content{
 			Parts: []genai.Part{
-				genai.Text(text),
+				genai.Text(t1),
 			},
 			Role: "user",
 		},
 		&genai.Content{
 			Parts: []genai.Part{
-				genai.Text(result),
+				genai.Text(t2),
 			},
 			Role: "model",
 		},
@@ -79,8 +166,23 @@ func gen_DialogSendMessage(user *UserInfo, text string) {
 
 	user.Gen_History = history
 
-	msgText = string(result)
-	SendMessage(user, msgText, nil, "")
+}
+
+// Обработку ошибок выполняем тут же
+func gen_GetResultFromResponse(user *UserInfo, resp *genai.GenerateContentResponse) (string, error) {
+
+	if resp.Candidates[0].Content == nil {
+
+		user.Gen_History = []*genai.Content{}
+		msgText := GetText(MsgText_BadRequest2, user.Language)
+		err := errors.New("resp.Candidates[0].Content = nil")
+		return msgText, err
+
+	}
+
+	result := string(resp.Candidates[0].Content.Parts[0].(genai.Text))
+
+	return result, nil
 
 }
 

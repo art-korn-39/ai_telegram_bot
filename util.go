@@ -26,16 +26,6 @@ func init() {
 	WorkDir = strings.ReplaceAll(filepath.Dir(callerFile), "\\", "/")
 }
 
-// func MsgIsCommand(m *tgbotapi.Message) bool {
-
-// 	if slices.Contains(Models, strings.ToLower(m.Text)) {
-// 		return true
-// 	}
-
-// 	return m.IsCommand()
-
-// }
-
 func MsgCommand(m *tgbotapi.Message) string {
 
 	Models := map[string]string{
@@ -49,10 +39,6 @@ func MsgCommand(m *tgbotapi.Message) string {
 	if ok {
 		return value
 	}
-
-	// if slices.Contains(Models, strings.ToLower(m.Text)) {
-	// 	return strings.ToLower(m.Text)
-	// }
 
 	return m.Command()
 

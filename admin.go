@@ -9,7 +9,23 @@ import (
 	tgbotapi "github.com/Syfaro/telegram-bot-api"
 )
 
-func sendMessageToAllUsers(u *UserInfo) {
+func HandleAdminCommand(u *UserInfo, cmd string) {
+
+	switch cmd {
+	case "info":
+		SendMessage(u, GetInfo(false), GetButton(btn_RemoveKeyboard, ""), "")
+	case "updconf":
+		LoadConfig()
+		SendMessage(u, "Config updated.", GetButton(btn_RemoveKeyboard, ""), "")
+	case "sendMessageToAllUsers":
+		SendMessageToAllUsers(u)
+	default:
+		SendMessage(u, GetText(MsgText_UnknownCommand, u.Language), GetButton(btn_Models, ""), "")
+	}
+
+}
+
+func SendMessageToAllUsers(u *UserInfo) {
 
 	folder := WorkDir + "/messageToAll"
 

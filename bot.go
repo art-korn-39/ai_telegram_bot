@@ -14,7 +14,7 @@ import (
 	"github.com/sashabaranov/go-openai"
 )
 
-func SendMessage(user *UserInfo, text string, ReplyMarkup any, ParseMod string) {
+func SendMessage(user *UserInfo, text string, ReplyMarkup any, ParseMod string) (M tgbotapi.Message) {
 
 	// Если длина сообщения превышает лимиты телеграма
 	lenght := utf8.RuneCountInString(text)
@@ -32,7 +32,7 @@ func SendMessage(user *UserInfo, text string, ReplyMarkup any, ParseMod string) 
 	Message := tgbotapi.NewMessage(user.ChatID, text)
 	Message.ReplyMarkup = ReplyMarkup
 	Message.ParseMode = ParseMod
-	Bot.Send(Message)
+	M, _ = Bot.Send(Message)
 
 	// Общий лог, пишем сюда все ответы пользователю
 	// Логи с ошибками пишем в месте их возникновения
@@ -44,6 +44,17 @@ func SendMessage(user *UserInfo, text string, ReplyMarkup any, ParseMod string) 
 		text = "/account for " + user.Username
 	}
 	Logs <- NewLog(user, "bot", Info, text)
+
+	return
+
+}
+
+func SendEditMessage(user *UserInfo, messageID int, text string) {
+
+	Message := tgbotapi.NewEditMessageText(user.ChatID, messageID, text)
+	Bot.Send(Message)
+
+	//Logs <- NewLog(user, "bot", Info, text)
 
 }
 

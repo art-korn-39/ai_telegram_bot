@@ -12,19 +12,20 @@ import (
 
 type UserInfo struct {
 	Username            string
-	ChatID              int64  `db:"chat_id"`
+	ChatID              int64  `db:"chat_id"` // для db.Select()
 	Language            string `db:"language"`
+	System_language     string `db:"system_language"`
 	IsRunning           bool
-	Path                string
-	Options             map[string]string
+	Path                string            `db:"path"`
+	Options             map[string]string `db:"options"`
 	Gpt_History         []openai.ChatCompletionMessage
 	Gen_History         []*genai.Content
 	Images_Gemini       map[int]string // Удалять не забыть
-	Tokens_used_gpt     int
-	Requests_today_gen  int
-	Requests_today_sdxl int
-	Level               UserLevel
-	LevelChecked        bool // Если false, то выполняем EditLevelManualy()
+	Tokens_used_gpt     int            `db:"tokens_used_gpt"`
+	Requests_today_gen  int            `db:"requests_today_gen"`
+	Requests_today_sdxl int            `db:"requests_today_sdxl"`
+	Level               UserLevel      `db:"level"`
+	LevelChecked        bool           // Если false, то выполняем EditLevelManualy()
 	Mutex               sync.Mutex
 	WG                  sync.WaitGroup
 }
@@ -144,6 +145,9 @@ func (u *UserInfo) SetPath(v string) {
 func (u *UserInfo) FillLanguage(lang string) {
 	if u.Language == "" {
 		u.Language = lang
+	}
+	if u.System_language == "" {
+		u.System_language = lang
 	}
 }
 
