@@ -31,14 +31,17 @@ const (
 	MsgText_LanguageChanged                // Язык успешено изменён!
 	MsgText_DailyRequestLimitExceeded      // Достигнут дневной лимит запросов, дождитесь обновления лимита (%d ч. %d мин.) или воспользуйтесь другой нейросетью.
 	MsgText_APIdead                        // Сервис временно недоступен из-за технических неполадок :(\nПриносим изменения за неудобства.
-	MsgText_AvailiableImageFormats         // Некорретный формат файла, поддерживаются изображения с расширениями: png, jpeg и bmp.
+	MsgText_AvailiableImageFormats         // Некорректный формат файла, поддерживаются изображения с расширениями: png и jpeg.
+	MsgText_WrongDataType                  // Некорректный тип данных.
+	MsgText_ProcessingRequest              // Обработка запроса...
+	MsgText_nil
 
 	// GEMINI
 
 	MsgText_GeminiHello                 // Вас приветствует Gemini Pro от компании Google 🚀
 	MsgText_WriteQuestionToImages       // Напишите свой вопрос к загруженным изображениям
 	MsgText_UploadImages                // Загрузите одну или несколько картинок
-	MsgText_PhotosUploadedWriteQuestion // Загружено фотографий: %d\nНапишите свой вопрос.\nНапример:\n\"Кто на фотографии?\"\n\"Чем отличаются эти картинки?\"
+	MsgText_PhotosUploadedWriteQuestion // Загружено фотографий: %d\nНапишите свой вопрос.\nНапример:\n\"Пришли текст с картинки\"\n\"Переведи на русский\"
 	MsgText_LoadingImages               // Выполняется загрузка изображений...
 	MsgText_FailedLoadImages            // Не удалось загрузить изображение, попробуйте ещё раз.
 
@@ -88,6 +91,12 @@ const (
 	MsgText_FailedImageUpscale               // Не удалось повысить качество картинки, попробуйте другое изображение.
 	MsgText_UploadImage2                     // Загрузите картинку (рекомендуется с разрешением не больше 1024х1024)
 
+	// FACESWAP
+	MsgText_FSinfo      // Осталось генераций: <b>%d</b> <i>(обновится через: %d ч. %d мин.)</i>
+	MsgText_FSimage1    // Загрузите картинку из которой необходимо взять лицо.
+	MsgText_FSimage2    // Загрузите картинку в которой нужно заменить лицо на отправленное ранее.
+	MsgText_NoFaceFound // Не обнаружено лицо на фотографии
+
 	// BAD REQUEST
 
 	MsgText_BadRequest1 // Не удалось получить ответ от сервиса. Попробуйте изменить текст запроса или использовать другие изображения.
@@ -101,23 +110,25 @@ const (
 	BtnText_ChatGPT   // 🤖 ChatGPT
 	BtnText_Kandinsky // 🗿 Kandinsky
 	BtnText_SDXL      // 🏔 SDXL 1.0
+	BtnText_Faceswap  // 🎭 Face Swap
 
 	BtnText_Subscribe             // ✅ Подписаться
 	BtnText_SendPictureWithText   // 🖼 AI Vision
-	BtnText_ChangeQuestionText    // Изменить вопрос
 	BtnText_ChooseAnotherVoice    // Изменить голос
 	BtnText_ChangeQuerryText      // 🎮 Изменить запрос
 	BtnText_ChooseAnotherStyle    // 🎨 Изменить стиль
-	BtnText_ChangeText            // Изменить текст
+	BtnText_ChangeText            // 📝 Изменить текст
 	BtnText_UploadNewImages       // Загрузить новые фото
 	BtnText_UploadNewImage        // Загрузить новое фото
-	BtnText_EndDialog             // Завершить диалог
-	BtnText_StartDialog           // 🎭 Начать диалог
+	BtnText_EndDialog             // 🏁 Завершить диалог
+	BtnText_StartDialog           // 💭 Начать диалог
 	BtnText_GenerateAudioFromText // 🗣 Озвучить текст
-	BtnText_ClearContext          // Очистить контекст
+	BtnText_ClearContext          // 🧻 Очистить контекст
 	BtnText_Upscale               // ⭐️ Улучшить (SDXL)
 	BtnText_Upscale2              // ⭐️ Улучшить мою картинку
 	BtnText_GenerateImage         // 🏞 Создать картинку
+
+	//BtnText_ChangeQuestionText    // Изменить вопрос
 )
 
 func init() {
@@ -125,13 +136,11 @@ func init() {
 	// common
 	dictionary[MsgText_Start] = textForStarting()
 	dictionary[MsgText_Account] = textForAccount()
+	dictionary[MsgText_nil] = MultiText{ru: "", en: ""}
 
 	dictionary[MsgText_ChatGPTHello] = MultiText{
 		ru: "Вас приветствует ChatGPT 3.5 Turbo 🤖\n\nТекущий остаток токенов: <b>%d</b> <i>(обновится через: %d ч. %d мин.)</i>",
 		en: "Welcome to ChatGPT 3.5 Turbo 🤖\n\nCurrent balance of tokens: <b>%d</b> <i>(updated in: %d hours %d min.)</i>"}
-	dictionary[MsgText_SDXLinfo] = MultiText{
-		ru: "Осталось генераций и улучшений: <b>%d</b> <i>(обновится через: %d ч. %d мин.)</i>",
-		en: "Generations and upscales left: <b>%d</b> <i>(updated in: %d hours %d min.)</i>"}
 	dictionary[MsgText_GeminiHello] = MultiText{
 		ru: "Вас приветствует Gemini Pro от компании Google 🚀",
 		en: "Welcome to Gemini Pro from Google 🚀"}
@@ -184,8 +193,8 @@ func init() {
 		ru: "Завершить диалог",
 		en: "End dialog"}
 	dictionary[MsgText_PhotosUploadedWriteQuestion] = MultiText{
-		ru: "Загружено фотографий: %d\nНапишите свой вопрос.\nНапример:\n\"Кто на фотографии?\"\n\"Чем отличаются эти картинки?\"",
-		en: "Photos uploaded: %d\nWrite your question.\nFor example:\n\"Who is in the photo?\"\n\"What is the difference between these pictures?\""}
+		ru: "Загружено фотографий: %d\nНапишите свой вопрос.\nНапример:\n\"Напиши текст из картинки\"\n\"Переведи на русский\"",
+		en: "Photos uploaded: %d\nWrite your question.\nFor example:\n\"Send text from picture\"\n\"Translate to English\""}
 	dictionary[MsgText_UploadImages] = MultiText{
 		ru: "Загрузите одну или несколько картинок",
 		en: "Upload one or more images"}
@@ -195,6 +204,12 @@ func init() {
 	dictionary[MsgText_UploadImage2] = MultiText{
 		ru: "Загрузите картинку (рекомендуется с разрешением не больше 1024х1024)",
 		en: "Upload image (recommended with a resolution of no more than 1024x1024)"}
+	dictionary[MsgText_FSimage1] = MultiText{
+		ru: "Загрузите картинку из которой необходимо взять лицо.",
+		en: "Upload a picture from which you need to take a face."}
+	dictionary[MsgText_FSimage2] = MultiText{
+		ru: "Загрузите картинку в которой нужно заменить лицо на отправленное ранее.",
+		en: "Upload a picture in which you need to replace the face with the one sent earlier."}
 	dictionary[MsgText_BadRequest4] = MultiText{
 		ru: "Запрос был заблокирован по соображениям безопасности. Попробуйте изменить текст запроса.",
 		en: "The request was blocked for security reasons. Try changing the request text."}
@@ -234,6 +249,9 @@ func init() {
 	dictionary[MsgText_NoImageFoundToProcess] = MultiText{
 		ru: "Не найдена картинка для обработки.",
 		en: "No image found to process."}
+	dictionary[MsgText_NoFaceFound] = MultiText{
+		ru: "Не обнаружено лицо на фотографии.",
+		en: "No face found in photo."}
 	dictionary[MsgText_FailedLoadImages] = MultiText{
 		ru: "Не удалось загрузить изображение, попробуйте ещё раз.",
 		en: "Failed to load image, try again."}
@@ -261,9 +279,21 @@ func init() {
 	dictionary[MsgText_UnknownCommand] = MultiText{
 		ru: "Неизвестная команда",
 		en: "Unknown command"}
+	dictionary[MsgText_WrongDataType] = MultiText{
+		ru: "Некорректный тип данных",
+		en: "Wrong data type"}
 	dictionary[MsgText_AvailiableImageFormats] = MultiText{
-		ru: "Некорретный формат файла, поддерживаются изображения с расширениями: png and jpeg.",
+		ru: "Некорректный формат файла, поддерживаются изображения с расширениями: png и jpeg.",
 		en: "Incorrect file format, supported images with extensions: png and jpeg."}
+	dictionary[MsgText_ProcessingRequest] = MultiText{
+		ru: "Обработка запроса...",
+		en: "Processing request..."}
+	dictionary[MsgText_SDXLinfo] = MultiText{
+		ru: "Осталось генераций и улучшений: <b>%d</b> <i>(обновится через: %d ч. %d мин.)</i>",
+		en: "Generations and upscales left: <b>%d</b> <i>(updated in: %d hours %d min.)</i>"}
+	dictionary[MsgText_FSinfo] = MultiText{
+		ru: "Осталось генераций: <b>%d</b> <i>(обновится через: %d ч. %d мин.)</i>",
+		en: "Generations left: <b>%d</b> <i>(updated in: %d hours %d min.)</i>"}
 	dictionary[MsgText_LastOperationInProgress] = MultiText{
 		ru: "Последняя операция ещё выполняется, дождитесь её завершения перед отправкой новых запросов.",
 		en: "The last operation is still in progress, please wait until it completes before sending new requests."}
@@ -316,23 +346,25 @@ func init() {
 	dictionary[BtnText_ChatGPT] = MultiText{ru: "🤖 ChatGPT", en: "🤖 ChatGPT"}
 	dictionary[BtnText_Kandinsky] = MultiText{ru: "🗿 Kandinsky", en: "🗿 Kandinsky"}
 	dictionary[BtnText_SDXL] = MultiText{ru: "🏔 Stable Diffusion XL", en: "🏔 Stable Diffusion XL"}
+	dictionary[BtnText_Faceswap] = MultiText{ru: "🎭 Face Swap", en: "🎭 Face Swap"}
 
 	dictionary[BtnText_SendPictureWithText] = MultiText{ru: "🖼 AI Vision", en: "🖼 AI Vision"}
-	dictionary[BtnText_ChangeQuestionText] = MultiText{ru: "Изменить вопрос", en: "Change question"}
 	dictionary[BtnText_ChooseAnotherVoice] = MultiText{ru: "Изменить голос", en: "Change voice"}
 	dictionary[BtnText_ChangeQuerryText] = MultiText{ru: "🎮 Изменить запрос", en: "🎮 Change request"}
 	dictionary[BtnText_ChooseAnotherStyle] = MultiText{ru: "🎨 Изменить стиль", en: "🎨 Change style"}
-	dictionary[BtnText_ChangeText] = MultiText{ru: "Изменить текст", en: "Change text"}
-	dictionary[BtnText_EndDialog] = MultiText{ru: "Завершить диалог", en: "End dialog"}
+	dictionary[BtnText_ChangeText] = MultiText{ru: "📝 Изменить текст", en: "📝 Change text"}
+	dictionary[BtnText_EndDialog] = MultiText{ru: "🏁 Завершить диалог", en: "🏁 End dialog"}
 	dictionary[BtnText_UploadNewImages] = MultiText{ru: "Загрузить новые фото", en: "Upload new images"}
 	dictionary[BtnText_UploadNewImage] = MultiText{ru: "Загрузить новое фото", en: "Upload new image"}
-	dictionary[BtnText_StartDialog] = MultiText{ru: "🎭 Начать диалог", en: "🎭 Start dialog"}
+	dictionary[BtnText_StartDialog] = MultiText{ru: "💭 Начать диалог", en: "💭 Start dialog"}
 	dictionary[BtnText_GenerateAudioFromText] = MultiText{ru: "🗣 Озвучить текст", en: "🗣 Audio from text"}
-	dictionary[BtnText_ClearContext] = MultiText{ru: "Очистить контекст", en: "Clear context"}
+	dictionary[BtnText_ClearContext] = MultiText{ru: "🧻 Очистить контекст", en: "🧻 Clear context"}
 	dictionary[BtnText_Subscribe] = MultiText{ru: "✅ Подписаться", en: "✅ Subscribe"}
 	dictionary[BtnText_Upscale] = MultiText{ru: "⭐️ Улучшить (SDXL)", en: "⭐️ Upscale (SDXL)"}
 	dictionary[BtnText_Upscale2] = MultiText{ru: "⭐️ Улучшить мою картинку", en: "⭐ Upscale my picture"}
 	dictionary[BtnText_GenerateImage] = MultiText{ru: "🏞 Создать картинку", en: "🏞 Create a picture"}
+
+	//dictionary[BtnText_ChangeQuestionText] = MultiText{ru: "Изменить вопрос", en: "Change question"}
 
 }
 
@@ -385,10 +417,12 @@ func textForStarting() MultiText {
 🤖 <b>ChatGPT</b> - генерация текста, аудио и анализ изображений <i>(OpenAI)</i>
 🗿 <b>Kandinsky</b> - создание изображений по текстовому описанию <i>(Sber AI)</i>
 🏔 <b>Stable Diffusion XL</b> - создание изображений по текстовому описанию
+🎭 <b>Face Swap</b> - замена лица у фотографий
 	
 <u>Последние обновления:</u>
 <i>09.02.24 - добавлен Stable Diffusion XL для получения изображений высокого качества.</i>
 <i>21.02.24 - добавлена опция по улучшению собственных картинок при помощи Stable Diffusion.</i>
+<i>09.03.24 - добавлена замена лица (Face Swap).</i>
 
 Бот полностью бесплатный, удачных генераций 🔥`,
 
@@ -401,6 +435,7 @@ With my help you can use the following models:
 🤖 <b>ChatGPT</b> - text & audio generation and image analysis <i>(OpenAI)</i>
 🗿 <b>Kandinsky</b> - creating images based on text description <i>(Sber AI)</i>
 🏔 <b>Stable Diffusion XL</b> - creating images based on text description
+🎭 <b>Face Swap</b> - face replacement for photos
 			
 <u>Latest updates:</u>
 <i>09.02.24 - added Stable Diffusion XL for high quality images.</i>
@@ -425,11 +460,12 @@ func textForAccount() MultiText {
 🤖 ChatGPT токены: <b>%d</b> (осталось <b>%d</b>)
 🗿 Kandinsky: <b>без ограничений</b>
 🏔 Stable Diffusion: <b>%d</b> (осталось <b>%d</b>)
+🎭 Face Swap: <b>%d</b> (осталось <b>%d</b>)
 ----------------------------------------------                
 		
 <i>Лимиты обновятся через : %d ч. %d мин.</i>
 			
-Регулярные пользователи бота (%d дней подряд и более) получают <b>%s</b> уровень, на котором доступно <b>%d</b> генераций Stable Diffusion и <b>%d</b> токенов ChatGPT в сутки 🔥`,
+Регулярные пользователи бота (%d дней подряд и более) получают <b>%s</b> уровень, на котором доступно по <b>%d</b> генераций в Stable Diffusion и Face Swap + <b>%d</b> токенов ChatGPT в сутки 🔥`,
 
 		en: `
 👤 User ID: <b>%d</b>
@@ -442,15 +478,17 @@ Daily limits:
 🤖 ChatGPT tokens: <b>%d</b> (<b>%d</b> left)
 🗿 Kandinsky: <b>no limits</b>
 🏔 Stable Diffusion: <b>%d</b> (<b>%d</b> left)
+🎭 Face Swap: <b>%d</b> (<b>%d</b> left)
 ----------------------------------------------
 		
 <i>Limits will be updated in: %d hours %d minutes</i>
 		
-Regular users of the bot (%d days in a row or more) receive a <b>%s</b> level at which <b>%d</b> generations of Stable Diffusion and <b>%d</b> ChatGPT tokens are available per day 🔥`,
+Regular users of the bot (%d days in a row or more) receive the <b>%s</b> level at which <b>%d</b> generation is available in Stable Diffusion and Face Swap + <b>%d</b> ChatGPT tokens per day 🔥`,
 	}
 
 }
 
+// не используется
 func textForAccount_tmp() MultiText {
 
 	return MultiText{

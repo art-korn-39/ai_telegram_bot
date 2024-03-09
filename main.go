@@ -13,7 +13,7 @@ import (
 // https://elevenlabs.io/voice-lab
 
 const (
-	Version       = "2.4.5"
+	Version       = "2.5.0"
 	ChannelChatID = -1001997602646
 	ChannelURL    = "https://t.me/+6ZMACWRgFdRkNGEy"
 )
@@ -107,6 +107,7 @@ func main() {
 
 			// Пустой текст пропускаем только в случае загрузки картинок
 			if !MessageWithData(upd.Message.Text, User.Path) {
+				SendMessage(User, GetText(MsgText_WrongDataType, User.Language), nil, "")
 				return
 			}
 
@@ -163,6 +164,11 @@ func MessageWithData(text, path string) bool {
 		return true
 	} else if path == "sdxl/type/image" {
 		return true
+	} else if path == "faceswap/image1" {
+		return true
+	} else if path == "faceswap/image2" {
+		return true
+
 	}
 
 	return false
@@ -287,6 +293,18 @@ func HandleMessage(u *UserInfo, m *tgbotapi.Message) {
 
 	case "sdxl/type/image":
 		sdxl_image(u, m)
+
+	case "faceswap":
+		fs_start(u)
+
+	case "faceswap/image1":
+		fs_image(u, m, 1)
+
+	case "faceswap/image2":
+		fs_image(u, m, 2)
+
+	case "faceswap/newgen":
+		fs_newgen(u, m.Text)
 
 	default:
 		if slices.Contains(Cfg.Admins, u.Username) {

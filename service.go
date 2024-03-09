@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"math"
 	"sort"
 	"time"
@@ -90,4 +91,8 @@ func MskTimeNow() time.Time {
 	//UTC + 14 = 20:20 -> (PQ) 09.02 00:20
 	//UTC + 13 = 19:20 -> (PQ) 08.02 23:20
 
+}
+
+func getFilepathForImage(chat_id int64, extension string) string {
+	return fmt.Sprintf("%s/data/img_%d_0.%s", WorkDir, chat_id, extension)
 }

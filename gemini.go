@@ -79,14 +79,20 @@ func gen_type(user *UserInfo, text string) {
 	}
 
 	switch text {
+
+	// НАЧАТЬ ДИАЛОГ
 	case GetText(BtnText_StartDialog, user.Language):
 		SendMessage(user, GetText(MsgText_HelloCanIHelpYou, user.Language), GetButton(btn_GenEndDialog, user.Language), "")
 		user.Path = "gemini/type/dialog"
+
+	// AI VISION
 	case GetText(BtnText_SendPictureWithText, user.Language):
 		SendMessage(user, GetText(MsgText_UploadImages, user.Language), GetButton(btn_RemoveKeyboard, ""), "")
 		user.Path = "gemini/type/image"
+
+	// ОБРАБОТКА НОВОГО ЗАПРОСА (чат)
 	default:
-		SendMessage(user, "Обработка запроса...", GetButton(btn_GenEndDialog, user.Language), "")
+		SendMessage(user, GetText(MsgText_ProcessingRequest, user.Language), GetButton(btn_GenEndDialog, user.Language), "")
 		gen_dialog(user, text)
 		user.Path = "gemini/type/dialog"
 	}

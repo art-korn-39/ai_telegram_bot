@@ -35,18 +35,26 @@ func gpt_type(user *UserInfo, text string) {
 	}
 
 	switch text {
+
+	// НАЧАТЬ ДИАЛОГ
 	case GetText(BtnText_StartDialog, user.Language):
 		SendMessage(user, GetText(MsgText_ChatGPTDialogStarted, user.Language), nil, "")
 		SendMessage(user, GetText(MsgText_HelloCanIHelpYou, user.Language), GetButton(btn_GptClearContext, user.Language), "")
 		user.Path = "chatgpt/type/dialog"
+
+	// ОЗВУЧИТЬ ТЕКСТ
 	case GetText(BtnText_GenerateAudioFromText, user.Language):
 		SendMessage(user, GetText(MsgText_EnterTextForAudio, user.Language), GetButton(btn_RemoveKeyboard, ""), "")
 		user.Path = "chatgpt/type/speech_text"
+
+	// AI VISION
 	case GetText(BtnText_SendPictureWithText, user.Language):
 		SendMessage(user, GetText(MsgText_UploadImage, user.Language), GetButton(btn_RemoveKeyboard, ""), "")
 		user.Path = "chatgpt/type/image"
+
+	// ОБРАБОТКА НОВОГО ЗАПРОСА (чат)
 	default:
-		SendMessage(user, "Обработка запроса...", GetButton(btn_GptClearContext, user.Language), "")
+		SendMessage(user, GetText(MsgText_ProcessingRequest, user.Language), GetButton(btn_GptClearContext, user.Language), "")
 		gpt_dialog(user, text)
 		user.Path = "chatgpt/type/dialog"
 	}

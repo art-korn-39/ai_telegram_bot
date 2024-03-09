@@ -123,7 +123,9 @@ func sdxl_style(user *UserInfo, text string) {
 
 }
 
-func sdxl_upscale(user *UserInfo) {
+// Универсальная функция для upscale картинки, которая находится в user.Options["image"]
+// btn - кнопки которые отобразить после Upscale
+func sdxl_upscale(user *UserInfo, btn Button) {
 
 	if sdxl_DailyLimitOfRequestsIsOver(user, 0) {
 		return
@@ -133,7 +135,7 @@ func sdxl_upscale(user *UserInfo) {
 	if !ok {
 		Logs <- NewLog(user, "SDXL", Error, `{Upscale} пусто в user.Options["image"]`)
 		msgText := GetText(MsgText_NoImageFoundToProcess, user.Language)
-		SendMessage(user, msgText, GetButton(btn_ImgNewgen, ""), "")
+		SendMessage(user, msgText, GetButton(btn, ""), "")
 		return
 	}
 
@@ -145,12 +147,12 @@ func sdxl_upscale(user *UserInfo) {
 		if err.Error() != "CONTENT_FILTERED" {
 			Logs <- NewLog(user, "SDXL", Error, err.Error())
 		}
-		SendMessage(user, res, GetButton(btn_ImgNewgen, user.Language), "")
+		SendMessage(user, res, GetButton(btn, user.Language), "")
 	} else {
-		err = SendFileMessage(user, res, "", GetButton(btn_ImgNewgen, user.Language))
+		err = SendFileMessage(user, res, "", GetButton(btn, user.Language))
 		if err != nil {
 			Logs <- NewLog(user, "SDXL", Error, "{FileSend} "+err.Error())
-			SendMessage(user, GetText(MsgText_UnexpectedError, user.Language), GetButton(btn_ImgNewgen, user.Language), "")
+			SendMessage(user, GetText(MsgText_UnexpectedError, user.Language), GetButton(btn, user.Language), "")
 		} else {
 			user.Requests_today_sdxl++
 			Operation := SQL_NewOperation(user, "sdxl", "upscale", user.Options["text"])
@@ -169,15 +171,23 @@ func sdxl_newgen(user *UserInfo, text string) {
 	}
 
 	switch text {
+
+	// ИЗМЕНИТЬ ЗАПРОС
 	case GetText(BtnText_ChangeQuerryText, user.Language):
 		SendMessage(user, GetText(MsgText_EnterDescriptionOfPicture, user.Language), GetButton(btn_RemoveKeyboard, ""), "")
 		user.Path = "sdxl/type/text"
+
+	// ИЗМЕНИТЬ СТИЛЬ
 	case GetText(BtnText_ChooseAnotherStyle, user.Language):
 		SendMessage(user, GetText(MsgText_SelectStyleForImage, user.Language), GetButton(btn_SDXLStyles, ""), "")
 		user.Path = "sdxl/type/text/style"
+
+	// UPSCALE
 	case GetText(BtnText_Upscale, user.Language):
-		sdxl_upscale(user)
+		sdxl_upscale(user, btn_ImgNewgen)
 		user.Path = "sdxl/type/text/style/newgen"
+
+	// ОБРАБОТАТЬ НОВЫЙ ЗАПРОС
 	default:
 		// Предполагаем, что там новый запрос
 		user.Path = "sdxl/type/text"

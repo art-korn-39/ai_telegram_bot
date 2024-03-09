@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"io"
+	"net/http"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -33,6 +34,7 @@ func MsgCommand(m *tgbotapi.Message) string {
 		GetText(BtnText_ChatGPT, ""):   "chatgpt",
 		GetText(BtnText_Kandinsky, ""): "kandinsky",
 		GetText(BtnText_SDXL, ""):      "sdxl",
+		GetText(BtnText_Faceswap, ""):  "faceswap",
 	}
 
 	value, ok := Models[m.Text]
@@ -93,4 +95,26 @@ func CreateFile(filename string, data io.Reader) error {
 
 	return nil
 
+}
+
+func DownloadFileByURL(filepath string, url string) error {
+
+	// Get the data
+	resp, err := http.Get(url)
+
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	// Create the file
+	out, err := os.Create(filepath)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+
+	// Write the body to file
+	_, err = io.Copy(out, resp.Body)
+	return err
 }

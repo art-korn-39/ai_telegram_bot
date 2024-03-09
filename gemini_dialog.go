@@ -74,7 +74,7 @@ func gen_DialogSendMessageStream(user *UserInfo, text string) {
 	//Ошибка: "напиши первые 3000 сиволов из библии"
 
 	cs := gen_TextModel.StartChat()
-	cs.History = user.Gen_History
+	//cs.History = user.Gen_History
 	iter := cs.SendMessageStream(gen_ctx, genai.Text(text))
 
 	var resp *genai.GenerateContentResponse
@@ -122,6 +122,9 @@ func gen_DialogSendMessageStream(user *UserInfo, text string) {
 		} else {
 			SendEditMessage(user, M.MessageID, resultFull)
 		}
+
+		// чтобы избежать ошибки "Content = nil"
+		time.Sleep(3 * time.Second)
 
 	}
 

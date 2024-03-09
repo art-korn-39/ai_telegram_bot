@@ -15,6 +15,9 @@ const (
 	btn_ImgNewgenFull
 	btn_ImgNewgen
 
+	btn_FSNewgenFull
+	btn_FSNewgen
+
 	btn_SDXLStyles
 	btn_SDXLTypes
 
@@ -51,10 +54,13 @@ func GetButton(btn Button, lang string) (keyboard any) {
 		keyboard = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(GetText(BtnText_Gemini, "")),
-				tgbotapi.NewKeyboardButton(GetText(BtnText_ChatGPT, "")),
 			),
 			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(GetText(BtnText_ChatGPT, "")),
 				tgbotapi.NewKeyboardButton(GetText(BtnText_SDXL, "")),
+			),
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(GetText(BtnText_Faceswap, "")),
 				tgbotapi.NewKeyboardButton(GetText(BtnText_Kandinsky, "")),
 			),
 		)
@@ -115,6 +121,19 @@ func GetButton(btn Button, lang string) (keyboard any) {
 				tgbotapi.NewKeyboardButton(GetText(BtnText_ChooseAnotherStyle, lang)),
 			))
 
+	//FACESWAP
+	case btn_FSNewgenFull:
+		keyboard = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(GetText(BtnText_UploadNewImages, lang)),
+				tgbotapi.NewKeyboardButton(GetText(BtnText_Upscale, lang)),
+			))
+	case btn_FSNewgen:
+		keyboard = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(GetText(BtnText_UploadNewImages, lang)),
+			))
+
 	//GEMINI
 	case btn_GenTypes:
 		keyboard = tgbotapi.NewReplyKeyboard(
@@ -125,7 +144,7 @@ func GetButton(btn Button, lang string) (keyboard any) {
 	case btn_GenNewgen:
 		keyboard = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(GetText(BtnText_ChangeQuestionText, lang)),
+				tgbotapi.NewKeyboardButton(GetText(BtnText_ChangeQuerryText, lang)),
 				tgbotapi.NewKeyboardButton(GetText(BtnText_UploadNewImages, lang)),
 				tgbotapi.NewKeyboardButton(GetText(BtnText_StartDialog, lang)),
 			))
@@ -171,7 +190,7 @@ func GetButton(btn Button, lang string) (keyboard any) {
 	case btn_GptImageNewgen:
 		keyboard = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(GetText(BtnText_ChangeQuestionText, lang)),
+				tgbotapi.NewKeyboardButton(GetText(BtnText_ChangeQuerryText, lang)),
 				tgbotapi.NewKeyboardButton(GetText(BtnText_UploadNewImage, lang)),
 				tgbotapi.NewKeyboardButton(GetText(BtnText_StartDialog, lang)),
 			))

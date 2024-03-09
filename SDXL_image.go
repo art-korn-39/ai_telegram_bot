@@ -43,8 +43,11 @@ func sdxl_image(user *UserInfo, message *tgbotapi.Message) {
 		}
 	}
 
+	msgText := GetText(MsgText_LoadingImage, user.Language)
+	SendMessage(user, msgText, GetButton(btn_RemoveKeyboard, ""), "")
+
 	// Сохраняем картинку в файловую систему
-	name := fmt.Sprintf("img_%d_0", user.ChatID) // data/img_ChatID_0.jpg
+	name := fmt.Sprintf("img_%d_0", user.ChatID)
 	filename, err := DownloadFile(Photo.FileID, name)
 	if err != nil {
 		Logs <- NewLog(user, "sdxl{img}", Error, err.Error())
@@ -69,14 +72,16 @@ func sdxl_image(user *UserInfo, message *tgbotapi.Message) {
 		user.Options["minSide"] = "height"
 	}
 
-	sdxl_upscale(user)
+	sdxl_upscale(user, btn_ImgNewgen)
 
-	msgText := GetText(MsgText_SelectOption, user.Language)
+	msgText = GetText(MsgText_SelectOption, user.Language)
 	SendMessage(user, msgText, GetButton(btn_SDXLTypes, user.Language), "")
 
 	user.Path = "sdxl/type"
 }
 
+// Приводит изображение к 1048576 пикселей, пропорционально сжимая
+// Если исходное изображение <= 1048576 пикселей, возвращается ссылка на исходник
 func AdaptImageResolution(ph *tgbotapi.PhotoSize, filename string, user *UserInfo) (newFilename string, err error) {
 
 	// 4194304 (max out)
@@ -117,7 +122,7 @@ func AdaptImageResolution(ph *tgbotapi.PhotoSize, filename string, user *UserInf
 		draw.Over, nil)
 
 	// Подтоговка пути к файлу
-	outFile := fmt.Sprintf(WorkDir+"/data/img_%d_0.png", user.ChatID)
+	outFile := getFilepathForImage(user.ChatID, "png")
 
 	// Создание пустого файла
 	file, err := os.Create(outFile)

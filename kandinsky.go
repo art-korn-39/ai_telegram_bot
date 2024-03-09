@@ -96,15 +96,23 @@ func kand_style(user *UserInfo, text string) {
 func kand_newgen(user *UserInfo, text string) {
 
 	switch text {
+
+	// ИЗМЕНИТЬ ЗАПРОС
 	case GetText(BtnText_ChangeQuerryText, user.Language):
 		SendMessage(user, GetText(MsgText_EnterDescriptionOfPicture, user.Language), GetButton(btn_RemoveKeyboard, ""), "")
 		user.Path = "kandinsky/text"
+
+	// ИЗМЕНИТЬ СТИЛЬ
 	case GetText(BtnText_ChooseAnotherStyle, user.Language):
 		SendMessage(user, GetText(MsgText_SelectStyleForImage, user.Language), GetButton(btn_KandStyles, ""), "")
 		user.Path = "kandinsky/text/style"
+
+	// UPSCALE
 	case GetText(BtnText_Upscale, user.Language):
-		sdxl_upscale(user)
+		sdxl_upscale(user, btn_ImgNewgen)
 		user.Path = "kandinsky/text/style/newgen"
+
+	// ОБРАБОТКА НОВОГО ЗАПРОСА
 	default:
 		// Предполагаем, что там новый запрос
 		user.Path = "kandinsky/text"

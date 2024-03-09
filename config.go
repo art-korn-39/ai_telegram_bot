@@ -14,11 +14,16 @@ type config struct {
 	Kandinsky_Key                 string
 	Kandinsky_Secret              string
 	Stability_Key                 string
+	Replicate_Key                 string
+	Faceswap_Version              string
+	Faceswap_id                   string
 	TPD_gpt                       int
 	RPD_gen                       int
 	RPD_sdxl                      int
+	RPD_fs                        int
 	TPD_advanced_gpt              int
 	RPD_advanced_sdxl             int
+	RPD_advanced_fs               int
 	DaysForAdvancedStatus         int
 	DB_name                       string
 	DB_host                       string
@@ -62,6 +67,7 @@ func LoadConfig() {
 
 }
 
+// Получить доступный суточный лимит использования ChatGPT по пользователю
 func Get_TPD_gpt(u *UserInfo) (res int) {
 	if u.Level == Basic {
 		res = Cfg.TPD_gpt
@@ -71,11 +77,22 @@ func Get_TPD_gpt(u *UserInfo) (res int) {
 	return
 }
 
+// Получить доступный суточный лимит использования SDXL по пользователю
 func Get_RPD_sdxl(u *UserInfo) (res int) {
 	if u.Level == Basic {
 		res = Cfg.RPD_sdxl
 	} else if u.Level == Advanced {
 		res = Cfg.RPD_advanced_sdxl
+	}
+	return
+}
+
+// Получить доступный суточный лимит использования faceswap по пользователю
+func Get_RPD_fs(u *UserInfo) (res int) {
+	if u.Level == Basic {
+		res = Cfg.RPD_fs
+	} else if u.Level == Advanced {
+		res = Cfg.RPD_advanced_fs
 	}
 	return
 }

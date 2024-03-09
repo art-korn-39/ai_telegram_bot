@@ -38,20 +38,23 @@ func GetInfo(isRO bool) string {
 		return err4
 	}
 
+	alltimeOP := result_dec25["gemini"] + result_dec25["chatgpt"] + result_dec25["kandinsky"] + result_dec25["sdxl"] + result_dec25["faceswap"]
+	todayOP := result_Today["gemini"] + result_Today["chatgpt"] + result_Today["kandinsky"] + result_Today["sdxl"] + result_Today["faceswap"]
+
 	return fmt.Sprintf(
 		`All time [%d]
 Users: %d	
-Gemini: %d | ChatGPT: %d | Kandinsky: %d | SDXL: %d
+Gen: %d | GPT: %d | Kand: %d | SDXL: %d | FS: %d
 
 Today [%d]
 Users: %d (new: %d)
-Gemini: %d | ChatGPT: %d | Kandinsky: %d | SDXL: %d`,
-		result_dec25["gemini"]+result_dec25["chatgpt"]+result_dec25["kandinsky"]+result_dec25["sdxl"],
+Gen: %d | GPT: %d | Kand: %d | SDXL: %d | FS: %d`,
+		alltimeOP,
 		result_dec29["users"],
-		result_dec25["gemini"], result_dec25["chatgpt"], result_dec25["kandinsky"], result_dec25["sdxl"],
-		result_Today["gemini"]+result_Today["chatgpt"]+result_Today["kandinsky"]+result_Today["sdxl"],
+		result_dec25["gemini"], result_dec25["chatgpt"], result_dec25["kandinsky"], result_dec25["sdxl"], result_dec25["faceswap"],
+		todayOP,
 		result_Today["users"], newUsersToday,
-		result_Today["gemini"], result_Today["chatgpt"], result_Today["kandinsky"], result_Today["sdxl"],
+		result_Today["gemini"], result_Today["chatgpt"], result_Today["kandinsky"], result_Today["sdxl"], result_Today["faceswap"],
 	)
 
 }

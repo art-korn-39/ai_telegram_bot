@@ -94,36 +94,23 @@ func SQL_LoadUserStates() {
 
 	stmt := `
 	SELECT
-		user_name, chat_id, path, options, tokens_used_gpt, 
-		language, requests_today_gen, requests_today_sdxl, level,
-		system_language 
+		user_name, chat_id, path, options, 
+		language, system_language, level,
+		tokens_used_gpt, requests_today_gen, requests_today_sdxl, requests_today_fs		 
 	FROM 
 		user_states
 	`
-	rows, err := db.Query(stmt)
+
+	var users []*UserInfo
+	err := db.Select(&users, stmt)
 	if err != nil {
 		Logs <- NewLog(nil, "SQL{LoadUserStates}", Error, err.Error())
 		return
 	}
-	defer rows.Close()
 
-	for rows.Next() {
-		var u UserInfo
-		var options string
-		if err := rows.Scan(
-			&u.Username, &u.ChatID,
-			&u.Path, &options,
-			&u.Tokens_used_gpt, &u.Language,
-			&u.Requests_today_gen, &u.Requests_today_sdxl,
-			&u.Level, &u.System_language); err != nil {
-			Logs <- NewLog(nil, "SQL{LoadUserStates}", Error, err.Error())
-		}
-		u.Options = JSONtoMap(options)
-		ListOfUsers[u.ChatID] = &u
-	}
-	if err = rows.Err(); err != nil {
-		Logs <- NewLog(nil, "SQL{LoadUserStates}", Error, err.Error())
-		return
+	for _, u := range users {
+		u.Options = JSONtoMap(u.Options_str)
+		ListOfUsers[u.ChatID] = u
 	}
 
 	Logs <- NewLog(nil, "SQL", Info, "Loading user_states complete")
@@ -132,13 +119,18 @@ func SQL_LoadUserStates() {
 
 func SQL_SaveUserStates() {
 
+	// оптимизация:
 	// добавить флаг об изменении информации в userinfo
 	// если флаг есть - то в БД удаляем по нему записи и вставляем актуальные
 	// если флага нет - пропускаем
-	// должно помочь в оптимизации
 
 	if db == nil {
 		Logs <- NewLog(nil, "SQL{SaveUserStates}", Error, sql_LostConnection)
+		return
+	}
+
+	if len(ListOfUsers) < 1000 {
+		Logs <- NewLog(nil, "SQL{SaveUserStates}", Error, "len(ListOfUsers) < 1000")
 		return
 	}
 
@@ -152,28 +144,28 @@ func SQL_SaveUserStates() {
 		return
 	}
 
-	stmt = `INSERT INTO user_states (user_name, chat_id, path, options, 
-									 tokens_used_gpt, language, requests_today_gen, requests_today_sdxl, 
-									 level, system_language)
+	stmt = `INSERT INTO user_states (user_name, chat_id, path, options,
+									language, system_language, level,
+									tokens_used_gpt, requests_today_gen, requests_today_sdxl, requests_today_fs)
 	VALUES ($1, $2, $3, $4, 
-			$5, $6, $7, $8, 
-			$9, $10)`
+			$5, $6, $7, 
+			$8, $9, $10, $11)`
 
 	for _, v := range ListOfUsers {
 		optionsJSON := MapToJSON(v.Options)
 		_, err = tx.Exec(stmt,
 			v.Username, v.ChatID, v.Path, optionsJSON,
-			v.Tokens_used_gpt, v.Language, v.Requests_today_gen, v.Requests_today_sdxl,
-			v.Level, v.System_language)
+			v.Language, v.System_language, v.Level,
+			v.Tokens_used_gpt, v.Requests_today_gen, v.Requests_today_sdxl, v.Requests_today_fs)
 		if err != nil {
 			Logs <- NewLog(nil, "SQL{SaveUserStates}", Error, err.Error())
 			return
 		}
 	}
 
-	Logs <- NewLog(nil, "SQL", Info, "Saving user states done")
-
 	tx.Commit()
+
+	Logs <- NewLog(nil, "SQL", Info, "Saving user states done")
 
 }
 

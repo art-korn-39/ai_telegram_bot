@@ -61,7 +61,7 @@ func sdxl_DailyLimitOfRequestsIsOver(u *UserInfo, btn Button) bool {
 
 func sdxl_CreateImageFileFromBase64(i int, image TextToImage, user *UserInfo) (string, error) {
 
-	outFile := fmt.Sprintf(WorkDir+"/data/img_%d_0.png", user.ChatID)
+	outFile := getFilepathForImage(user.ChatID, "png")
 	file, err := os.Create(outFile)
 	if err != nil {
 		err = errors.New("{os.Create()} " + err.Error())
@@ -91,7 +91,7 @@ func sdxl_CreateImageFileFromBase64(i int, image TextToImage, user *UserInfo) (s
 func sdxl_CreateImageFileFromBody(user *UserInfo, res *http.Response) (string, error) {
 
 	// Write the response to a file
-	outFile := fmt.Sprintf(WorkDir+"/data/img_%d_0.png", user.ChatID)
+	outFile := getFilepathForImage(user.ChatID, "png")
 	file, err := os.Create(outFile)
 	if err != nil {
 		err = errors.New("{os.Create()} " + err.Error())

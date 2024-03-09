@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	tgbotapi "github.com/Syfaro/telegram-bot-api"
 	"github.com/google/generative-ai-go/genai"
@@ -52,17 +51,23 @@ func gen_image(user *UserInfo, message *tgbotapi.Message) {
 		// инициализируем мапу с файлами картинок (хотя обычно она != nil)
 		user.Images_Gemini = map[int]string{}
 	}
-	ImageNumber := len(user.Images_Gemini)                            // количество уже добавленных
-	newName := fmt.Sprintf("img_%d_gen_%d", user.ChatID, ImageNumber) // создаем новое имя с индексом в массиве фото
-	newFilename := strings.ReplaceAll(filename, name, newName)        // получаем полный путь с новым именем
-	os.Rename(filename, newFilename)                                  // заменяем имя у уже созданного
-	IsMainGorutine := ImageNumber == 0                                // определяем главную горутину
-	user.Images_Gemini[message.MessageID] = newFilename               // указываем в мапе новый путь до файла
+	ImageNumber := len(user.Images_Gemini) // количество уже добавленных
+	IsMainGorutine := ImageNumber == 0     // определяем главную горутину
+
+	// не нужно +++
+	//	newName := fmt.Sprintf("img_%d_gen_%d", user.ChatID, ImageNumber) // создаем новое имя с индексом в массиве фото
+	//	newFilename := strings.ReplaceAll(filename, name, newName)        // получаем полный путь с новым именем
+	//	os.Rename(filename, newFilename)                                  // заменяем имя у уже созданного
+	//	user.Images_Gemini[message.MessageID] = newFilename               // указываем в мапе новый путь до файла
+	// не нужно ---
+
+	user.Images_Gemini[message.MessageID] = filename // указываем в мапе путь до файла
+
 	user.Mutex.Unlock()
 
 	user.WG.Done()
 
-	// Если это последующие горутины, то завершаем их
+	// Если не основная горутина (первая), то завершаем
 	if !IsMainGorutine {
 		return
 	}
@@ -149,17 +154,25 @@ func gen_imgtext_newgen(user *UserInfo, text string) {
 	}
 
 	switch text {
-	case GetText(BtnText_ChangeQuestionText, user.Language):
+
+	// ИЗМЕНИТЬ ЗАПРОС
+	case GetText(BtnText_ChangeQuerryText, user.Language):
 		SendMessage(user, GetText(MsgText_WriteQuestionToImages, user.Language), GetButton(btn_RemoveKeyboard, ""), "")
 		user.Path = "gemini/type/image/text"
+
+	// ЗАГРУЗИТЬ НОВЫЕ КАРТИНКИ
 	case GetText(BtnText_UploadNewImages, user.Language):
 		user.DeleteImages() // на всякий почистим, если что-то осталось
 		SendMessage(user, GetText(MsgText_UploadImages, user.Language), GetButton(btn_RemoveKeyboard, ""), "")
 		user.Path = "gemini/type/image"
+
+	// НАЧАТЬ ДИАЛОГ
 	case GetText(BtnText_StartDialog, user.Language):
 		user.DeleteImages() // на всякий почистим, если что-то осталось
 		SendMessage(user, GetText(MsgText_HelloCanIHelpYou, user.Language), GetButton(btn_GenEndDialog, user.Language), "")
 		user.Path = "gemini/type/dialog"
+
+	// ОБРАБОТКА НОВОГО ЗАПРОСА
 	default:
 		// Предполагаем, что там новый вопрос к загруженным картинкам
 		gen_imgtext(user, text)

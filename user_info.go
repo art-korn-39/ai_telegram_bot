@@ -10,20 +10,23 @@ import (
 	openai "github.com/sashabaranov/go-openai"
 )
 
+// расход за сегодня в json переделать
 type UserInfo struct {
-	Username            string
+	Username            string `db:"user_name"`
 	ChatID              int64  `db:"chat_id"` // для db.Select()
 	Language            string `db:"language"`
 	System_language     string `db:"system_language"`
 	IsRunning           bool
-	Path                string            `db:"path"`
-	Options             map[string]string `db:"options"`
+	Path                string `db:"path"`
+	Options_str         string `db:"options"`
+	Options             map[string]string
 	Gpt_History         []openai.ChatCompletionMessage
 	Gen_History         []*genai.Content
 	Images_Gemini       map[int]string // Удалять не забыть
 	Tokens_used_gpt     int            `db:"tokens_used_gpt"`
 	Requests_today_gen  int            `db:"requests_today_gen"`
 	Requests_today_sdxl int            `db:"requests_today_sdxl"`
+	Requests_today_fs   int            `db:"requests_today_fs"`
 	Level               UserLevel      `db:"level"`
 	LevelChecked        bool           // Если false, то выполняем EditLevelManualy()
 	Mutex               sync.Mutex

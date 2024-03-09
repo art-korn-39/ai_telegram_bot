@@ -117,16 +117,22 @@ func gpt_speech_newgen(user *UserInfo, text string) {
 	}
 
 	switch text {
+	// ИЗМЕНИТЬ ТЕКСТ
 	case GetText(BtnText_ChangeText, user.Language):
 		SendMessage(user, GetText(MsgText_WriteTextForVoicing, user.Language), GetButton(btn_RemoveKeyboard, ""), "")
 		user.Path = "chatgpt/type/speech_text"
+
+	// ИЗМЕНИТЬ ГОЛОС
 	case GetText(BtnText_ChooseAnotherVoice, user.Language):
 		SendMessage(user, GetText(MsgText_SelectVoice, user.Language), GetButton(btn_GptVoices, ""), "")
 		user.Path = "chatgpt/type/speech_text/voice"
+
+	// НАЧАТЬ ДИАЛОГ
 	case GetText(BtnText_StartDialog, user.Language):
 		user.ClearUserData()
 		SendMessage(user, GetText(MsgText_HelloCanIHelpYou, user.Language), GetButton(btn_GptClearContext, user.Language), "")
 		user.Path = "chatgpt/type/dialog"
+
 	default:
 		SendMessage(user, GetText(MsgText_UnknownCommand, user.Language), GetButton(btn_GptSpeechNewgen, user.Language), "")
 	}
