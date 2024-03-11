@@ -6,6 +6,7 @@ import (
 	tgbotapi "github.com/Syfaro/telegram-bot-api"
 )
 
+// https://replicate.com/yan-ops/face_swap?input=http
 // https://icons8.ru/swapper ($99 в год)
 
 // После команды "/faceswap" или при вводе текста = "faceswap"

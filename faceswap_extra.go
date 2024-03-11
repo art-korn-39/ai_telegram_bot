@@ -42,9 +42,12 @@ func fs_DailyLimitOfRequestsIsOver(u *UserInfo) bool {
 func fs_PrepareImageToUpscale(user *UserInfo) (err error) {
 
 	filename := user.Options["image"]
-	filename, err = AdaptImageResolution(&tgbotapi.PhotoSize{}, filename, user)
+
+	photo := tgbotapi.PhotoSize{}
+	filename, err = AdaptImageResolution(&photo, filename, user)
 	if err == nil {
 		user.Options["image"] = filename
+		sdxl_SetOptionMinSide(user, &photo)
 	}
 
 	return

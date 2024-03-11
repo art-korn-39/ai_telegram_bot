@@ -146,6 +146,8 @@ func sdxl_upscale(user *UserInfo, btn Button) {
 	if err != nil {
 		if err.Error() != "CONTENT_FILTERED" {
 			Logs <- NewLog(user, "SDXL", Error, err.Error())
+		} else {
+			Logs <- NewLog(user, "SDXL", Warning, "(Цензура) "+err.Error())
 		}
 		SendMessage(user, res, GetButton(btn, user.Language), "")
 	} else {

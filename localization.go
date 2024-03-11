@@ -420,9 +420,8 @@ func textForStarting() MultiText {
 🎭 <b>Face Swap</b> - замена лица у фотографий
 	
 <u>Последние обновления:</u>
-<i>09.02.24 - добавлен Stable Diffusion XL для получения изображений высокого качества.</i>
 <i>21.02.24 - добавлена опция по улучшению собственных картинок при помощи Stable Diffusion.</i>
-<i>09.03.24 - добавлена замена лица (Face Swap).</i>
+<i>10.03.24 - добавлена замена лица (Face Swap).</i>
 
 Бот полностью бесплатный, удачных генераций 🔥`,
 
@@ -438,8 +437,8 @@ With my help you can use the following models:
 🎭 <b>Face Swap</b> - face replacement for photos
 			
 <u>Latest updates:</u>
-<i>09.02.24 - added Stable Diffusion XL for high quality images.</i>
 <i>21.02.24 - added an option to improve your own pictures using Stable Diffusion.</i>
+<i>10.03.24 - added face swap.</i>
 
 Bot is absolutely free, successful generations 🔥`,
 	}

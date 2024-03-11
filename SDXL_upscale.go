@@ -9,6 +9,8 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
+
+	tgbotapi "github.com/Syfaro/telegram-bot-api"
 )
 
 const SDXL_URL_UPSCALE = "https://api.stability.ai/v1/generation/esrgan-v1-x2plus/image-to-image/upscale"
@@ -99,4 +101,12 @@ func sdxl_SetResolution(writer *multipart.Writer, user *UserInfo) {
 		writer.WriteField("width", "2048")
 	}
 
+}
+
+func sdxl_SetOptionMinSide(user *UserInfo, photo *tgbotapi.PhotoSize) {
+	if photo.Height < photo.Width {
+		user.Options["minSide"] = "width"
+	} else {
+		user.Options["minSide"] = "height"
+	}
 }

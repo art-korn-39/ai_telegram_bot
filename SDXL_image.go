@@ -66,11 +66,8 @@ func sdxl_image(user *UserInfo, message *tgbotapi.Message) {
 	}
 
 	user.Options["image"] = filename
-	if Photo.Height < Photo.Width {
-		user.Options["minSide"] = "width"
-	} else {
-		user.Options["minSide"] = "height"
-	}
+
+	sdxl_SetOptionMinSide(user, &Photo)
 
 	sdxl_upscale(user, btn_ImgNewgen)
 
