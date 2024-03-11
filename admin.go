@@ -21,13 +21,16 @@ func HandleAdminCommand(u *UserInfo, cmd string) {
 		SendMessage(u, "Config updated.", GetButton(btn_RemoveKeyboard, ""), "")
 	case "sendMessageToAllUsers":
 		SendMessageToAllUsers(u)
+	case "clearTokens":
+		ClearTokens(u)
 	default:
 		SendMessage(u, GetText(MsgText_UnknownCommand, u.Language), GetButton(btn_Models, ""), "")
 	}
 
 }
 
-// 100 отправок за 33 секунды
+// 100 отправлений за 26 сек (прод)
+// 100 отправлений за 33 сек (тест)
 func SendMessageToAllUsers(u *UserInfo) {
 
 	folder := WorkDir + "/messageToAll"
@@ -155,5 +158,17 @@ func SendMessageToAllUsers(u *UserInfo) {
 	SendMessage(u, "Отправка сообщений завершена.", nil, "")
 	SendMessage(u, fmt.Sprintf("%d пользователей получили сообщение.", counter_done), nil, "")
 	SendMessage(u, fmt.Sprintf("%d заблокировано.", counter_fail), nil, "")
+
+}
+
+func ClearTokens(u *UserInfo) {
+
+	for _, u := range ListOfUsers {
+		u.Mutex.Lock()
+		u.ClearTokens()
+		u.Mutex.Unlock()
+	}
+
+	SendMessage(u, "Лимиты очищены у всех пользователей.", nil, "")
 
 }

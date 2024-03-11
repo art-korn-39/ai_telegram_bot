@@ -165,6 +165,7 @@ func (u *UserInfo) ClearTokens() {
 	u.Tokens_used_gpt = 0
 	u.Requests_today_gen = 0
 	u.Requests_today_sdxl = 0
+	u.Requests_today_fs = 0
 }
 
 // Выполняется индивидуально и только по триггеру от юзера
