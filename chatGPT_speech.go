@@ -23,7 +23,7 @@ func gpt_speech_text(user *UserInfo, text string) {
 	}
 
 	length := utf8.RuneCountInString(text)
-	if length*20 > (Get_TPD_gpt(user) - user.Tokens_used_gpt) {
+	if length*20 > (Get_TPD_gpt(user) - user.Usage.GPT) {
 		msgText := GetText(MsgText_NotEnoughTokensWriteShorterTextLength, user.Language)
 		SendMessage(user, msgText, GetButton(btn_RemoveKeyboard, ""), "")
 		return
@@ -97,6 +97,7 @@ func gpt_speech_voice(user *UserInfo, text string) {
 
 	tokensForRequest := utf8.RuneCountInString(inputText) * 20
 	user.Tokens_used_gpt = user.Tokens_used_gpt + tokensForRequest
+	user.Usage.GPT = user.Usage.GPT + tokensForRequest
 
 	caption := fmt.Sprintf(GetText(MsgText_ResultAudioGeneration, user.Language), inputText, voice)
 	err = SendAudioMessage(user, filename, caption, GetButton(btn_GptSpeechNewgen, user.Language))

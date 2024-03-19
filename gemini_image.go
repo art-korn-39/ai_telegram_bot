@@ -104,11 +104,10 @@ func gen_imgtext(user *UserInfo, text string) {
 	<-delay_Gemini
 
 	user.Requests_today_gen++
+	user.Usage.Gen++
 
 	Operation := SQL_NewOperation(user, "gemini", "img", text)
 	SQL_AddOperation(Operation)
-
-	//model := gen_client.GenerativeModel("gemini-pro-vision")
 
 	prompt := []genai.Part{genai.Text(text)}
 	for _, v := range user.Images_Gemini {

@@ -27,6 +27,7 @@ func gen_dialog(user *UserInfo, text string) {
 	<-delay_Gemini
 
 	user.Requests_today_gen++
+	user.Usage.Gen++
 
 	Operation := SQL_NewOperation(user, "gemini", "dialog", text)
 	SQL_AddOperation(Operation)

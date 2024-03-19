@@ -14,7 +14,7 @@ func fs_WelcomeTextMessage(u *UserInfo) string {
 	minutes := int(duration.Minutes()) - hours*60
 
 	return fmt.Sprintf(GetText(MsgText_FSinfo, u.Language),
-		max(Get_RPD_fs(u)-u.Requests_today_fs, 0),
+		max(Get_RPD_fs(u)-u.Usage.FS, 0),
 		hours,
 		minutes)
 }
@@ -25,7 +25,7 @@ func fs_DailyLimitOfRequestsIsOver(u *UserInfo) bool {
 		return false
 	}
 
-	if u.Requests_today_fs >= Get_RPD_fs(u) {
+	if u.Usage.FS >= Get_RPD_fs(u) {
 		duration := GetDurationToNextDay()
 		hours := int(duration.Hours())
 		minutes := int(duration.Minutes()) - hours*60

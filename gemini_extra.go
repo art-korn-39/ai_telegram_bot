@@ -11,7 +11,7 @@ func gen_DailyLimitOfRequestsIsOver(u *UserInfo) bool {
 		return false
 	}
 
-	if u.Requests_today_gen >= Cfg.RPD_gen {
+	if u.Usage.Gen >= Cfg.RPD_gen {
 		duration := GetDurationToNextDay()
 		hours := int(duration.Hours())
 		minutes := int(duration.Minutes()) - hours*60

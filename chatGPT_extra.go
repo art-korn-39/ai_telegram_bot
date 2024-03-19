@@ -16,7 +16,7 @@ func gpt_WelcomeTextMessage(u *UserInfo) string {
 	minutes := int(duration.Minutes()) - hours*60
 
 	return fmt.Sprintf(GetText(MsgText_ChatGPTHello, u.Language),
-		max(Get_TPD_gpt(u)-u.Tokens_used_gpt, 0),
+		max(Get_TPD_gpt(u)-u.Usage.GPT, 0),
 		hours,
 		minutes)
 }
@@ -27,7 +27,7 @@ func gpt_DailyLimitOfTokensIsOver(u *UserInfo) bool {
 		return false
 	}
 
-	if u.Tokens_used_gpt >= Get_TPD_gpt(u) {
+	if u.Usage.GPT >= Get_TPD_gpt(u) {
 		duration := GetDurationToNextDay()
 		hours := int(duration.Hours())
 		minutes := int(duration.Minutes()) - hours*60

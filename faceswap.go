@@ -79,6 +79,7 @@ func fs_image(user *UserInfo, message *tgbotapi.Message, i int) {
 				SendMessage(user, GetText(MsgText_ErrorWhileSendingPicture, user.Language), GetButton(btn_FSNewgen, user.Language), "")
 			} else {
 				user.Requests_today_fs++
+				user.Usage.FS++
 				Operation := SQL_NewOperation(user, "faceswap", "", "")
 				SQL_AddOperation(Operation)
 				user.Options["image"] = result

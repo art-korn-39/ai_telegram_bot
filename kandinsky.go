@@ -70,6 +70,7 @@ func kand_style(user *UserInfo, text string) {
 
 	<-delay_Kandinsky
 
+	user.Usage.Kand++
 	Operation := SQL_NewOperation(user, "kandinsky", text, inputText)
 	SQL_AddOperation(Operation)
 

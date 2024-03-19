@@ -61,19 +61,19 @@ func account(user *UserInfo) {
 	FirstDate, _ := SQL_GetFirstDate(user)
 
 	msgText := fmt.Sprintf(sample,
-		user.ChatID,                             // ID Пользователя
-		GetLevelName(user.Level, user.Language), // Уровень
-		DayStreak,                               // Посещений подряд (дней)
-		FirstDate.Format(time.DateOnly),         // Дата первого использования
-		Cfg.RPD_gen,                             // Gemini на день у пользователя
-		max(Cfg.RPD_gen-user.Requests_today_gen, 0), // Gemini остаток
-		Get_TPD_gpt(user), // ChatGPT на день у пользователя
-		max(Get_TPD_gpt(user)-user.Tokens_used_gpt, 0), // ChatGPT остаток
-		Get_RPD_sdxl(user), // Stable Diffusion на день у пользователя
-		max(Get_RPD_sdxl(user)-user.Requests_today_sdxl, 0), // Stable Diffusion остаток
-		Get_RPD_fs(user), // Face Swap на день у пользователя
-		max(Get_RPD_fs(user)-user.Requests_today_fs, 0), // Face Swap остаток
-		hours, minutes, // time to refresh
+		user.ChatID,                                // ID Пользователя
+		GetLevelName(user.Level, user.Language),    // Уровень
+		DayStreak,                                  // Посещений подряд (дней)
+		FirstDate.Format(time.DateOnly),            // Дата первого использования
+		Cfg.RPD_gen,                                // Gemini на день у пользователя
+		max(Cfg.RPD_gen-user.Usage.Gen, 0),         // Gemini остаток
+		Get_TPD_gpt(user),                          // ChatGPT на день у пользователя
+		max(Get_TPD_gpt(user)-user.Usage.GPT, 0),   // ChatGPT остаток
+		Get_RPD_sdxl(user),                         // Stable Diffusion на день у пользователя
+		max(Get_RPD_sdxl(user)-user.Usage.SDXL, 0), // Stable Diffusion остаток
+		Get_RPD_fs(user),                           // Face Swap на день у пользователя
+		max(Get_RPD_fs(user)-user.Usage.FS, 0),     // Face Swap остаток
+		hours, minutes,                             // time to refresh
 		Cfg.DaysForAdvancedStatus,             // дней для продвинутого уровня
 		GetLevelName(Advanced, user.Language), // Уровень строкой
 		Cfg.RPD_advanced_sdxl,                 // Stable Diffusion продвинутый
@@ -104,16 +104,16 @@ func account_tmp(user *UserInfo) {
 	FirstDate, _ := SQL_GetFirstDate(user)
 
 	msgText := fmt.Sprintf(sample,
-		user.ChatID,                             // ID Пользователя
-		GetLevelName(user.Level, user.Language), // Уровень
-		DayStreak,                               // Посещений подряд (дней)
-		FirstDate.Format(time.DateOnly),         // Дата первого использования
-		Cfg.RPD_gen,                             // Gemini на день у пользователя
-		max(Cfg.RPD_gen-user.Requests_today_gen, 0), // Gemini остаток
-		Get_TPD_gpt(user), // ChatGPT на день у пользователя
-		max(Get_TPD_gpt(user)-user.Tokens_used_gpt, 0), // ChatGPT остаток
-		Get_RPD_sdxl(user), // Stable Diffusion на день у пользователя
-		max(Get_RPD_sdxl(user)-user.Requests_today_sdxl, 0), // Stable Diffusion остаток
+		user.ChatID,                                // ID Пользователя
+		GetLevelName(user.Level, user.Language),    // Уровень
+		DayStreak,                                  // Посещений подряд (дней)
+		FirstDate.Format(time.DateOnly),            // Дата первого использования
+		Cfg.RPD_gen,                                // Gemini на день у пользователя
+		max(Cfg.RPD_gen-user.Usage.Gen, 0),         // Gemini остаток
+		Get_TPD_gpt(user),                          // ChatGPT на день у пользователя
+		max(Get_TPD_gpt(user)-user.Usage.GPT, 0),   // ChatGPT остаток
+		Get_RPD_sdxl(user),                         // Stable Diffusion на день у пользователя
+		max(Get_RPD_sdxl(user)-user.Usage.SDXL, 0), // Stable Diffusion остаток
 		hours, minutes, // time to refresh
 	)
 

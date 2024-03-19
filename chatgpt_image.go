@@ -97,6 +97,7 @@ func gpt_imgtext(user *UserInfo, text string) {
 
 	// умножаем на 20, хотя в реале соотношение цены токенов gpt3.5 к gpt4 ~ 26-27
 	user.Tokens_used_gpt = user.Tokens_used_gpt + resp.Usage.TotalTokens*20
+	user.Usage.GPT = user.Usage.GPT + resp.Usage.TotalTokens*20
 
 	content := resp.Choices[0].Message.Content
 

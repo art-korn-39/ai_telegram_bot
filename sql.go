@@ -95,8 +95,8 @@ func SQL_LoadUserStates() {
 	stmt := `
 	SELECT
 		user_name, chat_id, path, options, 
-		language, system_language, level,
-		tokens_used_gpt, requests_today_gen, requests_today_sdxl, requests_today_fs		 
+		language, system_language, level, usage,
+		tokens_used_gpt, requests_today_gen, requests_today_sdxl, requests_today_fs
 	FROM 
 		user_states
 	`
@@ -109,7 +109,7 @@ func SQL_LoadUserStates() {
 	}
 
 	for _, u := range users {
-		u.Options = JSONtoMap(u.Options_str)
+		u.ConvertFromJsonToFields()
 		ListOfUsers[u.ChatID] = u
 	}
 
@@ -145,17 +145,17 @@ func SQL_SaveUserStates() {
 	}
 
 	stmt = `INSERT INTO user_states (user_name, chat_id, path, options,
-									language, system_language, level,
+									language, system_language, level, usage,
 									tokens_used_gpt, requests_today_gen, requests_today_sdxl, requests_today_fs)
 	VALUES ($1, $2, $3, $4, 
-			$5, $6, $7, 
-			$8, $9, $10, $11)`
+			$5, $6, $7, $8,
+			$9, $10, $11, $12)`
 
 	for _, v := range ListOfUsers {
-		optionsJSON := MapToJSON(v.Options)
+		v.ConvertCompositeFieldsToJson()
 		_, err = tx.Exec(stmt,
-			v.Username, v.ChatID, v.Path, optionsJSON,
-			v.Language, v.System_language, v.Level,
+			v.Username, v.ChatID, v.Path, v.Options_str,
+			v.Language, v.System_language, v.Level, v.Usage_str,
 			v.Tokens_used_gpt, v.Requests_today_gen, v.Requests_today_sdxl, v.Requests_today_fs)
 		if err != nil {
 			Logs <- NewLog(nil, "SQL{SaveUserStates}", Error, err.Error())

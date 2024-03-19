@@ -30,7 +30,7 @@ func sdxl_WelcomeTextMessage(u *UserInfo) string {
 	minutes := int(duration.Minutes()) - hours*60
 
 	return fmt.Sprintf(GetText(MsgText_SDXLinfo, u.Language),
-		max(Get_RPD_sdxl(u)-u.Requests_today_sdxl, 0),
+		max(Get_RPD_sdxl(u)-u.Usage.SDXL, 0),
 		hours,
 		minutes)
 }
@@ -41,7 +41,7 @@ func sdxl_DailyLimitOfRequestsIsOver(u *UserInfo, btn Button) bool {
 		return false
 	}
 
-	if u.Requests_today_sdxl >= Get_RPD_sdxl(u) {
+	if u.Usage.SDXL >= Get_RPD_sdxl(u) {
 		duration := GetDurationToNextDay()
 		hours := int(duration.Hours())
 		minutes := int(duration.Minutes()) - hours*60

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"io"
 	"net/http"
 	"os"
@@ -43,25 +42,6 @@ func MsgCommand(m *tgbotapi.Message) string {
 	}
 
 	return m.Command()
-
-}
-
-func MapToJSON(m map[string]string) string {
-
-	result, _ := json.Marshal(m)
-	return string(result)
-
-}
-
-func JSONtoMap(JSON string) map[string]string {
-
-	result := map[string]string{}
-
-	resBytes := []byte(JSON)
-	//resBytes := io.ReadAll(res.Body)
-	json.Unmarshal(resBytes, &result)
-
-	return result
 
 }
 

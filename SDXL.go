@@ -113,6 +113,7 @@ func sdxl_style(user *UserInfo, text string) {
 			SendMessage(user, GetText(MsgText_UnexpectedError, user.Language), GetButton(btn_ImgNewgen, user.Language), "")
 		} else {
 			user.Requests_today_sdxl++
+			user.Usage.SDXL++
 			Operation := SQL_NewOperation(user, "sdxl", text, user.Options["text"])
 			SQL_AddOperation(Operation)
 			user.Options["image"] = res
@@ -157,6 +158,7 @@ func sdxl_upscale(user *UserInfo, btn Button) {
 			SendMessage(user, GetText(MsgText_UnexpectedError, user.Language), GetButton(btn, user.Language), "")
 		} else {
 			user.Requests_today_sdxl++
+			user.Usage.SDXL++
 			Operation := SQL_NewOperation(user, "sdxl", "upscale", user.Options["text"])
 			SQL_AddOperation(Operation)
 		}

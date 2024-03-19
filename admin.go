@@ -29,8 +29,7 @@ func HandleAdminCommand(u *UserInfo, cmd string) {
 
 }
 
-// 100 отправлений за 26 сек (прод)
-// 100 отправлений за 33 сек (тест)
+// 2466 за 9m 32s -> 250/мин (прод)
 func SendMessageToAllUsers(u *UserInfo) {
 
 	folder := WorkDir + "/messageToAll"
