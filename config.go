@@ -8,28 +8,33 @@ import (
 )
 
 type config struct {
-	TelegramBotToken              string
-	OpenAIToken                   string
-	GeminiKey                     string
-	Kandinsky_Key                 string
-	Kandinsky_Secret              string
-	Stability_Key                 string
-	Replicate_Key                 string
-	Faceswap_Version              string
-	Faceswap_id                   string
-	TPD_gpt                       int
-	RPD_gen                       int
-	RPD_sdxl                      int
-	RPD_fs                        int
-	TPD_advanced_gpt              int
-	RPD_advanced_sdxl             int
-	RPD_advanced_fs               int
+	TelegramBotToken string
+	OpenAIToken      string
+	GeminiKey        string
+	Kandinsky_Key    string
+	Kandinsky_Secret string
+	Stability_Key    string
+	Replicate_Key    string
+	Faceswap_Version string
+	Faceswap_id      string
+
+	TPD_gpt           int
+	RPD_gen           int
+	RPD_sdxl          int
+	RPD_fs            int
+	TPD_advanced_gpt  int
+	RPD_advanced_sdxl int
+	RPD_advanced_fs   int
+
+	Gen_UseStream bool
+
+	DB_name     string
+	DB_host     string
+	DB_port     int
+	DB_user     string
+	DB_password string
+
 	DaysForAdvancedStatus         int
-	DB_name                       string
-	DB_host                       string
-	DB_port                       int
-	DB_user                       string
-	DB_password                   string
 	CheckSubscription             bool
 	OperationsWithoutSubscription int
 	Debug                         bool // для функции recovery()

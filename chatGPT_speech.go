@@ -96,7 +96,7 @@ func gpt_speech_voice(user *UserInfo, text string) {
 	}
 
 	tokensForRequest := utf8.RuneCountInString(inputText) * 20
-	user.Tokens_used_gpt = user.Tokens_used_gpt + tokensForRequest
+	//user.Tokens_used_gpt = user.Tokens_used_gpt + tokensForRequest
 	user.Usage.GPT = user.Usage.GPT + tokensForRequest
 
 	caption := fmt.Sprintf(GetText(MsgText_ResultAudioGeneration, user.Language), inputText, voice)

@@ -74,7 +74,7 @@ func gpt_DialogSendMessage(user *UserInfo, text string, firstLaunch bool) {
 		}
 	}
 
-	user.Tokens_used_gpt = user.Tokens_used_gpt + resp.Usage.TotalTokens
+	//user.Tokens_used_gpt = user.Tokens_used_gpt + resp.Usage.TotalTokens
 	user.Usage.GPT = user.Usage.GPT + resp.Usage.TotalTokens
 
 	content = resp.Choices[0].Message.Content

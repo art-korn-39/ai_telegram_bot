@@ -103,12 +103,6 @@ func gen_imgtext(user *UserInfo, text string) {
 
 	<-delay_Gemini
 
-	user.Requests_today_gen++
-	user.Usage.Gen++
-
-	Operation := SQL_NewOperation(user, "gemini", "img", text)
-	SQL_AddOperation(Operation)
-
 	prompt := []genai.Part{genai.Text(text)}
 	for _, v := range user.Images_Gemini {
 		imgData, err := os.ReadFile(v)
@@ -140,6 +134,10 @@ func gen_imgtext(user *UserInfo, text string) {
 	result := resp.Candidates[0].Content.Parts[0].(genai.Text)
 
 	SendMessage(user, string(result), GetButton(btn_GenNewgen, user.Language), "")
+
+	user.Usage.Gen++
+	Operation := SQL_NewOperation(user, "gemini", "img", text)
+	SQL_AddOperation(Operation)
 
 	user.Path = "gemini/type/image/text/newgen"
 

@@ -95,8 +95,7 @@ func SQL_LoadUserStates() {
 	stmt := `
 	SELECT
 		user_name, chat_id, path, options, 
-		language, system_language, level, usage,
-		tokens_used_gpt, requests_today_gen, requests_today_sdxl, requests_today_fs
+		language, system_language, level, usage
 	FROM 
 		user_states
 	`
@@ -145,18 +144,16 @@ func SQL_SaveUserStates() {
 	}
 
 	stmt = `INSERT INTO user_states (user_name, chat_id, path, options,
-									language, system_language, level, usage,
-									tokens_used_gpt, requests_today_gen, requests_today_sdxl, requests_today_fs)
+									language, system_language, level, usage)
 	VALUES ($1, $2, $3, $4, 
-			$5, $6, $7, $8,
-			$9, $10, $11, $12)`
+			$5, $6, $7, $8)`
 
 	for _, v := range ListOfUsers {
 		v.ConvertCompositeFieldsToJson()
 		_, err = tx.Exec(stmt,
 			v.Username, v.ChatID, v.Path, v.Options_str,
-			v.Language, v.System_language, v.Level, v.Usage_str,
-			v.Tokens_used_gpt, v.Requests_today_gen, v.Requests_today_sdxl, v.Requests_today_fs)
+			v.Language, v.System_language, v.Level, v.Usage_str)
+		//v.Tokens_used_gpt, v.Requests_today_gen, v.Requests_today_sdxl, v.Requests_today_fs)
 		if err != nil {
 			Logs <- NewLog(nil, "SQL{SaveUserStates}", Error, err.Error())
 			return
@@ -180,7 +177,7 @@ func SQL_GetInfoOnDate(timestamp time.Time) (result map[string]int, errStr strin
 	var count int
 
 	Statement := `
-	SELECT count(distinct username) FROM operations WHERE date > '$1';
+	SELECT count(distinct chat_id) FROM operations WHERE date > '$1';
 	SELECT count(*), model FROM operations WHERE date > '$1' GROUP BY model;
 	`
 	Statement = strings.ReplaceAll(Statement, "$1", timestamp.Format(time.DateTime))

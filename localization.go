@@ -415,7 +415,7 @@ func textForStarting() MultiText {
 	
 🚀 <b>Gemini</b> - генерация текста и анализ изображений <i>(Google)</i>
 🤖 <b>ChatGPT</b> - генерация текста, аудио и анализ изображений <i>(OpenAI)</i>
-🗿 <b>Kandinsky</b> - создание изображений по текстовому описанию <i>(Sber AI)</i>
+🗿 <b>Kandinsky</b> - создание изображений по текстовому описанию
 🏔 <b>Stable Diffusion XL</b> - создание изображений по текстовому описанию
 🎭 <b>Face Swap</b> - замена лица у фотографий
 	
@@ -432,7 +432,7 @@ With my help you can use the following models:
 			
 🚀 <b>Gemini</b> - text generation and image analysis <i>(Google)</i>
 🤖 <b>ChatGPT</b> - text & audio generation and image analysis <i>(OpenAI)</i>
-🗿 <b>Kandinsky</b> - creating images based on text description <i>(Sber AI)</i>
+🗿 <b>Kandinsky</b> - creating images based on text description
 🏔 <b>Stable Diffusion XL</b> - creating images based on text description
 🎭 <b>Face Swap</b> - face replacement for photos
 			

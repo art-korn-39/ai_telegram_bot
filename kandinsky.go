@@ -70,10 +70,6 @@ func kand_style(user *UserInfo, text string) {
 
 	<-delay_Kandinsky
 
-	user.Usage.Kand++
-	Operation := SQL_NewOperation(user, "kandinsky", text, inputText)
-	SQL_AddOperation(Operation)
-
 	res, err := SendRequestToKandinsky(inputText, style, user)
 	if err != nil {
 		Logs <- NewLog(user, "kandinsky", Error, err.Error())
@@ -85,6 +81,9 @@ func kand_style(user *UserInfo, text string) {
 			Logs <- NewLog(user, "kandinsky", Error, "{ImgSend} "+err.Error())
 			SendMessage(user, GetText(MsgText_ErrorWhileSendingPicture, user.Language), GetButton(btn_ImgNewgen, user.Language), "")
 		} else {
+			user.Usage.Kand++
+			Operation := SQL_NewOperation(user, "kandinsky", text, inputText)
+			SQL_AddOperation(Operation)
 			user.Options["image"] = res
 		}
 	}

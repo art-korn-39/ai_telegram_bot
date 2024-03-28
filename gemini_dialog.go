@@ -26,14 +26,17 @@ func gen_dialog(user *UserInfo, text string) {
 
 	<-delay_Gemini
 
-	user.Requests_today_gen++
-	user.Usage.Gen++
+	// user.Requests_today_gen++
+	// user.Usage.Gen++
 
-	Operation := SQL_NewOperation(user, "gemini", "dialog", text)
-	SQL_AddOperation(Operation)
+	// Operation := SQL_NewOperation(user, "gemini", "dialog", text)
+	// SQL_AddOperation(Operation)
 
-	gen_DialogSendMessage(user, text)
-	//gen_DialogSendMessageStream(user, text)
+	if Cfg.Gen_UseStream {
+		gen_DialogSendMessageStream(user, text)
+	} else {
+		gen_DialogSendMessage(user, text)
+	}
 
 }
 
@@ -68,6 +71,10 @@ func gen_DialogSendMessage(user *UserInfo, text string) {
 
 	SendMessage(user, result, nil, "")
 
+	user.Usage.Gen++
+	Operation := SQL_NewOperation(user, "gemini", "dialog", text)
+	SQL_AddOperation(Operation)
+
 }
 
 func gen_DialogSendMessageStream(user *UserInfo, text string) {
@@ -75,7 +82,7 @@ func gen_DialogSendMessageStream(user *UserInfo, text string) {
 	//Ошибка: "напиши первые 3000 сиволов из библии"
 
 	cs := gen_TextModel.StartChat()
-	//cs.History = user.Gen_History
+	cs.History = user.Gen_History
 	iter := cs.SendMessageStream(gen_ctx, genai.Text(text))
 
 	var resp *genai.GenerateContentResponse
@@ -125,7 +132,7 @@ func gen_DialogSendMessageStream(user *UserInfo, text string) {
 		}
 
 		// чтобы избежать ошибки "Content = nil"
-		time.Sleep(3 * time.Second)
+		time.Sleep(1 * time.Second)
 
 	}
 
@@ -148,6 +155,10 @@ func gen_DialogSendMessageStream(user *UserInfo, text string) {
 	}
 
 	gen_AddToHistory(user, text, resultFull)
+
+	user.Usage.Gen++
+	Operation := SQL_NewOperation(user, "gemini", "dialog", text)
+	SQL_AddOperation(Operation)
 
 }
 

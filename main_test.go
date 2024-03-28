@@ -92,28 +92,24 @@ func TestSQL(t *testing.T) {
 
 func T_GetUser() *UserInfo {
 	return &UserInfo{
-		Username:            "test",
-		ChatID:              00000001,
-		IsRunning:           true,
-		Language:            "en",
-		Path:                "gemini/type/image/text",
-		Tokens_used_gpt:     1000,
-		Requests_today_gen:  12,
-		Requests_today_sdxl: 1,
-		Level:               Basic,
+		Username:  "test",
+		ChatID:    00000001,
+		IsRunning: true,
+		Language:  "en",
+		Path:      "gemini/type/image/text",
+		Usage:     Usage{Gen: 12, SDXL: 1, GPT: 1000},
+		Level:     Basic,
 	}
 }
 
 func T_GetUser2() *UserInfo {
 	return &UserInfo{
-		Username:            "test",
-		ChatID:              104868607, // 403059287
-		IsRunning:           true,
-		Language:            "en",
-		Path:                "gemini/type/image/text",
-		Tokens_used_gpt:     1000,
-		Requests_today_gen:  12,
-		Requests_today_sdxl: 1,
-		Level:               Advanced,
+		Username:  "test",
+		ChatID:    104868607, // 403059287
+		IsRunning: true,
+		Language:  "en",
+		Path:      "gemini/type/image/text",
+		Usage:     Usage{Gen: 12, SDXL: 1, GPT: 1000},
+		Level:     Advanced,
 	}
 }
