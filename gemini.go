@@ -7,6 +7,12 @@ import (
 	"google.golang.org/api/option"
 )
 
+//добавил текст в локал
+//условие в main
+//убрал кнопку
+//заменил на 1.5
+//добавил задержку по запросам
+
 // https://ai.google.dev/tutorials/go_quickstart?hl=ru
 // https://ai.google.dev/models/gemini?hl=ru
 
@@ -26,7 +32,7 @@ func NewConnectionGemini() {
 
 	gen_ctx = context.Background()
 	gen_client, _ = genai.NewClient(gen_ctx, option.WithAPIKey(Cfg.GeminiKey))
-	gen_TextModel = gen_client.GenerativeModel("gemini-1.0-pro")
+	gen_TextModel = gen_client.GenerativeModel("gemini-1.5-pro-latest")
 	gen_TextModelWithCensor = gen_client.GenerativeModel("gemini-1.0-pro")
 	gen_ImageModel = gen_client.GenerativeModel("gemini-pro-vision")
 
@@ -68,6 +74,16 @@ func gen_start(user *UserInfo) {
 	SendMessage(user, msgText, GetButton(btn_GenTypes, user.Language), "")
 
 	user.Path = "gemini/type"
+
+}
+
+// После команды "/gemini" или при вводе текста = "gemini"
+func gen_rip(user *UserInfo) {
+
+	msgText := GetText(MsgText_GeminiRIP, user.Language)
+	SendMessage(user, msgText, GetButton(btn_Models, ""), "")
+
+	user.Path = ""
 
 }
 

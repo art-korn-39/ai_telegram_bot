@@ -44,6 +44,7 @@ const (
 	MsgText_PhotosUploadedWriteQuestion // Загружено фотографий: %d\nНапишите свой вопрос.\nНапример:\n\"Пришли текст с картинки\"\n\"Переведи на русский\"
 	MsgText_LoadingImages               // Выполняется загрузка изображений...
 	MsgText_FailedLoadImages            // Не удалось загрузить изображение, попробуйте ещё раз.
+	MsgText_GeminiRIP                   // Gemini не поддерживается на текущий момент, пожалуйста, выберите другую модель. 🙁
 
 	// CHATGPT
 
@@ -339,6 +340,9 @@ func init() {
 	dictionary[MsgText_LanguageChanged] = MultiText{
 		ru: "Язык успешено изменён!",
 		en: "The language has been successfully changed!"}
+	dictionary[MsgText_GeminiRIP] = MultiText{
+		ru: "Gemini не поддерживается на текущий момент, пожалуйста, выберите другую модель. 🙁",
+		en: "Gemini is not currently supported, please select another model. 🙁"}
 
 	// buttons
 
@@ -363,8 +367,6 @@ func init() {
 	dictionary[BtnText_Upscale] = MultiText{ru: "⭐️ Улучшить (SDXL)", en: "⭐️ Upscale (SDXL)"}
 	dictionary[BtnText_Upscale2] = MultiText{ru: "⭐️ Улучшить мою картинку", en: "⭐ Upscale my picture"}
 	dictionary[BtnText_GenerateImage] = MultiText{ru: "🏞 Создать картинку", en: "🏞 Create a picture"}
-
-	//dictionary[BtnText_ChangeQuestionText] = MultiText{ru: "Изменить вопрос", en: "Change question"}
 
 }
 

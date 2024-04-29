@@ -13,7 +13,7 @@ import (
 // https://elevenlabs.io/voice-lab
 
 const (
-	Version       = "2.5.5"
+	Version       = "2.5.6"
 	ChannelChatID = -1001997602646
 	ChannelURL    = "https://t.me/+6ZMACWRgFdRkNGEy"
 )
@@ -220,7 +220,12 @@ func HandleMessage(u *UserInfo, m *tgbotapi.Message) {
 		language_type(u, m.Text)
 
 	case "gemini":
-		gen_start(u)
+
+		if slices.Contains(Cfg.Admins, u.Username) {
+			gen_start(u)
+		} else {
+			gen_rip(u)
+		}
 
 	case "gemini/type":
 		gen_type(u, m.Text)
