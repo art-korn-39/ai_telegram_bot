@@ -7,11 +7,8 @@ import (
 	"google.golang.org/api/option"
 )
 
-//добавил текст в локал
 //условие в main
 //убрал кнопку
-//заменил на 1.5
-//добавил задержку по запросам
 
 // https://ai.google.dev/tutorials/go_quickstart?hl=ru
 // https://ai.google.dev/models/gemini?hl=ru
@@ -43,11 +40,13 @@ func NewConnectionGemini() {
 	SafetySettings := []*genai.SafetySetting{
 		{
 			Category:  genai.HarmCategoryHarassment, // домогательство, преследование
-			Threshold: genai.HarmBlockNone,          // 4
+			Threshold: genai.HarmBlockMediumAndAbove,
+			//Threshold: genai.HarmBlockNone,          // 4
 		},
 		{
 			Category:  genai.HarmCategorySexuallyExplicit, // откровенно сексуального характера
-			Threshold: genai.HarmBlockNone,                // 4
+			Threshold: genai.HarmBlockMediumAndAbove,
+			//Threshold: genai.HarmBlockNone,                // 4
 		},
 		{
 			Category:  genai.HarmCategoryHateSpeech,  // разжигание ненависти
@@ -59,8 +58,8 @@ func NewConnectionGemini() {
 		},
 	}
 
-	//	gen_TextModel.SafetySettings = SafetySettings
-	//	gen_ImageModel.SafetySettings = SafetySettings
+	gen_TextModel.SafetySettings = SafetySettings
+	gen_ImageModel.SafetySettings = SafetySettings
 
 	Unused(SafetySettings)
 

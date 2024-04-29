@@ -41,10 +41,6 @@ func GetButton(btn Button, lang string) (keyboard any) {
 	case btn_RemoveKeyboard:
 		keyboard = tgbotapi.NewRemoveKeyboard(false)
 
-	//case btn_Empty:
-	//keyboard = tgbotapi.NewInlineKeyboardMarkup(tgbotapi.NewInlineKeyboardRow())
-	//keyboard = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow())
-
 	case btn_Subscribe:
 		keyboard = tgbotapi.NewInlineKeyboardMarkup(
 			tgbotapi.NewInlineKeyboardRow(
@@ -52,9 +48,9 @@ func GetButton(btn Button, lang string) (keyboard any) {
 			))
 	case btn_Models:
 		keyboard = tgbotapi.NewReplyKeyboard(
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(GetText(BtnText_Gemini, "")),
-			),
+			// tgbotapi.NewKeyboardButtonRow(
+			// 	tgbotapi.NewKeyboardButton(GetText(BtnText_Gemini, "")),
+			// ),
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(GetText(BtnText_ChatGPT, "")),
 				tgbotapi.NewKeyboardButton(GetText(BtnText_SDXL, "")),

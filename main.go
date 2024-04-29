@@ -221,11 +221,11 @@ func HandleMessage(u *UserInfo, m *tgbotapi.Message) {
 
 	case "gemini":
 
-		//		if slices.Contains(Cfg.Admins, u.Username) {
-		gen_start(u)
-		//		} else {
-		//			gen_rip(u)
-		//		}
+		if slices.Contains(Cfg.Admins, u.Username) {
+			gen_start(u)
+		} else {
+			gen_rip(u)
+		}
 
 	case "gemini/type":
 		gen_type(u, m.Text)
