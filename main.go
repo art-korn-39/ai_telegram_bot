@@ -13,7 +13,7 @@ import (
 // https://elevenlabs.io/voice-lab
 
 const (
-	Version       = "2.5.4"
+	Version       = "2.5.5"
 	ChannelChatID = -1001997602646
 	ChannelURL    = "https://t.me/+6ZMACWRgFdRkNGEy"
 )
@@ -133,11 +133,11 @@ func ValidMessage(upd *tgbotapi.Update) bool {
 		return false
 	}
 
-	if upd.Message != nil {
-		if upd.Message.From.IsBot {
-			return false
-		}
-	}
+	//if upd.Message != nil {
+	//if upd.Message.From.IsBot {
+	//return false
+	//}
+	//}
 
 	// Переносим данные из CallbackQuery в Message
 	if upd.Message == nil && upd.CallbackQuery != nil {
