@@ -32,7 +32,7 @@ func NewConnectionGemini() {
 
 	gen_ctx = context.Background()
 	gen_client, _ = genai.NewClient(gen_ctx, option.WithAPIKey(Cfg.GeminiKey))
-	gen_TextModel = gen_client.GenerativeModel("gemini-1.5-pro-latest")
+	gen_TextModel = gen_client.GenerativeModel("gemini-1.0-pro") //gemini-1.5-pro-latest
 	gen_TextModelWithCensor = gen_client.GenerativeModel("gemini-1.0-pro")
 	gen_ImageModel = gen_client.GenerativeModel("gemini-pro-vision")
 
@@ -59,8 +59,10 @@ func NewConnectionGemini() {
 		},
 	}
 
-	gen_TextModel.SafetySettings = SafetySettings
-	gen_ImageModel.SafetySettings = SafetySettings
+	//	gen_TextModel.SafetySettings = SafetySettings
+	//	gen_ImageModel.SafetySettings = SafetySettings
+
+	Unused(SafetySettings)
 
 }
 
