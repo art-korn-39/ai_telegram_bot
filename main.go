@@ -13,7 +13,7 @@ import (
 // https://elevenlabs.io/voice-lab
 
 const (
-	Version       = "2.5.6"
+	Version       = "2.5.7"
 	ChannelChatID = -1001997602646
 	ChannelURL    = "https://t.me/+6ZMACWRgFdRkNGEy"
 )
@@ -133,11 +133,11 @@ func ValidMessage(upd *tgbotapi.Update) bool {
 		return false
 	}
 
-	//if upd.Message != nil {
-	//if upd.Message.From.IsBot {
-	//return false
-	//}
-	//}
+	if upd.Message != nil {
+		if upd.Message.From.IsBot {
+			return false
+		}
+	}
 
 	// Переносим данные из CallbackQuery в Message
 	if upd.Message == nil && upd.CallbackQuery != nil {
@@ -221,11 +221,11 @@ func HandleMessage(u *UserInfo, m *tgbotapi.Message) {
 
 	case "gemini":
 
-		if slices.Contains(Cfg.Admins, u.Username) {
-			gen_start(u)
-		} else {
-			gen_rip(u)
-		}
+		// if slices.Contains(Cfg.Admins, u.Username) {
+		gen_start(u)
+		// } else {
+		// 	gen_rip(u)
+		// }
 
 	case "gemini/type":
 		gen_type(u, m.Text)

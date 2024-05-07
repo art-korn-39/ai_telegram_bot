@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"slices"
 
 	"github.com/google/generative-ai-go/genai"
 	"google.golang.org/api/option"
@@ -39,14 +40,14 @@ func NewConnectionGemini() {
 	// 4 - не блокировать совсем
 	SafetySettings := []*genai.SafetySetting{
 		{
-			Category:  genai.HarmCategoryHarassment, // домогательство, преследование
-			Threshold: genai.HarmBlockMediumAndAbove,
-			//Threshold: genai.HarmBlockNone,          // 4
+			Category: genai.HarmCategoryHarassment, // домогательство, преследование
+			//Threshold: genai.HarmBlockMediumAndAbove,
+			Threshold: genai.HarmBlockNone, // 4
 		},
 		{
-			Category:  genai.HarmCategorySexuallyExplicit, // откровенно сексуального характера
-			Threshold: genai.HarmBlockMediumAndAbove,
-			//Threshold: genai.HarmBlockNone,                // 4
+			Category: genai.HarmCategorySexuallyExplicit, // откровенно сексуального характера
+			//Threshold: genai.HarmBlockMediumAndAbove,
+			Threshold: genai.HarmBlockNone, // 4
 		},
 		{
 			Category:  genai.HarmCategoryHateSpeech,  // разжигание ненависти
@@ -67,6 +68,11 @@ func NewConnectionGemini() {
 
 // После команды "/gemini" или при вводе текста = "gemini"
 func gen_start(user *UserInfo) {
+
+	if Cfg.Gen_Rip && !slices.Contains(Cfg.Admins, user.Username) {
+		gen_rip(user)
+		return
+	}
 
 	msgText := GetText(MsgText_GeminiHello, user.Language)
 	SendMessage(user, msgText, nil, "")

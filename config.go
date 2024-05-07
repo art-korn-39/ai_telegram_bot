@@ -27,6 +27,7 @@ type config struct {
 	RPD_advanced_fs   int
 
 	Gen_UseStream bool
+	Gen_Rip       bool
 
 	DB_name     string
 	DB_host     string
