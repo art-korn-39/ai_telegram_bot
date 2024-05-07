@@ -23,11 +23,6 @@ func start(user *UserInfo, message *tgbotapi.Message) {
 
 func account(user *UserInfo) {
 
-	if Cfg.RPD_sdxl == Cfg.RPD_advanced_sdxl {
-		account_tmp(user)
-		return
-	}
-
 	// пример +++
 	sample :=
 		`
@@ -83,41 +78,6 @@ func account(user *UserInfo) {
 	SendMessage(user, msgText, GetButton(btn_Models, ""), "HTML")
 
 	user.Path = ""
-
-}
-
-func account_tmp(user *UserInfo) {
-
-	MT := textForAccount_tmp()
-
-	var sample string
-	if user.Language == "ru" || user.Language == "uk" {
-		sample = MT.ru
-	} else {
-		sample = MT.en
-	}
-
-	duration := GetDurationToNextDay()
-	hours := int(duration.Hours())
-	minutes := int(duration.Minutes()) - hours*60
-	DayStreak, _ := SQL_UserDayStreak(user)
-	FirstDate, _ := SQL_GetFirstDate(user)
-
-	msgText := fmt.Sprintf(sample,
-		user.ChatID,                                // ID Пользователя
-		GetLevelName(user.Level, user.Language),    // Уровень
-		DayStreak,                                  // Посещений подряд (дней)
-		FirstDate.Format(time.DateOnly),            // Дата первого использования
-		Cfg.RPD_gen,                                // Gemini на день у пользователя
-		max(Cfg.RPD_gen-user.Usage.Gen, 0),         // Gemini остаток
-		Get_TPD_gpt(user),                          // ChatGPT на день у пользователя
-		max(Get_TPD_gpt(user)-user.Usage.GPT, 0),   // ChatGPT остаток
-		Get_RPD_sdxl(user),                         // Stable Diffusion на день у пользователя
-		max(Get_RPD_sdxl(user)-user.Usage.SDXL, 0), // Stable Diffusion остаток
-		hours, minutes, // time to refresh
-	)
-
-	SendMessage(user, msgText, GetButton(btn_Models, ""), "HTML")
 
 }
 

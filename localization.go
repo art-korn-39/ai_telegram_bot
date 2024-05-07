@@ -45,6 +45,7 @@ const (
 	MsgText_LoadingImages               // Выполняется загрузка изображений...
 	MsgText_FailedLoadImages            // Не удалось загрузить изображение, попробуйте ещё раз.
 	MsgText_GeminiRIP                   // Gemini не поддерживается на текущий момент, пожалуйста, выберите другую модель. 🙁
+	MsgText_GenGeoError                 // Произошла ошибка на стороне сервера, мы работаем над её устранением.
 
 	// CHATGPT
 
@@ -313,6 +314,9 @@ func init() {
 	dictionary[MsgText_UnexpectedError] = MultiText{
 		ru: "Произошла непредвиденная ошибка, попробуйте позже.",
 		en: "An unexpected error occurred, please try again later."}
+	dictionary[MsgText_GenGeoError] = MultiText{
+		ru: "Произошла ошибка на стороне сервера, мы работаем над её устранением.",
+		en: "An error occurred on the server side, we are working to resolve it."}
 	dictionary[MsgText_ResultImageGeneration] = MultiText{
 		ru: `Результат генерации по запросу "%s", стиль: "%s"`,
 		en: `Generation result for query "%s", style: "%s"`}
@@ -485,43 +489,6 @@ Daily limits:
 <i>Limits will be updated in: %d hours %d minutes</i>
 		
 Regular users of the bot (%d days in a row or more) receive the <b>%s</b> level at which <b>%d</b> generation is available in Stable Diffusion and Face Swap + <b>%d</b> ChatGPT tokens per day 🔥`,
-	}
-
-}
-
-// не используется
-func textForAccount_tmp() MultiText {
-
-	return MultiText{
-		ru: `
-👤 ID Пользователя: <b>%d</b>
-⭐️ Уровень: <b>%s</b>
-✌️ Посещений подряд (дней): <b>%d</b>
-✅ Дата первого использования: <b>%s</b>
-----------------------------------------------
-Дневные лимиты:     
-🚀 Gemini запросы: <b>%d</b> (осталось <b>%d</b>)
-🤖 ChatGPT токены: <b>%d</b> (осталось <b>%d</b>)
-🗿 Kandinsky: <b>без ограничений</b>
-🏔 Stable Diffusion: <b>%d</b> (осталось <b>%d</b>)
-----------------------------------------------                
-		
-<i>Лимиты обновятся через : %d ч. %d мин.</i>`,
-
-		en: `
-👤 User ID: <b>%d</b>
-⭐️ Level: <b>%s</b>
-✌️ Consecutive visits (days): <b>%d</b>
-✅ Date of first use: <b>%s</b>
-----------------------------------------------
-Daily limits:
-🚀 Gemini requests: <b>%d</b> (<b>%d</b> left)
-🤖 ChatGPT tokens: <b>%d</b> (<b>%d</b> left)
-🗿 Kandinsky: <b>no limits</b>
-🏔 Stable Diffusion: <b>%d</b> (<b>%d</b> left)
-----------------------------------------------
-		
-<i>Limits will be updated in: %d hours %d minutes</i>`,
 	}
 
 }

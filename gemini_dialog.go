@@ -210,6 +210,13 @@ func gen_ProcessErrorsOfResponse(user *UserInfo, errIn error, cs *genai.ChatSess
 			msgText = GetText(MsgText_BadRequest3, user.Language)
 		}
 
+	case "googleapi: Error 400:":
+		time.Sleep(time.Millisecond * 200)
+		resp, err = cs.SendMessage(gen_ctx, genai.Text(text))
+		if err != nil {
+			msgText = GetText(MsgText_GenGeoError, user.Language)
+		}
+
 	case "googleapi: Error 500:":
 		time.Sleep(time.Millisecond * 200)
 		resp, err = cs.SendMessage(gen_ctx, genai.Text(text))
