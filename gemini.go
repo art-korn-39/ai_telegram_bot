@@ -40,14 +40,14 @@ func NewConnectionGemini() {
 	// 4 - не блокировать совсем
 	SafetySettings := []*genai.SafetySetting{
 		{
-			Category: genai.HarmCategoryHarassment, // домогательство, преследование
-			//Threshold: genai.HarmBlockMediumAndAbove,
-			Threshold: genai.HarmBlockNone, // 4
+			Category:  genai.HarmCategoryHarassment, // домогательство, преследование
+			Threshold: genai.HarmBlockMediumAndAbove,
+			//Threshold: genai.HarmBlockNone, // 4
 		},
 		{
-			Category: genai.HarmCategorySexuallyExplicit, // откровенно сексуального характера
-			//Threshold: genai.HarmBlockMediumAndAbove,
-			Threshold: genai.HarmBlockNone, // 4
+			Category:  genai.HarmCategorySexuallyExplicit, // откровенно сексуального характера
+			Threshold: genai.HarmBlockMediumAndAbove,
+			//Threshold: genai.HarmBlockNone, // 4
 		},
 		{
 			Category:  genai.HarmCategoryHateSpeech,  // разжигание ненависти

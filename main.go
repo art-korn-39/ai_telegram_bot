@@ -70,6 +70,11 @@ func main() {
 
 		go func(upd tgbotapi.Update) {
 
+			if MessageInGroupChat(upd) {
+				HandleGroupChatMessage(upd.Message)
+				return
+			}
+
 			// Пустые сообщения и сообщения от ботов - пропускаем
 			// Если это CallbackQuery, то помещаем его в Message
 			if !ValidMessage(&upd) {
@@ -220,12 +225,7 @@ func HandleMessage(u *UserInfo, m *tgbotapi.Message) {
 		language_type(u, m.Text)
 
 	case "gemini":
-
-		// if slices.Contains(Cfg.Admins, u.Username) {
 		gen_start(u)
-		// } else {
-		// 	gen_rip(u)
-		// }
 
 	case "gemini/type":
 		gen_type(u, m.Text)

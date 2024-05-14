@@ -166,7 +166,7 @@ func SQL_SaveUserStates() {
 
 }
 
-func SQL_GetInfoOnDate(timestamp time.Time) (result map[string]int, errStr string) {
+func SQL_GetOperationsFromDate(timestamp time.Time) (result map[string]int, errStr string) {
 
 	if db == nil {
 		Logs <- NewLog(nil, "SQL{Info}", Error, sql_LostConnection)
@@ -218,6 +218,51 @@ func SQL_GetInfoOnDate(timestamp time.Time) (result map[string]int, errStr strin
 
 	return
 
+}
+
+func SQL_GetErrorsForDay(timestamp time.Time) (result map[string]int, errStr string) {
+
+	if db == nil {
+		Logs <- NewLog(nil, "SQL{SQL_GetErrorsForDay}", Error, sql_LostConnection)
+		return result, "Отсутствует подключение к БД"
+	}
+
+	result = map[string]int{"gemini": 0, "chatgpt": 0, "sdxl": 0, "kandinsky": 0, "faceswap": 0}
+
+	Statement := `
+	select
+	count(*) as Errors,
+	author as Author 
+	from logs
+	where level = 1 AND date_trunc('day', date) = ($1::timestamp)
+	group by author`
+
+	type row struct {
+		Errors int
+		Author string
+	}
+	var data []row
+
+	err := db.Select(&data, Statement, timestamp)
+	if err != nil {
+		Logs <- NewLog(nil, "SQL{GetErrorsForDay}", Error, err.Error())
+		return result, err.Error()
+	}
+
+	for _, v := range data {
+
+		var model string
+		pos := strings.Index(v.Author, "{")
+		if pos == -1 {
+			model = strings.ToLower(v.Author)
+		} else {
+			model = strings.ToLower(SubString(v.Author, 0, pos))
+		}
+
+		result[model] = result[model] + v.Errors
+	}
+
+	return
 }
 
 func SQL_GetNewUsersForDay(timestamp time.Time) (cnt int, errStr string) {
@@ -439,7 +484,6 @@ func SQL_UserDayStreak(user *UserInfo) (daysByUsers map[int64]int, isErr bool) {
 
 	err := db.Select(&data, Statement, pq.Array(sliceChatID), MskTimeNow())
 	if err != nil {
-		fmt.Println(err.Error())
 		Logs <- NewLog(nil, "SQL{UserDayStreak}", Error, err.Error())
 		return daysByUsers, true
 	}

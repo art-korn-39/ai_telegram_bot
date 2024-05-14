@@ -24,16 +24,12 @@ type UserInfo struct {
 	Gpt_History     []openai.ChatCompletionMessage
 	Gen_History     []*genai.Content
 	Images_Gemini   map[int]string // удалять не забыть
-	//	Tokens_used_gpt     int            `db:"tokens_used_gpt"`
-	//	Requests_today_gen  int            `db:"requests_today_gen"`
-	//	Requests_today_sdxl int            `db:"requests_today_sdxl"`
-	//	Requests_today_fs   int            `db:"requests_today_fs"`
-	Usage_str    string    `db:"usage"` // только для взаимодействия с БД
-	Usage        Usage     // использование за сегодня
-	Level        UserLevel `db:"level"`
-	LevelChecked bool      // Если false, то выполняем EditLevelManualy()
-	Mutex        sync.Mutex
-	WG           sync.WaitGroup
+	Usage_str       string         `db:"usage"` // только для взаимодействия с БД
+	Usage           Usage          // использование за сегодня
+	Level           UserLevel      `db:"level"`
+	LevelChecked    bool           // Если false, то выполняем EditLevelManualy()
+	Mutex           sync.Mutex
+	WG              sync.WaitGroup
 }
 
 type Usage struct {
@@ -177,10 +173,6 @@ func (u *UserInfo) ImagesLoading(upd tgbotapi.Update) bool {
 }
 
 func (u *UserInfo) ClearTokens() {
-	//	u.Tokens_used_gpt = 0
-	//	u.Requests_today_gen = 0
-	//	u.Requests_today_sdxl = 0
-	//	u.Requests_today_fs = 0
 	u.Usage = Usage{}
 }
 
