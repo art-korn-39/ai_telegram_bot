@@ -33,6 +33,8 @@ func HandleGroupChatMessage(m *tgbotapi.Message) {
 		return
 	}
 
+	return
+
 	user := NewUserInfo(m)
 	prompt := SubString(m.Text, 5, utf8.RuneCountInString(m.Text))
 
@@ -50,11 +52,6 @@ func HandleGroupChatMessage(m *tgbotapi.Message) {
 		if err != nil {
 			Logs <- NewLog(user, "kandinsky{group}", Error, "{ImgSend} "+err.Error())
 			SendMessage(user, GetText(MsgText_ErrorWhileSendingPicture, user.Language), nil, "") //GetButton(btn_ImgNewgen, user.Language), "")
-		} else {
-			//user.Usage.Kand++
-			//Operation := SQL_NewOperation(user, "kandinsky", text, inputText)
-			//SQL_AddOperation(Operation)
-			//user.Options["image"] = res
 		}
 	}
 

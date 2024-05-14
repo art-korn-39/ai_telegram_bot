@@ -53,7 +53,7 @@ Gen: %d | GPT: %d | Kand: %d | SDXL: %d | FS: %d
 
 Today [%d]
 Users: %d (new: %d)
-Gen: %d (%d) | GPT: %d (%d%%) | Kand: %d (%d) | SDXL: %d (%d) | FS: %d (%d%%)`,
+Gen: %d (%d%%) | GPT: %d (%d%%) | Kand: %d (%d%%) | SDXL: %d (%d%%) | FS: %d (%d%%)`,
 		alltimeOP,
 		result_dec29["users"],
 		result_dec25["gemini"], result_dec25["chatgpt"], result_dec25["kandinsky"], result_dec25["sdxl"], result_dec25["faceswap"],
@@ -74,7 +74,7 @@ func GetPartOfErrors(model string, operations, errors map[string]int) int {
 	if sum == 0 {
 		return 0
 	} else {
-		return operations[model] * 100 / sum
+		return errors[model] * 100 / sum
 	}
 
 }
