@@ -29,7 +29,13 @@ var (
 func NewConnectionGemini() {
 
 	gen_ctx = context.Background()
-	gen_client, _ = genai.NewClient(gen_ctx, option.WithAPIKey(Cfg.GeminiKey))
+	gen_client, _ = genai.NewClient(gen_ctx,
+		option.WithAPIKey(Cfg.GeminiKey),
+		//option.WithEndpoint("europe-central2-aiplatform.googleapis.com"),
+		option.WithEndpoint("generativelanguage.googleapis.com"),
+		//us-central1-aiplatform.googleapis.com
+	)
+
 	gen_TextModel = gen_client.GenerativeModel("gemini-1.0-pro") //gemini-1.5-pro-latest
 	gen_TextModelWithCensor = gen_client.GenerativeModel("gemini-1.0-pro")
 	gen_ImageModel = gen_client.GenerativeModel("gemini-pro-vision")
