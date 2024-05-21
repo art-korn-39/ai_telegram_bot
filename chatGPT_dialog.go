@@ -15,14 +15,14 @@ func gpt_dialog(user *UserInfo, text string) {
 	}
 
 	if text == GetText(BtnText_ClearContext, user.Language) {
-		user.Gpt_History = []openai.ChatCompletionMessage{}
+		user.ClearDialogHistory()
 		SendMessage(user, GetText(MsgText_DialogContextCleared, user.Language), nil, "")
 		SendMessage(user, GetText(MsgText_HelloCanIHelpYou, user.Language), nil, "")
 		return
 	}
 
 	if text == GetText(BtnText_EndDialog, user.Language) {
-		user.Gpt_History = []openai.ChatCompletionMessage{}
+		user.ClearDialogHistory()
 		SendMessage(user, GetText(MsgText_SelectOption, user.Language), GetButton(btn_GptTypes, user.Language), "")
 		user.Path = "chatgpt/type"
 		return

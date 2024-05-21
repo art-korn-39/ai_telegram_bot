@@ -34,11 +34,13 @@ const (
 	MsgText_AvailiableImageFormats         // Некорректный формат файла, поддерживаются изображения с расширениями: png и jpeg.
 	MsgText_WrongDataType                  // Некорректный тип данных.
 	MsgText_ProcessingRequest              // Обработка запроса...
+	MsgText_FileIsTooBig                   // Превышен максимальный размер файла (20 МБ), пожалуйста, попробуйте отправить другой файл.
 	MsgText_nil
 
 	// GEMINI
 
-	MsgText_GeminiHello                 // Вас приветствует Gemini Pro от компании Google 🚀
+	MsgText_GeminiHello                 // Вас приветствует Gemini Pro 1.0 от компании Google 🚀
+	MsgText_Gemini15Hello               // Вас приветствует Gemini Flash 1.5 от компании Google 🃏
 	MsgText_WriteQuestionToImages       // Напишите свой вопрос к загруженным изображениям
 	MsgText_UploadImages                // Загрузите одну или несколько картинок
 	MsgText_PhotosUploadedWriteQuestion // Загружено фотографий: %d\nНапишите свой вопрос.\nНапример:\n\"Пришли текст с картинки\"\n\"Переведи на русский\"
@@ -46,6 +48,11 @@ const (
 	MsgText_FailedLoadImages            // Не удалось загрузить изображение, попробуйте ещё раз.
 	MsgText_GeminiRIP                   // Gemini не поддерживается на текущий момент, пожалуйста, выберите другую модель. 🙁
 	MsgText_GenGeoError                 // Произошла ошибка на стороне сервера, мы работаем над её устранением.
+	MsgText_FailedLoadFiles             // Не удалось загрузить файл на сервер, попробуйте ещё раз.
+	MsgText_UploadFiles                 // Вы можете отправить для обработки: картинку / видео / текстовый файл / аудио / голосовое сообщение
+	MsgText_LoadingFiles                // Выполняется загрузка файлов...
+	MsgText_FilesUploadedWriteText      // Загружено файлов: %d\nУкажите текст при необходимости.
+	MsgText_WriteTextToFiles            // Напишите текст к загруженным файлам
 
 	// CHATGPT
 
@@ -105,10 +112,13 @@ const (
 	MsgText_BadRequest2 // Не удалось получить ответ от сервиса. Попробуйте изменить текст запроса.
 	MsgText_BadRequest3 // Не удалось получить ответ от сервиса. Попробуйте изменить текст вопроса или начать новый диалог.
 	MsgText_BadRequest4 // Запрос был заблокирован по соображениям безопасности. Попробуйте изменить текст запроса.
+	MsgText_BadRequest5 // Не удалось получить ответ от сервиса. Попробуйте изменить текст запроса или использовать другие файлы.
+	MsgText_BadRequest6 // Отправленный тип данных не поддерживается текущей моделью Gemini :(
 
 	// BUTTONS
 
 	BtnText_Gemini    // 🚀 Gemini
+	BtnText_Gen15     // 🃏 Gemini 1.5
 	BtnText_ChatGPT   // 🤖 ChatGPT
 	BtnText_Kandinsky // 🗿 Kandinsky
 	BtnText_SDXL      // 🏔 SDXL 1.0
@@ -116,6 +126,7 @@ const (
 
 	BtnText_Subscribe             // ✅ Подписаться
 	BtnText_SendPictureWithText   // 🖼 AI Vision
+	BtnText_DataAnalysis          // 🩻 Анализ данных
 	BtnText_ChooseAnotherVoice    // Изменить голос
 	BtnText_ChangeQuerryText      // 🎮 Изменить запрос
 	BtnText_ChooseAnotherStyle    // 🎨 Изменить стиль
@@ -129,6 +140,8 @@ const (
 	BtnText_Upscale               // ⭐️ Улучшить (SDXL)
 	BtnText_Upscale2              // ⭐️ Улучшить мою картинку
 	BtnText_GenerateImage         // 🏞 Создать картинку
+	BtnText_SendWithoutText       // Отправить без текста
+	BtnText_UploadNewFile         // 📁 Загрузить другой файл
 
 	//BtnText_ChangeQuestionText    // Изменить вопрос
 )
@@ -144,8 +157,11 @@ func init() {
 		ru: "Вас приветствует ChatGPT 3.5 Turbo 🤖\n\nТекущий остаток токенов: <b>%d</b> <i>(обновится через: %d ч. %d мин.)</i>",
 		en: "Welcome to ChatGPT 3.5 Turbo 🤖\n\nCurrent balance of tokens: <b>%d</b> <i>(updated in: %d hours %d min.)</i>"}
 	dictionary[MsgText_GeminiHello] = MultiText{
-		ru: "Вас приветствует Gemini Pro от компании Google 🚀",
-		en: "Welcome to Gemini Pro from Google 🚀"}
+		ru: "Вас приветствует Gemini Pro 1.0 от компании Google 🚀",
+		en: "Welcome to Gemini Pro 1.0 from Google 🚀"}
+	dictionary[MsgText_Gemini15Hello] = MultiText{
+		ru: "Вас приветствует Gemini Flash 1.5 от компании Google 🃏",
+		en: "Welcome to Gemini Flash 1.5 from Google 🃏"}
 	dictionary[MsgText_EnterDescriptionOfPicture] = MultiText{
 		ru: "Введите описание картинки:",
 		en: "Enter a description of the picture:"}
@@ -179,6 +195,9 @@ func init() {
 	dictionary[MsgText_LoadingImage] = MultiText{
 		ru: "Выполняется загрузка изображения...",
 		en: "Loading image..."}
+	dictionary[MsgText_LoadingFiles] = MultiText{
+		ru: "Выполняется загрузка файлов...",
+		en: "Loading files..."}
 	dictionary[MsgText_SubscribeForUsing] = MultiText{
 		ru: "Для продолжения использования бота необходимо подписаться на канал👇",
 		en: "To continue using the bot you must subscribe to the channel👇"}
@@ -194,9 +213,15 @@ func init() {
 	dictionary[MsgText_EndDialog] = MultiText{
 		ru: "Завершить диалог",
 		en: "End dialog"}
+	dictionary[MsgText_FilesUploadedWriteText] = MultiText{
+		ru: "Загружено файлов: %d\nУкажите текст при необходимости.",
+		en: "Files uploaded: %d\nSpecify text if necessary."}
 	dictionary[MsgText_PhotosUploadedWriteQuestion] = MultiText{
 		ru: "Загружено фотографий: %d\nНапишите свой вопрос.\nНапример:\n\"Напиши текст из картинки\"\n\"Переведи на русский\"",
 		en: "Photos uploaded: %d\nWrite your question.\nFor example:\n\"Send text from picture\"\n\"Translate to English\""}
+	dictionary[MsgText_UploadFiles] = MultiText{
+		ru: "Вы можете отправить для обработки:\n🏞 картинку / 🎬 видео / 🧾 текстовый файл / 🔈 аудио / 🗣 голосовое сообщение",
+		en: "You can send for processing:\n🏞 picture / 🎬 video / 🧾 text file / 🔈 audio / 🗣 voice message"}
 	dictionary[MsgText_UploadImages] = MultiText{
 		ru: "Загрузите одну или несколько картинок",
 		en: "Upload one or more images"}
@@ -239,6 +264,9 @@ func init() {
 	dictionary[MsgText_WriteQuestionToImage] = MultiText{
 		ru: "Напишите свой вопрос к загруженному изображению.",
 		en: "Write your question to the uploaded image."}
+	dictionary[MsgText_WriteTextToFiles] = MultiText{
+		ru: "Напишите текст к загруженным файлам",
+		en: "Write text to the uploaded files"}
 	dictionary[MsgText_PhotoUploadedWriteQuestion] = MultiText{
 		ru: "Напишите свой запрос.\nНапример:\n\"Реши тест на картинке\"\n\"Как называется это блюдо?\"",
 		en: "Write your request.\nFor example:\n\"Solve the test in the picture\"\n\"What is the name of this dish?\""}
@@ -257,12 +285,18 @@ func init() {
 	dictionary[MsgText_FailedLoadImages] = MultiText{
 		ru: "Не удалось загрузить изображение, попробуйте ещё раз.",
 		en: "Failed to load image, try again."}
+	dictionary[MsgText_FailedLoadFiles] = MultiText{
+		ru: "Не удалось загрузить файл на сервер, попробуйте ещё раз.",
+		en: "Failed to upload the file to the server, try again."}
 	dictionary[MsgText_FailedImageUpscale] = MultiText{
 		ru: "Не удалось повысить качество картинки, попробуйте другое изображение.",
 		en: "Could not improve picture quality, try another image."}
 	dictionary[MsgText_BadRequest1] = MultiText{
 		ru: "Не удалось получить ответ от сервиса. Попробуйте изменить текст запроса или использовать другие изображения.",
 		en: "Failed to receive a response from the service. Try changing your request text or using different images."}
+	dictionary[MsgText_BadRequest5] = MultiText{
+		ru: "Не удалось получить ответ от сервиса. Попробуйте изменить текст запроса или использовать другие файлы.",
+		en: "Failed to receive a response from the service. Try changing the request text or using different files."}
 	dictionary[MsgText_BadRequest2] = MultiText{
 		ru: "Не удалось получить ответ от сервиса. Попробуйте изменить текст запроса.",
 		en: "Failed to receive a response from the service. Try changing the request text."}
@@ -296,9 +330,15 @@ func init() {
 	dictionary[MsgText_FSinfo] = MultiText{
 		ru: "Осталось генераций: <b>%d</b> <i>(обновится через: %d ч. %d мин.)</i>",
 		en: "Generations left: <b>%d</b> <i>(updated in: %d hours %d min.)</i>"}
+	dictionary[MsgText_BadRequest6] = MultiText{
+		ru: "Отправленный тип данных не поддерживается текущей моделью Gemini :(",
+		en: "This data type is not supported by the current Gemini model :("}
 	dictionary[MsgText_LastOperationInProgress] = MultiText{
 		ru: "Последняя операция ещё выполняется, дождитесь её завершения перед отправкой новых запросов.",
 		en: "The last operation is still in progress, please wait until it completes before sending new requests."}
+	dictionary[MsgText_FileIsTooBig] = MultiText{
+		ru: "Превышен максимальный размер файла (20 МБ), пожалуйста, попробуйте отправить другой файл.",
+		en: "The maximum file size (20 MB) has been exceeded, please try sending another file."}
 	dictionary[MsgText_ErrorSendingAudioFile] = MultiText{
 		ru: "При отправке аудиофайла возникла ошибка, попробуйте ещё раз позже.",
 		en: "There was an error sending the audio file, please try again later."}
@@ -350,19 +390,22 @@ func init() {
 
 	// buttons
 
-	dictionary[BtnText_Gemini] = MultiText{ru: "🚀 Gemini", en: "🚀 Gemini"}
+	dictionary[BtnText_Gemini] = MultiText{ru: "🚀 Gemini 1.0", en: "🚀 Gemini 1.0"}
+	dictionary[BtnText_Gen15] = MultiText{ru: "🃏 Gemini 1.5", en: "🃏 Gemini 1.5"}
 	dictionary[BtnText_ChatGPT] = MultiText{ru: "🤖 ChatGPT", en: "🤖 ChatGPT"}
 	dictionary[BtnText_Kandinsky] = MultiText{ru: "🗿 Kandinsky", en: "🗿 Kandinsky"}
 	dictionary[BtnText_SDXL] = MultiText{ru: "🏔 Stable Diffusion XL", en: "🏔 Stable Diffusion XL"}
 	dictionary[BtnText_Faceswap] = MultiText{ru: "🎭 Face Swap", en: "🎭 Face Swap"}
 
 	dictionary[BtnText_SendPictureWithText] = MultiText{ru: "🖼 AI Vision", en: "🖼 AI Vision"}
+	dictionary[BtnText_DataAnalysis] = MultiText{ru: "🧬 Анализ данных", en: "🧬 Data analysis"}
 	dictionary[BtnText_ChooseAnotherVoice] = MultiText{ru: "Изменить голос", en: "Change voice"}
 	dictionary[BtnText_ChangeQuerryText] = MultiText{ru: "🎮 Изменить запрос", en: "🎮 Change request"}
 	dictionary[BtnText_ChooseAnotherStyle] = MultiText{ru: "🎨 Изменить стиль", en: "🎨 Change style"}
 	dictionary[BtnText_ChangeText] = MultiText{ru: "📝 Изменить текст", en: "📝 Change text"}
 	dictionary[BtnText_EndDialog] = MultiText{ru: "🏁 Завершить диалог", en: "🏁 End dialog"}
 	dictionary[BtnText_UploadNewImages] = MultiText{ru: "Загрузить новые фото", en: "Upload new images"}
+	dictionary[BtnText_UploadNewFile] = MultiText{ru: "📁 Загрузить другой файл", en: "📁 Upload new file"}
 	dictionary[BtnText_UploadNewImage] = MultiText{ru: "Загрузить новое фото", en: "Upload new image"}
 	dictionary[BtnText_StartDialog] = MultiText{ru: "💭 Начать диалог", en: "💭 Start dialog"}
 	dictionary[BtnText_GenerateAudioFromText] = MultiText{ru: "🗣 Озвучить текст", en: "🗣 Audio from text"}
@@ -371,6 +414,7 @@ func init() {
 	dictionary[BtnText_Upscale] = MultiText{ru: "⭐️ Улучшить (SDXL)", en: "⭐️ Upscale (SDXL)"}
 	dictionary[BtnText_Upscale2] = MultiText{ru: "⭐️ Улучшить мою картинку", en: "⭐ Upscale my picture"}
 	dictionary[BtnText_GenerateImage] = MultiText{ru: "🏞 Создать картинку", en: "🏞 Create a picture"}
+	dictionary[BtnText_SendWithoutText] = MultiText{ru: "📨 Отправить без текста", en: "📨 Send without text"}
 
 }
 
@@ -419,15 +463,16 @@ func textForStarting() MultiText {
 Я бот для работы с нейросетями.
 С моей помощью ты можешь использовать следующие модели:
 	
-🚀 <b>Gemini</b> - генерация текста и анализ изображений <i>(Google)</i>
+🚀 <b>Gemini 1.0</b> - генерация текста и анализ изображений <i>(Google)</i>
+🃏 <b>Gemini 1.5</b> - генерация текста + анализ фото, видео, аудио, голоса и файлов
 🤖 <b>ChatGPT</b> - генерация текста, аудио и анализ изображений <i>(OpenAI)</i>
 🗿 <b>Kandinsky</b> - создание изображений по текстовому описанию
 🏔 <b>Stable Diffusion XL</b> - создание изображений по текстовому описанию
 🎭 <b>Face Swap</b> - замена лица у фотографий
 	
 <u>Последние обновления:</u>
-<i>21.02.24 - добавлена опция по улучшению собственных картинок при помощи Stable Diffusion.</i>
 <i>10.03.24 - добавлена замена лица (Face Swap).</i>
+<i>23.05.24 - добавлена улучшенная языковая модель (Gemini Flash 1.5).</i>
 
 Бот полностью бесплатный, удачных генераций 🔥`,
 
@@ -436,15 +481,16 @@ func textForStarting() MultiText {
 I am a bot for working with neural networks.
 With my help you can use the following models:
 			
-🚀 <b>Gemini</b> - text generation and image analysis <i>(Google)</i>
+🚀 <b>Gemini 1.0</b> - text generation and image analysis <i>(Google)</i>
+🃏 <b>Gemini 1.5</b> - text generation + image, video, audio and file analysis
 🤖 <b>ChatGPT</b> - text & audio generation and image analysis <i>(OpenAI)</i>
 🗿 <b>Kandinsky</b> - creating images based on text description
 🏔 <b>Stable Diffusion XL</b> - creating images based on text description
 🎭 <b>Face Swap</b> - face replacement for photos
 			
 <u>Latest updates:</u>
-<i>21.02.24 - added an option to improve your own pictures using Stable Diffusion.</i>
 <i>10.03.24 - added face swap.</i>
+<i>23.05.24 - added improved language model (Gemini Flash 1.5).</i>
 
 Bot is absolutely free, successful generations 🔥`,
 	}
@@ -461,7 +507,8 @@ func textForAccount() MultiText {
 ✅ Дата первого использования: <b>%s</b>
 ----------------------------------------------
 Дневные лимиты:     
-🚀 Gemini запросы: <b>%d</b> (осталось <b>%d</b>)
+🚀 Gemini 1.0 запросы: <b>%d</b> (осталось <b>%d</b>)
+🃏 Gemini 1.5 запросы: <b>%d</b> (осталось <b>%d</b>)
 🤖 ChatGPT токены: <b>%d</b> (осталось <b>%d</b>)
 🗿 Kandinsky: <b>без ограничений</b>
 🏔 Stable Diffusion: <b>%d</b> (осталось <b>%d</b>)
@@ -479,7 +526,8 @@ func textForAccount() MultiText {
 ✅ Date of first use: <b>%s</b>
 ----------------------------------------------
 Daily limits:
-🚀 Gemini requests: <b>%d</b> (<b>%d</b> left)
+🚀 Gemini 1.0 requests: <b>%d</b> (<b>%d</b> left)
+🃏 Gemini 1.5 requests: <b>%d</b> (<b>%d</b> left)
 🤖 ChatGPT tokens: <b>%d</b> (<b>%d</b> left)
 🗿 Kandinsky: <b>no limits</b>
 🏔 Stable Diffusion: <b>%d</b> (<b>%d</b> left)

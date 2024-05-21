@@ -20,7 +20,7 @@ func gen_dialog(user *UserInfo, text string) {
 		return
 	}
 
-	if gen_DailyLimitOfRequestsIsOver(user) {
+	if gen_DailyLimitOfRequestsIsOver(user, gen10) {
 		return
 	}
 
@@ -65,8 +65,9 @@ func gen_DialogSendMessage(user *UserInfo, text string) {
 
 	SendMessage(user, result, nil, "")
 
-	user.Usage.Gen++
+	user.Usage.Gen10++
 	Operation := SQL_NewOperation(user, "gemini", "dialog", text)
+
 	SQL_AddOperation(Operation)
 
 }
@@ -150,7 +151,7 @@ func gen_DialogSendMessageStream(user *UserInfo, text string) {
 
 	gen_AddToHistory(user, text, resultFull)
 
-	user.Usage.Gen++
+	user.Usage.Gen10++
 	Operation := SQL_NewOperation(user, "gemini", "dialog", text)
 	SQL_AddOperation(Operation)
 

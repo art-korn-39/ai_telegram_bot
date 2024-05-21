@@ -11,7 +11,7 @@ import (
 // После отправки картинок пользователем
 func gen_image(user *UserInfo, message *tgbotapi.Message) {
 
-	if gen_DailyLimitOfRequestsIsOver(user) {
+	if gen_DailyLimitOfRequestsIsOver(user, gen10) {
 		return
 	}
 
@@ -23,7 +23,7 @@ func gen_image(user *UserInfo, message *tgbotapi.Message) {
 	}
 
 	// Потом лучше переделать, а то могут быть баги
-	if len(user.Images_Gemini) >= 10 {
+	if len(user.Gen_LocalFiles) >= 10 {
 		return
 	}
 
@@ -47,21 +47,21 @@ func gen_image(user *UserInfo, message *tgbotapi.Message) {
 	// Собираем в map, где key = MsgID, value = путь к файлу
 	// Тут важно собрать горутины в очередь, чтобы самая первая стала основной
 	user.Mutex.Lock()
-	if user.Images_Gemini == nil {
+	if user.Gen_LocalFiles == nil {
 		// инициализируем мапу с файлами картинок (хотя обычно она != nil)
-		user.Images_Gemini = map[int]string{}
+		user.Gen_LocalFiles = map[int]string{}
 	}
-	ImageNumber := len(user.Images_Gemini) // количество уже добавленных
-	IsMainGorutine := ImageNumber == 0     // определяем главную горутину
+	ImageNumber := len(user.Gen_LocalFiles) // количество уже добавленных
+	IsMainGorutine := ImageNumber == 0      // определяем главную горутину
 
 	// не нужно +++
 	//	newName := fmt.Sprintf("img_%d_gen_%d", user.ChatID, ImageNumber) // создаем новое имя с индексом в массиве фото
 	//	newFilename := strings.ReplaceAll(filename, name, newName)        // получаем полный путь с новым именем
 	//	os.Rename(filename, newFilename)                                  // заменяем имя у уже созданного
-	//	user.Images_Gemini[message.MessageID] = newFilename               // указываем в мапе новый путь до файла
+	//	user.Gen_LocalFiles[message.MessageID] = newFilename               // указываем в мапе новый путь до файла
 	// не нужно ---
 
-	user.Images_Gemini[message.MessageID] = filename // указываем в мапе путь до файла
+	user.Gen_LocalFiles[message.MessageID] = filename // указываем в мапе путь до файла
 
 	user.Mutex.Unlock()
 
@@ -77,10 +77,10 @@ func gen_image(user *UserInfo, message *tgbotapi.Message) {
 	// В основной горутине встаём на ожидание, чтобы остальные картинки успели загрузиться
 	user.WG.Wait()
 
-	user.Images_Gemini = SortMap(user.Images_Gemini)
+	user.Gen_LocalFiles = SortMap(user.Gen_LocalFiles)
 
 	// Просим написать запрос к ним
-	msgText := fmt.Sprintf(GetText(MsgText_PhotosUploadedWriteQuestion, user.Language), len(user.Images_Gemini))
+	msgText := fmt.Sprintf(GetText(MsgText_PhotosUploadedWriteQuestion, user.Language), len(user.Gen_LocalFiles))
 	SendMessage(user, msgText, GetButton(btn_RemoveKeyboard, ""), "")
 
 	user.Path = "gemini/type/image/text"
@@ -90,7 +90,7 @@ func gen_image(user *UserInfo, message *tgbotapi.Message) {
 // После ввода вопроса пользователем
 func gen_imgtext(user *UserInfo, text string) {
 
-	if gen_DailyLimitOfRequestsIsOver(user) {
+	if gen_DailyLimitOfRequestsIsOver(user, gen10) {
 		return
 	}
 
@@ -104,7 +104,7 @@ func gen_imgtext(user *UserInfo, text string) {
 	<-delay_Gemini
 
 	prompt := []genai.Part{genai.Text(text)}
-	for _, v := range user.Images_Gemini {
+	for _, v := range user.Gen_LocalFiles {
 		imgData, err := os.ReadFile(v)
 		if err != nil {
 			Logs <- NewLog(user, "gemini", Error, err.Error())
@@ -135,7 +135,7 @@ func gen_imgtext(user *UserInfo, text string) {
 
 	SendMessage(user, string(result), GetButton(btn_GenNewgen, user.Language), "")
 
-	user.Usage.Gen++
+	user.Usage.Gen10++
 	Operation := SQL_NewOperation(user, "gemini", "img", text)
 	SQL_AddOperation(Operation)
 
@@ -146,7 +146,7 @@ func gen_imgtext(user *UserInfo, text string) {
 // После ответа пользователя на результат по вопросу и картинкам
 func gen_imgtext_newgen(user *UserInfo, text string) {
 
-	if gen_DailyLimitOfRequestsIsOver(user) {
+	if gen_DailyLimitOfRequestsIsOver(user, gen10) {
 		return
 	}
 
@@ -159,13 +159,13 @@ func gen_imgtext_newgen(user *UserInfo, text string) {
 
 	// ЗАГРУЗИТЬ НОВЫЕ КАРТИНКИ
 	case GetText(BtnText_UploadNewImages, user.Language):
-		user.DeleteImages() // на всякий почистим, если что-то осталось
+		user.GenDeleteFiles(false) // на всякий почистим, если что-то осталось
 		SendMessage(user, GetText(MsgText_UploadImages, user.Language), GetButton(btn_RemoveKeyboard, ""), "")
 		user.Path = "gemini/type/image"
 
 	// НАЧАТЬ ДИАЛОГ
 	case GetText(BtnText_StartDialog, user.Language):
-		user.DeleteImages() // на всякий почистим, если что-то осталось
+		user.GenDeleteFiles(false) // на всякий почистим, если что-то осталось
 		SendMessage(user, GetText(MsgText_HelloCanIHelpYou, user.Language), GetButton(btn_GenEndDialog, user.Language), "")
 		user.Path = "gemini/type/dialog"
 

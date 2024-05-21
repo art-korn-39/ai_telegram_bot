@@ -122,13 +122,13 @@ func gpt_imgtext_newgen(user *UserInfo, text string) {
 
 	// ЗАГРУЗИТЬ НОВЫЕ ФОТО
 	case GetText(BtnText_UploadNewImage, user.Language):
-		user.DeleteImages() // на всякий почистим, если что-то осталось
+		//user.DeleteFiles() // на всякий почистим, если что-то осталось
 		SendMessage(user, GetText(MsgText_UploadImage, user.Language), GetButton(btn_RemoveKeyboard, ""), "")
 		user.Path = "chatgpt/type/image"
 
 	// НАЧАТЬ ДИАЛОГ
 	case GetText(BtnText_StartDialog, user.Language):
-		user.DeleteImages() // на всякий почистим, если что-то осталось
+		//user.DeleteFiles() // на всякий почистим, если что-то осталось
 		SendMessage(user, GetText(MsgText_HelloCanIHelpYou, user.Language), GetButton(btn_GptClearContext, user.Language), "")
 		user.Path = "chatgpt/type/dialog"
 

@@ -10,7 +10,7 @@ from sys import argv
 script, datapath, text, style, userid, model_id, api, secret = argv
 
 # cd C:\DEV\GO\ai_telegram_bot
-# python C:/DEV/GO/ai_telegram_bot/scripts/generate_image.py C:/DEV/GO/ai_telegram_bot/data "Green forest near lake" "ANIME" "111" "4" "1B189E2CFA69FFD2130FC56294B96DA9" "7C0B7C7FE4FFA4F6EE9DF0CFA257167C"
+# python C:/DEV/GO/ai_telegram_bot/scripts/generate_image.py C:/DEV/GO/ai_telegram_bot/data "Green forest near lake" "ANIME" "111" "4" "98CEC2F87ABC4AAC1F609FDFCBCB7ACD" "23E24C8712FEC1D4F0F571EB2BB1CFF4"
 
 class Text2ImageAPI:
 

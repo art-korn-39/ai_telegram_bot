@@ -13,7 +13,7 @@ import (
 // https://elevenlabs.io/voice-lab
 
 const (
-	Version       = "2.5.9"
+	Version       = "2.6.0"
 	ChannelChatID = -1001997602646
 	ChannelURL    = "https://t.me/+6ZMACWRgFdRkNGEy"
 )
@@ -165,6 +165,8 @@ func MessageWithData(text, path string) bool {
 		return true
 	} else if path == "gemini/type/image" {
 		return true
+	} else if path == "gen15/type/file" {
+		return true
 	} else if path == "chatgpt/type/image" {
 		return true
 	} else if path == "sdxl/type/image" {
@@ -241,6 +243,24 @@ func HandleMessage(u *UserInfo, m *tgbotapi.Message) {
 
 	case "gemini/type/image/text/newgen":
 		gen_imgtext_newgen(u, m.Text)
+
+	case "gen15":
+		gen15_start(u)
+
+	case "gen15/type":
+		gen15_type(u, m.Text)
+
+	case "gen15/type/dialog":
+		gen15_dialog(u, m.Text)
+
+	case "gen15/type/file":
+		gen15_file(u, m)
+
+	case "gen15/type/file/text":
+		gen15_filetext(u, m.Text)
+
+	case "gen15/type/file/text/newgen":
+		gen15_filetext_newgen(u, m.Text)
 
 	case "kandinsky":
 		kand_start(u)

@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"slices"
 	"sync"
@@ -23,17 +24,19 @@ type UserInfo struct {
 	Options         map[string]string // пути к изображениям, текст запросов и тд.
 	Gpt_History     []openai.ChatCompletionMessage
 	Gen_History     []*genai.Content
-	Images_Gemini   map[int]string // удалять не забыть
-	Usage_str       string         `db:"usage"` // только для взаимодействия с БД
-	Usage           Usage          // использование за сегодня
-	Level           UserLevel      `db:"level"`
-	LevelChecked    bool           // Если false, то выполняем EditLevelManualy()
+	Gen_LocalFiles  map[int]string      // удалять не забыть
+	Gen_CloudFiles  map[int]*genai.File // удалять не забыть
+	Usage_str       string              `db:"usage"` // только для взаимодействия с БД
+	Usage           Usage               // использование за сегодня
+	Level           UserLevel           `db:"level"`
+	LevelChecked    bool                // Если false, то выполняем EditLevelManualy()
 	Mutex           sync.Mutex
 	WG              sync.WaitGroup
 }
 
 type Usage struct {
-	Gen,
+	Gen10,
+	Gen15,
 	GPT,
 	Kand,
 	SDXL,
@@ -62,7 +65,7 @@ func NewUserInfo(m *tgbotapi.Message) *UserInfo {
 func (u *UserInfo) ClearUserData() {
 	u.Options = map[string]string{}
 	u.ClearDialogHistory()
-	u.DeleteImages()
+	u.GenDeleteFiles(true)
 }
 
 func (u *UserInfo) ClearDialogHistory() {
@@ -70,11 +73,20 @@ func (u *UserInfo) ClearDialogHistory() {
 	u.Gen_History = []*genai.Content{}
 }
 
-func (u *UserInfo) DeleteImages() {
-	for _, v := range u.Images_Gemini {
+func (u *UserInfo) GenDeleteFiles(cloud bool) {
+	for _, v := range u.Gen_LocalFiles {
 		os.Remove(v)
 	}
-	u.Images_Gemini = map[int]string{}
+	u.Gen_LocalFiles = map[int]string{}
+
+	if cloud {
+		for _, f := range u.Gen_CloudFiles {
+			err := gen_client.DeleteFile(gen_ctx, f.Name)
+			fmt.Println(err)
+		}
+		u.Gen_LocalFiles = map[int]string{}
+	}
+
 }
 
 func AccessIsAllowed(upd tgbotapi.Update, u *UserInfo) bool {
@@ -137,7 +149,7 @@ func (u *UserInfo) CheckUserLock(upd tgbotapi.Update) (isLocking bool) {
 	defer u.Mutex.Unlock()
 
 	// Проверка на наличие уже обрабатываемого запроса от пользователя
-	if u.IsRunning && !u.ImagesLoading(upd) {
+	if u.IsRunning && !u.FilesLoading(upd) {
 		msgText := GetText(MsgText_LastOperationInProgress, u.Language)
 		SendMessage(u, msgText, nil, "")
 		return true
@@ -165,10 +177,16 @@ func (u *UserInfo) FillLanguage(lang string) {
 	}
 }
 
-func (u *UserInfo) ImagesLoading(upd tgbotapi.Update) bool {
+func (u *UserInfo) FilesLoading(upd tgbotapi.Update) bool {
+
 	if u.Path == "gemini/type/image" && upd.Message.Photo != nil {
 		return true
 	}
+
+	if u.Path == "gen15/type/file" && gen15_GetFileID(upd.Message) != "" {
+		return true
+	}
+
 	return false
 }
 

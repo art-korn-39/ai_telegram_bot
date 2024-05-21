@@ -33,6 +33,7 @@ func account(user *UserInfo) {
 ----------------------------------------------
 Дневные лимиты:     
 🚀 Gemini запросы: <b>%d</b> (осталось <b>%d</b>)
+🃏 Gemini 1.5 запросы: <b>%d</b> (осталось <b>%d</b>)
 🤖 ChatGPT токены: <b>%d</b> (осталось <b>%d</b>)
 🗿 Kandinsky: <b>без ограничений</b>
 🏔 Stable Diffusion: <b>%d</b> (осталось <b>%d</b>)
@@ -60,8 +61,10 @@ func account(user *UserInfo) {
 		GetLevelName(user.Level, user.Language),    // Уровень
 		DayStreak,                                  // Посещений подряд (дней)
 		FirstDate.Format(time.DateOnly),            // Дата первого использования
-		Cfg.RPD_gen,                                // Gemini на день у пользователя
-		max(Cfg.RPD_gen-user.Usage.Gen, 0),         // Gemini остаток
+		Cfg.RPD_gen10,                              // Gemini 1.0 на день у пользователя
+		max(Cfg.RPD_gen10-user.Usage.Gen10, 0),     // Gemini 1.0 остаток
+		Cfg.RPD_gen15,                              // Gemini 1.5 на день у пользователя
+		max(Cfg.RPD_gen15-user.Usage.Gen15, 0),     // Gemini 1.5 остаток
 		Get_TPD_gpt(user),                          // ChatGPT на день у пользователя
 		max(Get_TPD_gpt(user)-user.Usage.GPT, 0),   // ChatGPT остаток
 		Get_RPD_sdxl(user),                         // Stable Diffusion на день у пользователя

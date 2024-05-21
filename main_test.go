@@ -97,7 +97,7 @@ func T_GetUser() *UserInfo {
 		IsRunning: true,
 		Language:  "en",
 		Path:      "gemini/type/image/text",
-		Usage:     Usage{Gen: 12, SDXL: 1, GPT: 1000},
+		Usage:     Usage{Gen10: 12, SDXL: 1, GPT: 1000},
 		Level:     Basic,
 	}
 }
@@ -109,7 +109,7 @@ func T_GetUser2() *UserInfo {
 		IsRunning: true,
 		Language:  "en",
 		Path:      "gemini/type/image/text",
-		Usage:     Usage{Gen: 12, SDXL: 1, GPT: 1000},
+		Usage:     Usage{Gen10: 12, SDXL: 1, GPT: 1000},
 		Level:     Advanced,
 	}
 }

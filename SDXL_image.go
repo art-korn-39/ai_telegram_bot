@@ -51,7 +51,7 @@ func sdxl_image(user *UserInfo, message *tgbotapi.Message) {
 	filename, err := DownloadFile(Photo.FileID, name)
 	if err != nil {
 		Logs <- NewLog(user, "sdxl{img}", Error, err.Error())
-		msgText := GetText(MsgText_FailedLoadImages, user.Language)
+		msgText := ProcessErrorOfDownloadingFile(user, err, MsgText_FailedLoadImages)
 		SendMessage(user, msgText, GetButton(btn_RemoveKeyboard, ""), "")
 		return
 	}

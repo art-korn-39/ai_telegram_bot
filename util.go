@@ -30,6 +30,7 @@ func MsgCommand(m *tgbotapi.Message) string {
 
 	Models := map[string]string{
 		GetText(BtnText_Gemini, ""):    "gemini",
+		GetText(BtnText_Gen15, ""):     "gen15",
 		GetText(BtnText_ChatGPT, ""):   "chatgpt",
 		GetText(BtnText_Kandinsky, ""): "kandinsky",
 		GetText(BtnText_SDXL, ""):      "sdxl",

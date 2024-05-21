@@ -19,7 +19,8 @@ type config struct {
 	Faceswap_id      string
 
 	TPD_gpt           int
-	RPD_gen           int
+	RPD_gen10         int
+	RPD_gen15         int
 	RPD_sdxl          int
 	RPD_fs            int
 	TPD_advanced_gpt  int

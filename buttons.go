@@ -22,8 +22,11 @@ const (
 	btn_SDXLTypes
 
 	btn_GenTypes
+	btn_Gen15Types
 	btn_GenNewgen
+	btn_Gen15Newgen
 	btn_GenEndDialog
+	btn_SendWithoutText
 
 	btn_GptTypes
 	btn_GptVoices
@@ -50,6 +53,7 @@ func GetButton(btn Button, lang string) (keyboard any) {
 		keyboard = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(GetText(BtnText_Gemini, "")),
+				tgbotapi.NewKeyboardButton(GetText(BtnText_Gen15, "")),
 			),
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(GetText(BtnText_ChatGPT, "")),
@@ -148,6 +152,25 @@ func GetButton(btn Button, lang string) (keyboard any) {
 		keyboard = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(GetText(BtnText_EndDialog, lang))))
+
+	//GEMINI 1.5
+	case btn_Gen15Types:
+		keyboard = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(GetText(BtnText_StartDialog, lang)),
+				tgbotapi.NewKeyboardButton(GetText(BtnText_DataAnalysis, lang)),
+			))
+	case btn_SendWithoutText:
+		keyboard = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(GetText(BtnText_SendWithoutText, lang))))
+	case btn_Gen15Newgen:
+		keyboard = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(GetText(BtnText_ChangeText, lang)),
+				tgbotapi.NewKeyboardButton(GetText(BtnText_UploadNewFile, lang)),
+				tgbotapi.NewKeyboardButton(GetText(BtnText_StartDialog, lang)),
+			))
 
 	//CHATGPT
 	case btn_GptTypes:

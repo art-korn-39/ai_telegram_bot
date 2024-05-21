@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"slices"
 
 	"github.com/google/generative-ai-go/genai"
 	"google.golang.org/api/option"
@@ -18,12 +17,18 @@ import (
 // - BlockReasonSafety означает, что промт был заблокирован по соображениям безопасности. Вы можете проверить
 // `safety_ratings`, чтобы понять, какая категория безопасности заблокировала его.
 
+const (
+	gen10 = "1.0"
+	gen15 = "1.0"
+)
+
 var (
 	gen_ctx                 context.Context
 	gen_client              *genai.Client
 	gen_TextModel           *genai.GenerativeModel
 	gen_TextModelWithCensor *genai.GenerativeModel
 	gen_ImageModel          *genai.GenerativeModel
+	gen15_Model             *genai.GenerativeModel
 )
 
 func NewConnectionGemini() {
@@ -31,14 +36,17 @@ func NewConnectionGemini() {
 	gen_ctx = context.Background()
 	gen_client, _ = genai.NewClient(gen_ctx,
 		option.WithAPIKey(Cfg.GeminiKey),
-		//option.WithEndpoint("europe-central2-aiplatform.googleapis.com"),
-		option.WithEndpoint("generativelanguage.googleapis.com"),
-		//us-central1-aiplatform.googleapis.com
+		//option.WithEndpoint("generativelanguage.googleapis.com"),
 	)
 
-	gen_TextModel = gen_client.GenerativeModel("gemini-1.0-pro") //gemini-1.5-pro-latest
+	//gemini-1.0-pro
+	//gemini-pro-vision
+	//gemini-1.5-flash-latest
+	//gemini-1.5-pro-latest
+	gen_TextModel = gen_client.GenerativeModel("gemini-1.0-pro")
 	gen_TextModelWithCensor = gen_client.GenerativeModel("gemini-1.0-pro")
 	gen_ImageModel = gen_client.GenerativeModel("gemini-pro-vision")
+	gen15_Model = gen_client.GenerativeModel("gemini-1.5-flash-latest")
 
 	// 1 - блокировать всё
 	// 2 - допускается с незначимым и низким
@@ -47,13 +55,11 @@ func NewConnectionGemini() {
 	SafetySettings := []*genai.SafetySetting{
 		{
 			Category:  genai.HarmCategoryHarassment, // домогательство, преследование
-			Threshold: genai.HarmBlockMediumAndAbove,
-			//Threshold: genai.HarmBlockNone, // 4
+			Threshold: genai.HarmBlockNone,          // 4
 		},
 		{
 			Category:  genai.HarmCategorySexuallyExplicit, // откровенно сексуального характера
-			Threshold: genai.HarmBlockMediumAndAbove,
-			//Threshold: genai.HarmBlockNone, // 4
+			Threshold: genai.HarmBlockNone,                // 4
 		},
 		{
 			Category:  genai.HarmCategoryHateSpeech,  // разжигание ненависти
@@ -67,18 +73,12 @@ func NewConnectionGemini() {
 
 	gen_TextModel.SafetySettings = SafetySettings
 	gen_ImageModel.SafetySettings = SafetySettings
-
-	Unused(SafetySettings)
+	gen15_Model.SafetySettings = SafetySettings
 
 }
 
 // После команды "/gemini" или при вводе текста = "gemini"
 func gen_start(user *UserInfo) {
-
-	if Cfg.Gen_Rip && !slices.Contains(Cfg.Admins, user.Username) {
-		gen_rip(user)
-		return
-	}
 
 	msgText := GetText(MsgText_GeminiHello, user.Language)
 	SendMessage(user, msgText, nil, "")
@@ -90,20 +90,10 @@ func gen_start(user *UserInfo) {
 
 }
 
-// После команды "/gemini" или при вводе текста = "gemini"
-func gen_rip(user *UserInfo) {
-
-	msgText := GetText(MsgText_GeminiRIP, user.Language)
-	SendMessage(user, msgText, GetButton(btn_Models, ""), "")
-
-	user.Path = ""
-
-}
-
 // После выбора пользователем типа взаимодействия
 func gen_type(user *UserInfo, text string) {
 
-	if gen_DailyLimitOfRequestsIsOver(user) {
+	if gen_DailyLimitOfRequestsIsOver(user, "1.0") {
 		return
 	}
 

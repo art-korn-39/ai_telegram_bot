@@ -43,27 +43,45 @@ func GetInfo(isRO bool) string {
 		return err5
 	}
 
-	alltimeOP := result_dec25["gemini"] + result_dec25["chatgpt"] + result_dec25["kandinsky"] + result_dec25["sdxl"] + result_dec25["faceswap"]
-	todayOP := result_Today["gemini"] + result_Today["chatgpt"] + result_Today["kandinsky"] + result_Today["sdxl"] + result_Today["faceswap"]
+	alltimeOP := result_dec25["gen15"] + result_dec25["gemini"] +
+		result_dec25["chatgpt"] + result_dec25["kandinsky"] +
+		result_dec25["sdxl"] + result_dec25["faceswap"]
+
+	todayOP := result_Today["gen15"] + result_Today["gemini"] +
+		result_Today["chatgpt"] + result_Today["kandinsky"] +
+		result_Today["sdxl"] + result_Today["faceswap"]
 
 	return fmt.Sprintf(`
 All time [%d]
 Users: %d	
-Gen: %d | GPT: %d | Kand: %d | SDXL: %d | FS: %d
+Gen15: %d | Gen: %d | GPT: %d | Kand: %d | SDXL: %d | FS: %d
 
 Today [%d]
 Users: %d (new: %d)
-Gen: %d (%d%%) | GPT: %d (%d%%) | Kand: %d (%d%%) | SDXL: %d (%d%%) | FS: %d (%d%%)`,
+Gen15: %d | Gen: %d | GPT: %d | Kand: %d | SDXL: %d | FS: %d
+
+Errors
+Gen15: %d%% | Gen: %d%% | GPT: %d%% | Kand: %d%% | SDXL: %d%% | FS: %d%%`,
+
 		alltimeOP,
 		result_dec29["users"],
-		result_dec25["gemini"], result_dec25["chatgpt"], result_dec25["kandinsky"], result_dec25["sdxl"], result_dec25["faceswap"],
+		result_dec25["gen15"], result_dec25["gemini"], result_dec25["chatgpt"], result_dec25["kandinsky"], result_dec25["sdxl"], result_dec25["faceswap"],
+
 		todayOP,
 		result_Today["users"], newUsersToday,
-		result_Today["gemini"], GetPartOfErrors("gemini", result_Today, errors_Today),
-		result_Today["chatgpt"], GetPartOfErrors("chatgpt", result_Today, errors_Today),
-		result_Today["kandinsky"], GetPartOfErrors("kandinsky", result_Today, errors_Today),
-		result_Today["sdxl"], GetPartOfErrors("sdxl", result_Today, errors_Today),
-		result_Today["faceswap"], GetPartOfErrors("faceswap", result_Today, errors_Today),
+		result_Today["gen15"],
+		result_Today["gemini"],
+		result_Today["chatgpt"],
+		result_Today["kandinsky"],
+		result_Today["sdxl"],
+		result_Today["faceswap"],
+
+		GetPartOfErrors("gen15", result_Today, errors_Today),
+		GetPartOfErrors("gemini", result_Today, errors_Today),
+		GetPartOfErrors("chatgpt", result_Today, errors_Today),
+		GetPartOfErrors("kandinsky", result_Today, errors_Today),
+		GetPartOfErrors("sdxl", result_Today, errors_Today),
+		GetPartOfErrors("faceswap", result_Today, errors_Today),
 	)
 
 }

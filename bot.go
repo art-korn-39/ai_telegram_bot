@@ -103,7 +103,7 @@ func DownloadFile(FileID, name string) (string, error) {
 
 	fileURL, err := Bot.GetFileDirectURL(FileID)
 	if err != nil {
-		return "", err
+		return "", err // 21 Mb: "Bad Request: file is too big"
 	}
 
 	ext := filepath.Ext(fileURL)
@@ -142,5 +142,18 @@ func StartBot() {
 
 	clientOpenAI = openai.NewClient(Cfg.OpenAIToken)
 	NewConnectionGemini()
+
+}
+
+func ProcessErrorOfDownloadingFile(user *UserInfo, err error, t Text) (msgText string) {
+
+	errString := err.Error()
+	if errString == "Bad Request: file is too big" {
+		msgText = GetText(MsgText_FileIsTooBig, user.Language)
+	} else {
+		msgText = GetText(t, user.Language)
+	}
+
+	return
 
 }
