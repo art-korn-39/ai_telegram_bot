@@ -1,6 +1,7 @@
 messageToAll/archive
 data/
 icons/
+admin/
 .idea/
 *.txt
 *.log

@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 	"slices"
 	"sync"
@@ -81,10 +80,10 @@ func (u *UserInfo) GenDeleteFiles(cloud bool) {
 
 	if cloud {
 		for _, f := range u.Gen_CloudFiles {
-			err := gen_client.DeleteFile(gen_ctx, f.Name)
-			fmt.Println(err)
+			gen_client.DeleteFile(gen_ctx, f.Name)
+			//fmt.Println(err)
 		}
-		u.Gen_LocalFiles = map[int]string{}
+		u.Gen_CloudFiles = map[int]*genai.File{}
 	}
 
 }

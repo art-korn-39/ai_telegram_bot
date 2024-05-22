@@ -149,7 +149,7 @@ func SendMessageToAllUsers(u *UserInfo) {
 		}
 
 		sum := counter_done + counter_fail
-		if sum%100 == 0 {
+		if sum%500 == 0 {
 			SendMessage(u, fmt.Sprintf("Done: %d | Fail: %d", counter_done, counter_fail), nil, "")
 		}
 	}
