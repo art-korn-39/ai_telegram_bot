@@ -81,8 +81,8 @@ func sdxl_Text2image(user *UserInfo) (result string, err error) {
 		}
 		var body res_body
 
-		if res.StatusCode == 522 || res.StatusCode == 520 {
-			err = errors.New("522 status code =/")
+		if res.StatusCode/100 == 5 { //522, 520, 503
+			err = errors.New("5XX status code =/")
 			msgText = GetText(MsgText_APIdead, user.Language)
 		} else if err = json.NewDecoder(res.Body).Decode(&body); err != nil {
 			err = errors.New("{Decode(&body) 1} " + err.Error())
