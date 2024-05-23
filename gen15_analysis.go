@@ -100,16 +100,16 @@ func gen15_filetext(user *UserInfo, text string) {
 	msgText := GetText(MsgText_ProcessingRequest, user.Language)
 	SendMessage(user, msgText, GetButton(btn_RemoveKeyboard, ""), "")
 
-	<-delay_Gemini
+	<-delay_Gen15
 
 	prompt := []genai.Part{}
 
 	// инициализируем мапу с файлами (хотя обычно она != nil)
 	if user.Gen_CloudFiles == nil {
-		user.Gen_CloudFiles = map[int]*genai.File{}
+		user.Gen_CloudFiles = []*genai.File{}
 	}
 
-	for i, filename := range user.Gen_LocalFiles {
+	for _, filename := range user.Gen_LocalFiles {
 
 		file, err := gen15_UploadFileToCloudStorage(filename)
 		if err != nil {
@@ -117,7 +117,7 @@ func gen15_filetext(user *UserInfo, text string) {
 			continue
 		}
 
-		user.Gen_CloudFiles[i] = file
+		user.Gen_CloudFiles = append(user.Gen_CloudFiles, file)
 
 	}
 
@@ -155,7 +155,7 @@ func gen15_filetext(user *UserInfo, text string) {
 	SendMessage(user, string(result), GetButton(btn_Gen15Newgen, user.Language), "")
 
 	user.Usage.Gen15++
-	Operation := SQL_NewOperation(user, "gen15", "file", text)
+	Operation := SQL_NewOperation(user, "gen15", "file", gen15_GetMIME(user), text)
 	SQL_AddOperation(Operation)
 
 }

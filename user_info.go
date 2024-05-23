@@ -23,12 +23,12 @@ type UserInfo struct {
 	Options         map[string]string // пути к изображениям, текст запросов и тд.
 	Gpt_History     []openai.ChatCompletionMessage
 	Gen_History     []*genai.Content
-	Gen_LocalFiles  map[int]string      // удалять не забыть
-	Gen_CloudFiles  map[int]*genai.File // удалять не забыть
-	Usage_str       string              `db:"usage"` // только для взаимодействия с БД
-	Usage           Usage               // использование за сегодня
-	Level           UserLevel           `db:"level"`
-	LevelChecked    bool                // Если false, то выполняем EditLevelManualy()
+	Gen_LocalFiles  map[int]string // удалять не забыть
+	Gen_CloudFiles  []*genai.File  // удалять не забыть
+	Usage_str       string         `db:"usage"` // только для взаимодействия с БД
+	Usage           Usage          // использование за сегодня
+	Level           UserLevel      `db:"level"`
+	LevelChecked    bool           // Если false, то выполняем EditLevelManualy()
 	Mutex           sync.Mutex
 	WG              sync.WaitGroup
 }
@@ -81,9 +81,8 @@ func (u *UserInfo) GenDeleteFiles(cloud bool) {
 	if cloud {
 		for _, f := range u.Gen_CloudFiles {
 			gen_client.DeleteFile(gen_ctx, f.Name)
-			//fmt.Println(err)
 		}
-		u.Gen_CloudFiles = map[int]*genai.File{}
+		u.Gen_CloudFiles = []*genai.File{}
 	}
 
 }

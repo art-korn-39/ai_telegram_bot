@@ -20,7 +20,7 @@ func gen15_dialog(user *UserInfo, text string) {
 		return
 	}
 
-	<-delay_Gemini
+	<-delay_Gen15
 
 	if Cfg.Gen_UseStream {
 		gen15_DialogSendMessageStream(user, text)
@@ -62,7 +62,7 @@ func gen15_DialogSendMessage(user *UserInfo, text string) {
 	SendMessage(user, result, nil, "")
 
 	user.Usage.Gen10++
-	Operation := SQL_NewOperation(user, "gen15", "dialog", text)
+	Operation := SQL_NewOperation(user, "gen15", "dialog", "", text)
 
 	SQL_AddOperation(Operation)
 
@@ -145,7 +145,7 @@ func gen15_DialogSendMessageStream(user *UserInfo, text string) {
 	gen_AddToHistory(user, text, resultFull)
 
 	user.Usage.Gen10++
-	Operation := SQL_NewOperation(user, "gen15", "dialog", text)
+	Operation := SQL_NewOperation(user, "gen15", "dialog", "", text)
 	SQL_AddOperation(Operation)
 
 }

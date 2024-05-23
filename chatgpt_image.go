@@ -60,7 +60,7 @@ func gpt_imgtext(user *UserInfo, text string) {
 
 	<-delay_ChatGPT
 
-	Operation := SQL_NewOperation(user, "chatgpt", "img", text)
+	Operation := SQL_NewOperation(user, "chatgpt", "img", "", text)
 	SQL_AddOperation(Operation)
 
 	resp, err := clientOpenAI.CreateChatCompletion(

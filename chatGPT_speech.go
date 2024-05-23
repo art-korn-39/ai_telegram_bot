@@ -63,7 +63,7 @@ func gpt_speech_voice(user *UserInfo, text string) {
 	model := openai.TTSModel1HD
 	inputText := user.Options["text"]
 
-	Operation := SQL_NewOperation(user, "chatgpt", "speech", text)
+	Operation := SQL_NewOperation(user, "chatgpt", "speech", "", text)
 	SQL_AddOperation(Operation)
 
 	SendMessage(user, GetText(MsgText_AudioFileCreationStarted, user.Language), nil, "")

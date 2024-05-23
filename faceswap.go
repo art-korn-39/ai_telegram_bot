@@ -80,7 +80,7 @@ func fs_image(user *UserInfo, message *tgbotapi.Message, i int) {
 			} else {
 				//user.Requests_today_fs++
 				user.Usage.FS++
-				Operation := SQL_NewOperation(user, "faceswap", "", "")
+				Operation := SQL_NewOperation(user, "faceswap", "", "", "")
 				SQL_AddOperation(Operation)
 				user.Options["image"] = result
 			}

@@ -82,7 +82,7 @@ func kand_style(user *UserInfo, text string) {
 			SendMessage(user, GetText(MsgText_ErrorWhileSendingPicture, user.Language), GetButton(btn_ImgNewgen, user.Language), "")
 		} else {
 			user.Usage.Kand++
-			Operation := SQL_NewOperation(user, "kandinsky", text, inputText)
+			Operation := SQL_NewOperation(user, "kandinsky", "image", text, inputText)
 			SQL_AddOperation(Operation)
 			user.Options["image"] = res
 		}

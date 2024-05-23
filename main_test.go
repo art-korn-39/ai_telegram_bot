@@ -68,7 +68,7 @@ func TestSQL(t *testing.T) {
 
 	u := T_GetUser()
 
-	Operation := SQL_NewOperation(u, "gemini", "img", "test operation")
+	Operation := SQL_NewOperation(u, "gemini", "img", "", "test operation")
 	SQL_AddOperation(Operation)
 
 	SQL_AddLog(NewLog(u, "", Warning, "test add log"))

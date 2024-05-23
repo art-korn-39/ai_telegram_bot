@@ -138,3 +138,13 @@ func gen15_UploadFileToCloudStorage(filename string) (*genai.File, error) {
 	return file, nil
 
 }
+
+func gen15_GetMIME(u *UserInfo) string {
+
+	if len(u.Gen_CloudFiles) > 0 {
+		return u.Gen_CloudFiles[0].MIMEType
+	}
+
+	return ""
+
+}

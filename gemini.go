@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/generative-ai-go/genai"
 	"google.golang.org/api/option"
@@ -29,6 +30,8 @@ var (
 	gen_TextModelWithCensor *genai.GenerativeModel
 	gen_ImageModel          *genai.GenerativeModel
 	gen15_Model             *genai.GenerativeModel
+	delay_Gemini            = time.Tick(time.Second * 3) // 20 RPM
+	delay_Gen15             = time.Tick(time.Second * 3) // 20 RPM
 )
 
 func NewConnectionGemini() {

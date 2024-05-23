@@ -136,7 +136,7 @@ func gen_imgtext(user *UserInfo, text string) {
 	SendMessage(user, string(result), GetButton(btn_GenNewgen, user.Language), "")
 
 	user.Usage.Gen10++
-	Operation := SQL_NewOperation(user, "gemini", "img", text)
+	Operation := SQL_NewOperation(user, "gemini", "img", "", text)
 	SQL_AddOperation(Operation)
 
 	user.Path = "gemini/type/image/text/newgen"

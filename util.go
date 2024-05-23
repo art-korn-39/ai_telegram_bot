@@ -15,10 +15,10 @@ import (
 var WorkDir string //C:/DEV/GO/ai_telegram_bot
 
 var (
-	delay_upd       = time.Tick(time.Millisecond * 10)
-	delay_ChatGPT   = time.Tick(time.Second * 15 / 10) // 40 RPM
-	delay_Gemini    = time.Tick(time.Second * 2)       // 30 RPM
-	delay_Kandinsky = time.Tick(time.Second * 3)       // 20 RPM
+	delay_upd     = time.Tick(time.Millisecond * 10)
+	delay_ChatGPT = time.Tick(time.Second * 15 / 10) // 40 RPM
+
+	delay_Kandinsky = time.Tick(time.Second * 3) // 20 RPM
 )
 
 func init() {

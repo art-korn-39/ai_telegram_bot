@@ -30,7 +30,7 @@ func gpt_dialog(user *UserInfo, text string) {
 
 	<-delay_ChatGPT
 
-	Operation := SQL_NewOperation(user, "chatgpt", "dialog", text)
+	Operation := SQL_NewOperation(user, "chatgpt", "dialog", "", text)
 	SQL_AddOperation(Operation)
 
 	gpt_DialogSendMessage(user, text, true)

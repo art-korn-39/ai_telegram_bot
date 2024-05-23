@@ -24,6 +24,7 @@ type Operation struct {
 	username string
 	model    string
 	class    string
+	category string
 	request  string
 }
 
@@ -47,7 +48,7 @@ func SQL_Connect() {
 
 }
 
-func SQL_NewOperation(user *UserInfo, model, class, request string) Operation {
+func SQL_NewOperation(user *UserInfo, model, class, category, request string) Operation {
 
 	return Operation{
 		date:     time.Now().UTC().Add(3 * time.Hour),
@@ -55,6 +56,7 @@ func SQL_NewOperation(user *UserInfo, model, class, request string) Operation {
 		username: SubString(user.Username, 0, 40),
 		model:    model,
 		class:    class,
+		category: category,
 		request:  request,
 	}
 }
@@ -67,8 +69,8 @@ func SQL_AddOperation(o Operation) {
 	}
 
 	Statement := `
-	INSERT INTO operations (date, chat_id, username, model, class, request)
-	VALUES ($1, $2, $3, $4, $5, $6)`
+	INSERT INTO operations (date, chat_id, username, model, class, category, request)
+	VALUES ($1, $2, $3, $4, $5, $6, $7)`
 
 	_, err := db.Exec(Statement,
 		o.date,
@@ -76,6 +78,7 @@ func SQL_AddOperation(o Operation) {
 		o.username,
 		o.model,
 		o.class,
+		o.category,
 		o.request)
 
 	if err != nil {
