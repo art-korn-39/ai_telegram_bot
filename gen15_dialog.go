@@ -36,7 +36,7 @@ func gen15_DialogSendMessage(user *UserInfo, text string) {
 	cs := gen15_Model.StartChat()
 	cs.History = user.Gen_History
 
-	resp, err := cs.SendMessage(gen_ctx, genai.Text(text))
+	resp, err := cs.SendMessage(gen15_ctx, genai.Text(text))
 	if err != nil {
 
 		resp, msgText, err = gen_ProcessErrorsOfResponse(user, err, cs, text)
@@ -61,7 +61,7 @@ func gen15_DialogSendMessage(user *UserInfo, text string) {
 
 	SendMessage(user, result, nil, "")
 
-	user.Usage.Gen10++
+	user.Usage.Gen15++
 	Operation := SQL_NewOperation(user, "gen15", "dialog", "", text)
 
 	SQL_AddOperation(Operation)
@@ -72,9 +72,9 @@ func gen15_DialogSendMessageStream(user *UserInfo, text string) {
 
 	//Ошибка: "напиши первые 3000 сиволов из библии"
 
-	cs := gen_TextModel.StartChat()
+	cs := gen15_Model.StartChat()
 	cs.History = user.Gen_History
-	iter := cs.SendMessageStream(gen_ctx, genai.Text(text))
+	iter := cs.SendMessageStream(gen15_ctx, genai.Text(text))
 
 	var resp *genai.GenerateContentResponse
 	var M tgbotapi.Message
@@ -144,7 +144,7 @@ func gen15_DialogSendMessageStream(user *UserInfo, text string) {
 
 	gen_AddToHistory(user, text, resultFull)
 
-	user.Usage.Gen10++
+	user.Usage.Gen15++
 	Operation := SQL_NewOperation(user, "gen15", "dialog", "", text)
 	SQL_AddOperation(Operation)
 

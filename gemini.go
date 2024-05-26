@@ -29,18 +29,22 @@ var (
 	gen_TextModel           *genai.GenerativeModel
 	gen_TextModelWithCensor *genai.GenerativeModel
 	gen_ImageModel          *genai.GenerativeModel
-	gen15_Model             *genai.GenerativeModel
-	delay_Gemini            = time.Tick(time.Second * 3) // 20 RPM
-	delay_Gen15             = time.Tick(time.Second * 3) // 20 RPM
+
+	gen15_ctx    context.Context
+	gen15_client *genai.Client
+	gen15_Model  *genai.GenerativeModel
+
+	delay_Gemini = time.Tick(time.Second * 3) // 20 RPM
+	delay_Gen15  = time.Tick(time.Second * 3) // 20 RPM
 )
 
 func NewConnectionGemini() {
 
 	gen_ctx = context.Background()
-	gen_client, _ = genai.NewClient(gen_ctx,
-		option.WithAPIKey(Cfg.GeminiKey),
-		//option.WithEndpoint("generativelanguage.googleapis.com"),
-	)
+	gen_client, _ = genai.NewClient(gen_ctx, option.WithAPIKey(Cfg.GeminiKey))
+
+	gen15_ctx = context.Background()
+	gen15_client, _ = genai.NewClient(gen_ctx, option.WithAPIKey(Cfg.GeminiKey))
 
 	//gemini-1.0-pro
 	//gemini-pro-vision
@@ -49,7 +53,7 @@ func NewConnectionGemini() {
 	gen_TextModel = gen_client.GenerativeModel("gemini-1.0-pro")
 	gen_TextModelWithCensor = gen_client.GenerativeModel("gemini-1.0-pro")
 	gen_ImageModel = gen_client.GenerativeModel("gemini-pro-vision")
-	gen15_Model = gen_client.GenerativeModel("gemini-1.5-flash-latest")
+	gen15_Model = gen15_client.GenerativeModel("gemini-1.5-flash-latest")
 
 	// 1 - блокировать всё
 	// 2 - допускается с незначимым и низким
