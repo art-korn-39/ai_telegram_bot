@@ -34,8 +34,8 @@ var (
 	gen15_client *genai.Client
 	gen15_Model  *genai.GenerativeModel
 
-	delay_Gemini = time.Tick(time.Second * 3) // 20 RPM
-	delay_Gen15  = time.Tick(time.Second * 3) // 20 RPM
+	delay_Gemini = time.Tick(time.Second * 4) // 15 RPM
+	delay_Gen15  = time.Tick(time.Second * 4) // 15 RPM
 )
 
 func NewConnectionGemini() {
