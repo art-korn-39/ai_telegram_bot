@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"slices"
 	"strings"
 
 	tgbotapi "github.com/Syfaro/telegram-bot-api"
@@ -13,15 +12,15 @@ import (
 
 func gen_DailyLimitOfRequestsIsOver(u *UserInfo, version string) bool {
 
-	if slices.Contains(Cfg.WhiteList, u.Username) {
-		return false
-	}
+	// if slices.Contains(Cfg.WhiteList, u.Username) {
+	// 	return false
+	// }
 
 	limitIsOver := false
 	if version == gen10 {
 		limitIsOver = u.Usage.Gen10 >= Cfg.RPD_gen10
 	} else {
-		limitIsOver = u.Usage.Gen15 >= Cfg.RPD_gen15
+		limitIsOver = u.Usage.Gen15 >= Get_RPD_gen15(u) //Cfg.RPD_gen15
 	}
 
 	if limitIsOver {

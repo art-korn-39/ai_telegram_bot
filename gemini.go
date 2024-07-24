@@ -20,7 +20,7 @@ import (
 
 const (
 	gen10 = "1.0"
-	gen15 = "1.0"
+	gen15 = "1.5"
 )
 
 var (

@@ -507,8 +507,8 @@ func textForAccount() MultiText {
 ✅ Дата первого использования: <b>%s</b>
 ----------------------------------------------
 Дневные лимиты:     
-🚀 Gemini 1.0 запросы: <b>%d</b> (осталось <b>%d</b>)
 🃏 Gemini 1.5 запросы: <b>%d</b> (осталось <b>%d</b>)
+🚀 Gemini 1.0 запросы: <b>%d</b> (осталось <b>%d</b>)
 🤖 ChatGPT токены: <b>%d</b> (осталось <b>%d</b>)
 🗿 Kandinsky: <b>без ограничений</b>
 🏔 Stable Diffusion: <b>%d</b> (осталось <b>%d</b>)
@@ -517,7 +517,7 @@ func textForAccount() MultiText {
 		
 <i>Лимиты обновятся через : %d ч. %d мин.</i>
 			
-Регулярные пользователи бота (%d дней подряд и более) получают <b>%s</b> уровень, на котором доступно по <b>%d</b> генераций в Stable Diffusion и Face Swap + <b>%d</b> токенов ChatGPT в сутки 🔥`,
+Регулярные пользователи бота (%d дней подряд и более) получают <b>%s</b> уровень, на котором доступно по <b>%d</b> генераций в Stable Diffusion и Face Swap + <b>%d</b> запросов Gemini 1.5 в сутки 🔥`,
 
 		en: `
 👤 User ID: <b>%d</b>
@@ -526,8 +526,8 @@ func textForAccount() MultiText {
 ✅ Date of first use: <b>%s</b>
 ----------------------------------------------
 Daily limits:
-🚀 Gemini 1.0 requests: <b>%d</b> (<b>%d</b> left)
 🃏 Gemini 1.5 requests: <b>%d</b> (<b>%d</b> left)
+🚀 Gemini 1.0 requests: <b>%d</b> (<b>%d</b> left)
 🤖 ChatGPT tokens: <b>%d</b> (<b>%d</b> left)
 🗿 Kandinsky: <b>no limits</b>
 🏔 Stable Diffusion: <b>%d</b> (<b>%d</b> left)
@@ -536,7 +536,7 @@ Daily limits:
 		
 <i>Limits will be updated in: %d hours %d minutes</i>
 		
-Regular users of the bot (%d days in a row or more) receive the <b>%s</b> level at which <b>%d</b> generation is available in Stable Diffusion and Face Swap + <b>%d</b> ChatGPT tokens per day 🔥`,
+Regular users of the bot (%d days in a row or more) receive the <b>%s</b> level at which <b>%d</b> generation is available in Stable Diffusion and Face Swap + <b>%d</b> requests Gemini 1.5 per day 🔥`,
 	}
 
 }

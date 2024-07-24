@@ -18,14 +18,15 @@ type config struct {
 	Faceswap_Version string
 	Faceswap_id      string
 
-	TPD_gpt           int
-	RPD_gen10         int
-	RPD_gen15         int
-	RPD_sdxl          int
-	RPD_fs            int
-	TPD_advanced_gpt  int
-	RPD_advanced_sdxl int
-	RPD_advanced_fs   int
+	TPD_gpt            int
+	RPD_gen10          int
+	RPD_gen15          int
+	RPD_sdxl           int
+	RPD_fs             int
+	TPD_advanced_gpt   int
+	RPD_advanced_sdxl  int
+	RPD_advanced_fs    int
+	RPD_advanced_gen15 int
 
 	Gen_UseStream bool
 	Gen_Rip       bool
@@ -72,6 +73,16 @@ func LoadConfig() {
 
 	log.Println("Config download complete")
 
+}
+
+// Получить доступный суточный лимит использования ChatGPT по пользователю
+func Get_RPD_gen15(u *UserInfo) (res int) {
+	if u.Level == Basic {
+		res = Cfg.RPD_gen15
+	} else if u.Level == Advanced {
+		res = Cfg.RPD_advanced_gen15
+	}
+	return
 }
 
 // Получить доступный суточный лимит использования ChatGPT по пользователю
