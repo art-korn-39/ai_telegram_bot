@@ -462,9 +462,9 @@ func textForStarting() MultiText {
 		
 Я бот для работы с нейросетями.
 С моей помощью ты можешь использовать следующие модели:
-	
-🚀 <b>Gemini 1.0</b> - генерация текста и анализ изображений <i>(Google)</i>
-🃏 <b>Gemini 1.5</b> - генерация текста + анализ фото, видео, аудио, голоса и файлов
+
+🃏 <b>Gemini 1.5</b> - генерация текста + анализ фото, видео, аудио, голоса и файлов <i>(Google)</i>
+🚀 <b>Gemini 1.0</b> - генерация текста 
 🤖 <b>ChatGPT</b> - генерация текста, аудио и анализ изображений <i>(OpenAI)</i>
 🗿 <b>Kandinsky</b> - создание изображений по текстовому описанию
 🏔 <b>Stable Diffusion XL</b> - создание изображений по текстовому описанию
@@ -481,8 +481,8 @@ func textForStarting() MultiText {
 I am a bot for working with neural networks.
 With my help you can use the following models:
 			
-🚀 <b>Gemini 1.0</b> - text generation and image analysis <i>(Google)</i>
-🃏 <b>Gemini 1.5</b> - text generation + image, video, audio and file analysis
+🃏 <b>Gemini 1.5</b> - text generation + image, video, audio and file analysis <i>(Google)</i>
+🚀 <b>Gemini 1.0</b> - text generation 
 🤖 <b>ChatGPT</b> - text & audio generation and image analysis <i>(OpenAI)</i>
 🗿 <b>Kandinsky</b> - creating images based on text description
 🏔 <b>Stable Diffusion XL</b> - creating images based on text description

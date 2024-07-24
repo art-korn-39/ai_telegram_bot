@@ -139,7 +139,7 @@ func GetButton(btn Button, lang string) (keyboard any) {
 		keyboard = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(GetText(BtnText_StartDialog, lang)),
-				tgbotapi.NewKeyboardButton(GetText(BtnText_SendPictureWithText, lang)),
+				//tgbotapi.NewKeyboardButton(GetText(BtnText_SendPictureWithText, lang)),
 			))
 	case btn_GenNewgen:
 		keyboard = tgbotapi.NewReplyKeyboard(
