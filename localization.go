@@ -471,8 +471,8 @@ func textForStarting() MultiText {
 🎭 <b>Face Swap</b> - замена лица у фотографий
 	
 <u>Последние обновления:</u>
-<i>10.03.24 - добавлена замена лица (Face Swap).</i>
 <i>23.05.24 - добавлена улучшенная языковая модель (Gemini Flash 1.5).</i>
+<i>25.07.24 - ChatGPT обновлён до версии 4o-mini.</i>
 
 Бот полностью бесплатный, удачных генераций 🔥`,
 
@@ -489,8 +489,8 @@ With my help you can use the following models:
 🎭 <b>Face Swap</b> - face replacement for photos
 			
 <u>Latest updates:</u>
-<i>10.03.24 - added face swap.</i>
 <i>23.05.24 - added improved language model (Gemini Flash 1.5).</i>
+<i>25.07.24 - ChatGPT updated to version 4o-mini</i>
 
 Bot is absolutely free, successful generations 🔥`,
 	}

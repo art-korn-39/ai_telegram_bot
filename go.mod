@@ -8,7 +8,7 @@ require (
 	github.com/google/generative-ai-go v0.12.1-0.20240514173057-88fcdb1373d2
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/lib/pq v1.10.9
-	github.com/sashabaranov/go-openai v1.17.9
+	github.com/sashabaranov/go-openai v1.27.0
 	golang.org/x/image v0.15.0
 	google.golang.org/api v0.178.0
 )

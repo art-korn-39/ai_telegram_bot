@@ -47,7 +47,7 @@ func gpt_DialogSendMessage(user *UserInfo, text string, firstLaunch bool) {
 	resp, err := clientOpenAI.CreateChatCompletion(
 		context.Background(),
 		openai.ChatCompletionRequest{
-			Model:    openai.GPT3Dot5Turbo,
+			Model:    openai.GPT4oMini,
 			Messages: messages,
 		},
 	)
