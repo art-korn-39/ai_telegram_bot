@@ -93,6 +93,10 @@ func AccessIsAllowed(upd tgbotapi.Update, u *UserInfo) bool {
 		return true
 	}
 
+	if u.System_language != "ru" {
+		return true
+	}
+
 	if slices.Contains(Cfg.WhiteList, u.Username) {
 		return true
 	}
