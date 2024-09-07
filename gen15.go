@@ -1,6 +1,13 @@
 package main
 
+import "slices"
+
 func gen15_start(user *UserInfo) {
+
+	if Cfg.Gen_Rip && !slices.Contains(Cfg.Admins, user.Username) {
+		gen_rip(user)
+		return
+	}
 
 	msgText := GetText(MsgText_Gemini15Hello, user.Language)
 	SendMessage(user, msgText, nil, "")

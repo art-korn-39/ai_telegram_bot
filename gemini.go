@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"slices"
 	"time"
 
 	"github.com/google/generative-ai-go/genai"
@@ -87,6 +88,11 @@ func NewConnectionGemini() {
 // После команды "/gemini" или при вводе текста = "gemini"
 func gen_start(user *UserInfo) {
 
+	if Cfg.Gen_Rip && !slices.Contains(Cfg.Admins, user.Username) {
+		gen_rip(user)
+		return
+	}
+
 	msgText := GetText(MsgText_GeminiHello, user.Language)
 	SendMessage(user, msgText, nil, "")
 
@@ -122,5 +128,14 @@ func gen_type(user *UserInfo, text string) {
 		gen_dialog(user, text)
 		user.Path = "gemini/type/dialog"
 	}
+
+}
+
+func gen_rip(user *UserInfo) {
+
+	msgText := GetText(MsgText_GeminiRIP, user.Language)
+	SendMessage(user, msgText, GetButton(btn_Models, ""), "")
+
+	user.Path = ""
 
 }

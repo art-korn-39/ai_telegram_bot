@@ -51,10 +51,10 @@ func GetButton(btn Button, lang string) (keyboard any) {
 			))
 	case btn_Models:
 		keyboard = tgbotapi.NewReplyKeyboard(
-			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton(GetText(BtnText_Gen15, "")),
-				tgbotapi.NewKeyboardButton(GetText(BtnText_Gemini, "")),
-			),
+			//tgbotapi.NewKeyboardButtonRow(
+			//	tgbotapi.NewKeyboardButton(GetText(BtnText_Gen15, "")),
+			//	tgbotapi.NewKeyboardButton(GetText(BtnText_Gemini, "")),
+			//),
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(GetText(BtnText_ChatGPT, "")),
 				tgbotapi.NewKeyboardButton(GetText(BtnText_SDXL, "")),
@@ -139,7 +139,6 @@ func GetButton(btn Button, lang string) (keyboard any) {
 		keyboard = tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton(GetText(BtnText_StartDialog, lang)),
-				//tgbotapi.NewKeyboardButton(GetText(BtnText_SendPictureWithText, lang)),
 			))
 	case btn_GenNewgen:
 		keyboard = tgbotapi.NewReplyKeyboard(
