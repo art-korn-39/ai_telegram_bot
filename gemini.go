@@ -53,7 +53,7 @@ func NewConnectionGemini() {
 	gen_TextModel = gen_client.GenerativeModel("gemini-1.0-pro")
 	gen_TextModelWithCensor = gen_client.GenerativeModel("gemini-1.0-pro")
 	gen_ImageModel = gen_client.GenerativeModel("gemini-pro-vision")
-	gen15_Model = gen15_client.GenerativeModel("gemini-1.5-flash-latest")
+	gen15_Model = gen15_client.GenerativeModel("gemini-1.5-flash")
 
 	// 1 - блокировать всё
 	// 2 - допускается с незначимым и низким
